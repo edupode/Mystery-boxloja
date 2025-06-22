@@ -1914,13 +1914,37 @@ const AdminProducts = () => {
     }
   };
 
+  // Função para converter imagem para base64
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('A imagem deve ter menos de 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64String = event.target.result;
+        setFormData({
+          ...formData,
+          image_base64: base64String,
+          image_url: '' // Clear URL if uploading file
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
-        stock_quantity: parseInt(formData.stock_quantity)
+        stock_quantity: parseInt(formData.stock_quantity),
+        // Use base64 image if uploaded, otherwise use URL
+        image_url: formData.image_base64 || formData.image_url
       };
 
       if (editingProduct) {
@@ -1937,6 +1961,7 @@ const AdminProducts = () => {
         category: '',
         price: '',
         image_url: '',
+        image_base64: '',
         stock_quantity: '100',
         featured: false
       });
