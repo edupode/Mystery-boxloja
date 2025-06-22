@@ -173,6 +173,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "Testado o endpoint POST /api/admin/products com image_base64, mas retorna erro 500 (Internal Server Error). O código para priorizar base64 sobre image_url está presente, mas há um problema na implementação."
+      - working: false
+        agent: "testing"
+        comment: "Retestado o endpoint POST /api/admin/products com image_base64, mas continua retornando erro 500 (Internal Server Error). O problema na implementação persiste."
 
 backend:
   - task: "FASE 1 - Correção página de admin - Criar página de gestão de pedidos"
