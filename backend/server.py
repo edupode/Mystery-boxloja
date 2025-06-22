@@ -347,11 +347,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 def validate_nif(nif: str) -> bool:
     """Validate Portuguese NIF (Número de Identificação Fiscal)"""
-    if not nif or not nif.startswith('PT'):
+    if not nif:
         return False
     
-    # Remove 'PT' prefix and get the numbers
-    nif_numbers = nif[2:]
+    # Remove 'PT' prefix if present
+    if nif.startswith('PT'):
+        nif_numbers = nif[2:]
+    else:
+        nif_numbers = nif
     
     # Check if it has exactly 9 digits
     if not re.match(r'^\d{9}$', nif_numbers):
