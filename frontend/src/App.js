@@ -965,7 +965,10 @@ const Cart = () => {
 const Checkout = () => {
   const { cart, sessionId } = useAppContext();
   const [formData, setFormData] = useState({
-    shippingAddress: '',
+    street: '',
+    postalCode: '',
+    city: '',
+    birthDate: '',
     phone: '',
     nif: '',
     paymentMethod: 'card',
