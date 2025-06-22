@@ -107,9 +107,9 @@ user_problem_statement: "Fase 1 - Correções Críticas de Funcionalidade: 1. Co
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
@@ -119,6 +119,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "Testado o checkout com diferentes métodos de pagamento (card, bank_transfer, cash_on_delivery). O carrinho não está sendo limpo após o checkout como esperado. O código para limpar o carrinho está presente, mas não está funcionando corretamente."
+      - working: true
+        agent: "testing"
+        comment: "Retestado o checkout com diferentes métodos de pagamento (card, bank_transfer, cash_on_delivery). O carrinho agora está sendo limpo corretamente após o checkout. Verificado que o status do pagamento via Stripe também funciona corretamente."
 
   - task: "FASE 1 - Correção admin - Melhorar atualizações de estado de encomendas"
     implemented: true
