@@ -122,15 +122,18 @@ backend:
 
   - task: "Autenticação - Login com email/password"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/auth/login para autenticação com email/password"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint de login funciona corretamente. Testado com sucesso."
 
   - task: "Autenticação - Login com Google OAuth"
     implemented: true
