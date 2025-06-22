@@ -1,54 +1,1691 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
-const Home = () => {
-  const helloWorldApi = async () => {
+// Context for cart and user
+const AppContext = createContext();
+
+const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext must be used within AppProvider');
+  }
+  return context;
+};
+
+const AppProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState({ items: [] });
+  const [sessionId] = useState(() => {
+    let id = localStorage.getItem('sessionId');
+    if (!id) {
+      id = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('sessionId', id);
+    }
+    return id;
+  });
+
+  // Check for stored auth token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Verify token and get user info
+      fetchUserInfo();
+    }
+  }, []);
+
+  const fetchUserInfo = async () => {
     try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+      const response = await axios.get(`${API}/auth/me`);
+      setUser(response.data);
+    } catch (error) {
+      // Token is invalid, remove it
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
+    }
+  };
+
+  const login = (token, userData) => {
+    localStorage.setItem('token', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
+
+  const loadCart = async () => {
+    try {
+      const response = await axios.get(`${API}/cart/${sessionId}`);
+      setCart(response.data);
+    } catch (error) {
+      console.error('Error loading cart:', error);
+    }
+  };
+
+  const addToCart = async (productId, quantity = 1, subscriptionType = null) => {
+    try {
+      const response = await axios.post(`${API}/cart/${sessionId}/add`, {
+        product_id: productId,
+        quantity,
+        subscription_type: subscriptionType
+      });
+      setCart(response.data);
+      return true;
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      return false;
+    }
+  };
+
+  const removeFromCart = async (productId, subscriptionType = null) => {
+    try {
+      const response = await axios.delete(
+        `${API}/cart/${sessionId}/remove/${productId}${subscriptionType ? `?subscription_type=${subscriptionType}` : ''}`
+      );
+      setCart(response.data);
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
+  };
+
+  const applyCoupon = async (couponCode) => {
+    try {
+      const response = await axios.post(`${API}/cart/${sessionId}/apply-coupon?coupon_code=${couponCode}`);
+      setCart(response.data);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.detail || 'Cupão inválido' };
+    }
+  };
+
+  const removeCoupon = async () => {
+    try {
+      const response = await axios.delete(`${API}/cart/${sessionId}/remove-coupon`);
+      setCart(response.data);
+    } catch (error) {
+      console.error('Error removing coupon:', error);
     }
   };
 
   useEffect(() => {
-    helloWorldApi();
+    loadCart();
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <AppContext.Provider value={{
+      user,
+      setUser,
+      cart,
+      setCart,
+      sessionId,
+      loadCart,
+      addToCart,
+      removeFromCart,
+      applyCoupon,
+      removeCoupon,
+      login,
+      logout
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+// Google OAuth Component
+const GoogleLoginButton = ({ onSuccess, onError }) => {
+  useEffect(() => {
+    const initializeGoogleSignIn = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signin-button"),
+          {
+            theme: "outline",
+            size: "large",
+            width: 300,
+            text: "signin_with",
+            shape: "rectangular"
+          }
+        );
+      }
+    };
+
+    const handleCredentialResponse = async (response) => {
+      try {
+        const result = await axios.post(`${API}/auth/google`, {
+          token: response.credential
+        });
+        onSuccess(result.data);
+      } catch (error) {
+        console.error('Google auth error:', error);
+        onError(error);
+      }
+    };
+
+    // Load Google Identity Services
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = initializeGoogleSignIn;
+      document.body.appendChild(script);
+    } else {
+      initializeGoogleSignIn();
+    }
+  }, [onSuccess, onError]);
+
+  return <div id="google-signin-button"></div>;
+};
+
+// Mobile detection hook
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
+  return isMobile;
+};
+
+// Components
+const Header = () => {
+  const { user, logout, cart } = useAppContext();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const cartItemsCount = cart.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
+  return (
+    <header className="bg-gradient-to-r from-purple-900 via-black to-purple-900 text-white shadow-2xl border-b-2 border-purple-500 sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent`}>
+            🎁 {isMobile ? 'Mystery Box' : 'Mystery Box Store'}
+          </Link>
+
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2"
+            >
+              <div className="space-y-1">
+                <div className={`w-6 h-0.5 bg-white transition-all ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></div>
+                <div className={`w-6 h-0.5 bg-white transition-all ${isMenuOpen ? 'opacity-0' : ''}`}></div>
+                <div className={`w-6 h-0.5 bg-white transition-all ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></div>
+              </div>
+            </button>
+          )}
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <nav className="hidden md:flex space-x-8">
+              <Link to="/" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                🏠 Início
+              </Link>
+              <Link to="/produtos" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                📦 Produtos
+              </Link>
+              <Link to="/assinaturas" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                🎯 Assinaturas
+              </Link>
+              {user?.is_admin && (
+                <Link to="/admin" className="hover:text-yellow-300 transition-colors duration-300 flex items-center">
+                  ⚙️ Admin
+                </Link>
+              )}
+            </nav>
+          )}
+
+          {/* Desktop User Actions */}
+          {!isMobile && (
+            <div className="flex items-center space-x-6">
+              <Link to="/carrinho" className="relative hover:text-purple-300 transition-all duration-300 transform hover:scale-110">
+                🛒 Carrinho
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs animate-bounce">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </Link>
+
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  {user.avatar_url && (
+                    <img src={user.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full" />
+                  )}
+                  <span className="text-purple-200">Olá, {user.name}</span>
+                  <button
+                    onClick={logout}
+                    className="text-sm hover:text-purple-300 transition-colors duration-300"
+                  >
+                    Sair
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
+                  Entrar
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Mobile User Actions */}
+          {isMobile && (
+            <div className="flex items-center space-x-3">
+              <Link to="/carrinho" className="relative">
+                <span className="text-2xl">🛒</span>
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs animate-bounce">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobile && isMenuOpen && (
+          <div className="md:hidden mt-4 pb-4 border-t border-purple-500/30">
+            <nav className="flex flex-col space-y-3 mt-4">
+              <Link to="/" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                🏠 Início
+              </Link>
+              <Link to="/produtos" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                📦 Produtos
+              </Link>
+              <Link to="/assinaturas" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                🎯 Assinaturas
+              </Link>
+              {user?.is_admin && (
+                <Link to="/admin" className="hover:text-yellow-300 transition-colors duration-300 flex items-center">
+                  ⚙️ Admin
+                </Link>
+              )}
+              <hr className="border-purple-500/30" />
+              {user ? (
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-2">
+                    {user.avatar_url && (
+                      <img src={user.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
+                    )}
+                    <span className="text-purple-200">Olá, {user.name}</span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="text-left hover:text-purple-300 transition-colors duration-300"
+                  >
+                    Sair
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-all duration-300 text-center">
+                  Entrar
+                </Link>
+              )}
+            </nav>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get(`${API}/products?featured=true`),
+          axios.get(`${API}/categories`)
+        ]);
+        setFeaturedProducts(productsRes.data.slice(0, 3));
+        setCategories(categoriesRes.data);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    loadData();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-r from-purple-900 via-black to-red-900 text-white py-20 md:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0">
+          <div className="stars"></div>
+          <div className="moving-stars"></div>
+        </div>
+        <div className={`container mx-auto px-4 text-center relative z-10 ${isMobile ? 'py-8' : ''}`}>
+          <h1 className={`${isMobile ? 'text-4xl md:text-6xl' : 'text-6xl md:text-8xl'} font-bold mb-8 animate-pulse bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent`}>
+            Descobre o Inesperado!
+          </h1>
+          <div className="text-4xl mb-4 animate-bounce">🎭 ⚡ 👻</div>
+          <p className={`${isMobile ? 'text-lg mb-8' : 'text-2xl mb-12'} max-w-3xl mx-auto text-purple-200 leading-relaxed`}>
+            Mystery boxes temáticas cheias de surpresas incríveis.
+            Mergulha no mistério e descobre tesouros únicos!
+          </p>
+          <div className={`${isMobile ? 'space-y-4' : 'space-x-6'} ${isMobile ? 'flex flex-col items-center' : ''}`}>
+            <Link
+              to="/produtos"
+              className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-8 py-3' : 'px-10 py-4'} rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 shadow-2xl ${isMobile ? 'w-full max-w-xs text-center' : ''}`}
+            >
+              🔍 Explorar Mistérios
+            </Link>
+            <Link
+              to="/assinaturas"
+              className={`border-2 border-purple-400 text-purple-300 ${isMobile ? 'px-8 py-3' : 'px-10 py-4'} rounded-xl font-semibold hover:bg-purple-600 hover:text-white transition-all duration-300 transform hover:scale-110 ${isMobile ? 'w-full max-w-xs text-center' : ''}`}
+            >
+              🎯 Assinaturas
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-b from-black to-purple-900`}>
+        <div className="container mx-auto px-4">
+          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white`}>
+            ✨ Mistérios em Destaque ✨
+          </h2>
+
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-10'}`}>
+            {featuredProducts.map((product, index) => (
+              <div key={product.id} className={`mystery-box-card hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-105 animate-fade-in-up`} style={{animationDelay: `${index * 0.2}s`}}>
+                <div className="relative overflow-hidden">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className={`w-full ${isMobile ? 'h-48' : 'h-64'} object-cover transition-transform duration-500 hover:scale-110`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+                </div>
+                <div className={`${isMobile ? 'p-6' : 'p-8'} bg-gradient-to-b from-gray-800 to-gray-900`}>
+                  <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-4 text-white`}>{product.name}</h3>
+                  <p className="text-gray-300 mb-6 leading-relaxed">{product.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400`}>
+                      €{product.price}
+                    </span>
+                    <Link
+                      to={`/produto/${product.id}`}
+                      className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+                    >
+                      🔮 Descobrir
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-b from-purple-900 to-black`}>
+        <div className="container mx-auto px-4">
+          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white`}>
+            🎭 Universos Misteriosos 🎭
+          </h2>
+
+          <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'md:grid-cols-4 gap-8'}`}>
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                to={`/categoria/${category.id}`}
+                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl ${isMobile ? 'p-4' : 'p-8'} text-center hover:from-purple-800 hover:to-pink-800 transition-all duration-500 transform hover:scale-110 hover:rotate-2 border border-purple-500/30 hover:border-purple-400`}
+                style={{animationDelay: `${index * 0.1}s`}}
+              >
+                <div className={`${isMobile ? 'text-3xl mb-2' : 'text-6xl mb-6'} animate-bounce group-hover:animate-spin transition-all duration-500`}>
+                  {category.emoji}
+                </div>
+                <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold text-white group-hover:text-purple-200 transition-colors duration-300`}>
+                  {category.name}
+                </h3>
+                <p className={`text-gray-400 ${isMobile ? 'text-xs mt-1' : 'text-sm mt-2'} group-hover:text-purple-300 transition-colors duration-300`}>
+                  {category.description}
+                </p>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-r from-purple-900 via-black to-red-900 text-center`}>
+        <div className="container mx-auto px-4">
+          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-8 text-white`}>
+            Pronto para a Aventura? 🚀
+          </h2>
+          <p className={`${isMobile ? 'text-lg mb-8' : 'text-xl mb-12'} text-purple-200 max-w-2xl mx-auto`}>
+            Junta-te a milhares de exploradores que já descobriram tesouros incríveis!
+          </p>
+          <Link
+            to="/produtos"
+            className={`bg-gradient-to-r from-yellow-500 to-orange-500 text-black ${isMobile ? 'px-8 py-4 text-lg' : 'px-12 py-6 text-xl'} rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-110 shadow-2xl`}
+          >
+            🎁 Começar Agora
+          </Link>
+        </div>
+      </section>
     </div>
   );
 };
 
-function App() {
+const Products = () => {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const { addToCart } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get(`${API}/products${selectedCategory ? `?category=${selectedCategory}` : ''}`),
+          axios.get(`${API}/categories`)
+        ]);
+        setProducts(productsRes.data);
+        setCategories(categoriesRes.data);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    };
+    loadData();
+  }, [selectedCategory]);
+
+  const handleAddToCart = async (productId) => {
+    const success = await addToCart(productId);
+    if (success) {
+      // Show success animation
+      const button = document.querySelector(`[data-product-id="${productId}"]`);
+      if (button) {
+        button.classList.add('animate-pulse');
+        setTimeout(() => button.classList.remove('animate-pulse'), 1000);
+      }
+    }
+  };
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-12 text-center text-white`}>
+          🔮 Nossos Mistérios 🔮
+        </h1>
+
+        {/* Category Filter */}
+        <div className="mb-12 text-center">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className={`bg-gray-800 text-white border border-purple-500 rounded-lg ${isMobile ? 'px-4 py-2 text-base w-full max-w-xs' : 'px-6 py-3 text-lg'} focus:outline-none focus:border-purple-400 transition-colors duration-300`}
+          >
+            <option value="">🎭 Todos os Universos</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.emoji} {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Products Grid */}
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 lg:grid-cols-4 gap-8'}`}>
+          {products.map((product, index) => (
+            <div key={product.id} className="mystery-box-card hover:shadow-purple-500/50 transition-all duration-500 animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+              <div className="relative overflow-hidden">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className={`w-full ${isMobile ? 'h-40' : 'h-48'} object-cover transition-transform duration-500 hover:scale-110`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+                {product.featured && (
+                  <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                    ⭐ Destaque
+                  </div>
+                )}
+              </div>
+              <div className={`${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-b from-gray-800 to-gray-900`}>
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-3 text-white`}>{product.name}</h3>
+                <p className={`text-gray-300 ${isMobile ? 'text-sm' : 'text-sm'} mb-4 line-clamp-3`}>{product.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
+                    €{product.price}
+                  </span>
+                  <button
+                    onClick={() => handleAddToCart(product.id)}
+                    data-product-id={product.id}
+                    className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+                  >
+                    🛒 Adicionar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+const ProductDetail = () => {
+  const location = useLocation();
+  const id = location.pathname.split('/').pop();
+  const [product, setProduct] = useState(null);
+  const [selectedSubscription, setSelectedSubscription] = useState('');
+  const { addToCart } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        const response = await axios.get(`${API}/products/${id}`);
+        setProduct(response.data);
+      } catch (error) {
+        console.error('Error loading product:', error);
+      }
+    };
+    loadProduct();
+  }, [id]);
+
+  const handleAddToCart = async () => {
+    const success = await addToCart(product.id, 1, selectedSubscription || null);
+    if (success) {
+      alert('🎉 Produto adicionado ao carrinho!');
+    }
+  };
+
+  if (!product) return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+      <div className="text-white text-center">
+        <div className="animate-spin text-6xl mb-4">🔮</div>
+        <p className="text-xl">Carregando mistério...</p>
+      </div>
+    </div>
+  );
+
+  const currentPrice = selectedSubscription
+    ? product.subscription_prices[selectedSubscription]
+    : product.price;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'md:grid-cols-2 gap-12'}`}>
+          <div className="relative">
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl"></div>
+          </div>
+
+          <div className="text-white">
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent`}>
+              {product.name}
+            </h1>
+            <p className={`text-gray-300 mb-8 ${isMobile ? 'text-base' : 'text-lg'} leading-relaxed`}>{product.description}</p>
+
+            <div className="mb-8 bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-purple-300`}>🎯 Opções de Compra:</h3>
+
+              <div className="space-y-4">
+                <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="purchaseType"
+                    value=""
+                    checked={selectedSubscription === ''}
+                    onChange={(e) => setSelectedSubscription('')}
+                    className="mr-4 scale-125"
+                  />
+                  <span className={`${isMobile ? 'text-base' : 'text-lg'}`}>🛒 Compra avulsa - €{product.price}</span>
+                </label>
+
+                <div className="ml-6 space-y-3">
+                  <h4 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-purple-300`}>📅 Assinaturas (com desconto!):</h4>
+
+                  {Object.entries(product.subscription_prices).map(([key, price]) => {
+                    const months = key.replace('_', ' ');
+                    const discount = ((product.price - price) / product.price * 100).toFixed(0);
+                    return (
+                      <label key={key} className="flex items-center p-3 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 transition-colors duration-300 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="purchaseType"
+                          value={key}
+                          checked={selectedSubscription === key}
+                          onChange={(e) => setSelectedSubscription(e.target.value)}
+                          className="mr-3 scale-125"
+                        />
+                        <span className="flex-1">
+                          <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>
+                            Assinatura {months} - €{price}/mês
+                          </span>
+                          {discount > 0 && <span className="text-green-400 ml-2">(-{discount}% desconto!)</span>}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-8 text-center">
+              <span className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-purple-400`}>
+                €{currentPrice}
+                {selectedSubscription && <span className={`${isMobile ? 'text-lg' : 'text-2xl'} text-gray-400`}>/mês</span>}
+              </span>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              className={`w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white ${isMobile ? 'py-3 text-lg' : 'py-4 text-xl'} rounded-2xl font-bold hover:from-purple-700 hover:via-pink-700 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-2xl`}
+            >
+              🎁 Adicionar ao Carrinho
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Cart = () => {
+  const { cart, removeFromCart, sessionId, applyCoupon, removeCoupon } = useAppContext();
+  const [products, setProducts] = useState({});
+  const [shippingMethods, setShippingMethods] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMessage, setCouponMessage] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [shippingRes] = await Promise.all([
+          axios.get(`${API}/shipping-methods`)
+        ]);
+        setShippingMethods(shippingRes.data);
+      } catch (error) {
+        console.error('Error loading shipping methods:', error);
+      }
+    };
+    loadData();
+
+    if (cart.items?.length > 0) {
+      const loadProducts = async () => {
+        const productMap = {};
+        for (const item of cart.items) {
+          if (!productMap[item.product_id]) {
+            try {
+              const response = await axios.get(`${API}/products/${item.product_id}`);
+              productMap[item.product_id] = response.data;
+            } catch (error) {
+              console.error('Error loading product:', error);
+            }
+          }
+        }
+        setProducts(productMap);
+      };
+      loadProducts();
+    }
+  }, [cart]);
+
+  const calculateSubtotal = () => {
+    return cart.items?.reduce((total, item) => {
+      const product = products[item.product_id];
+      if (!product) return total;
+
+      const price = item.subscription_type
+        ? product.subscription_prices[item.subscription_type]
+        : product.price;
+
+      return total + (price * item.quantity);
+    }, 0) || 0;
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    
+    setIsApplyingCoupon(true);
+    setCouponMessage('');
+    
+    const result = await applyCoupon(couponCode.trim());
+    
+    if (result.success) {
+      setCouponMessage('✅ Cupão aplicado com sucesso!');
+      setCouponCode('');
+    } else {
+      setCouponMessage(`❌ ${result.error}`);
+    }
+    
+    setIsApplyingCoupon(false);
+  };
+
+  const handleRemoveCoupon = async () => {
+    await removeCoupon();
+    setCouponMessage('');
+  };
+
+  const subtotal = calculateSubtotal();
+  const vat = subtotal * 0.23;
+  const shippingCost = 3.99; // Default shipping
+  const total = subtotal + vat + shippingCost;
+
+  if (!cart.items || cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white px-4">
+          <div className="text-8xl mb-8 animate-bounce">🛒</div>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-6`}>Seu Carrinho está Vazio</h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-400 mb-8`}>Que tal explorar nossos mistérios?</p>
+          <Link
+            to="/produtos"
+            className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+          >
+            🔍 Descobrir Produtos
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          🛒 Seu Carrinho Misterioso
+        </h1>
+
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'lg:grid-cols-3 gap-12'}`}>
+          <div className={`${isMobile ? '' : 'lg:col-span-2'} space-y-6`}>
+            {cart.items.map((item, index) => {
+              const product = products[item.product_id];
+              if (!product) return null;
+
+              const price = item.subscription_type
+                ? product.subscription_prices[item.subscription_type]
+                : product.price;
+
+              return (
+                <div key={index} className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300">
+                  <div className={`flex ${isMobile ? 'flex-col space-y-4' : 'items-center'}`}>
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className={`${isMobile ? 'w-full h-32' : 'w-24 h-24'} object-cover rounded-lg ${isMobile ? '' : 'mr-6'}`}
+                    />
+                    <div className="flex-1">
+                      <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-white mb-2`}>{product.name}</h3>
+                      {item.subscription_type && (
+                        <p className="text-purple-400 mb-1">
+                          📅 Assinatura: {item.subscription_type.replace('_', ' ')}
+                        </p>
+                      )}
+                      <p className="text-gray-400">Quantidade: {item.quantity}</p>
+                    </div>
+                    <div className={`${isMobile ? 'flex justify-between items-center' : 'text-right'}`}>
+                      <p className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-purple-400`}>€{(price * item.quantity).toFixed(2)}</p>
+                      <button
+                        onClick={() => removeFromCart(item.product_id, item.subscription_type)}
+                        className="text-red-400 text-sm hover:text-red-300 mt-2 transition-colors duration-300"
+                      >
+                        🗑️ Remover
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Coupon Section */}
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold mb-4 text-white`}>🎫 Cupão de Desconto</h3>
+              
+              {cart.coupon_code ? (
+                <div className="flex items-center justify-between bg-green-900/30 border border-green-500/50 rounded-lg p-4">
+                  <div>
+                    <p className="text-green-400 font-semibold">✅ Cupão aplicado: {cart.coupon_code}</p>
+                  </div>
+                  <button
+                    onClick={handleRemoveCoupon}
+                    className="text-red-400 hover:text-red-300 text-sm"
+                  >
+                    🗑️ Remover
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-3'}`}>
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Digite o código do cupão"
+                      className={`${isMobile ? 'w-full' : 'flex-1'} bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none`}
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={isApplyingCoupon || !couponCode.trim()}
+                      className={`${isMobile ? 'w-full' : ''} bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {isApplyingCoupon ? 'Aplicando...' : '🎫 Aplicar'}
+                    </button>
+                  </div>
+                  {couponMessage && (
+                    <p className={`text-sm ${couponMessage.includes('✅') ? 'text-green-400' : 'text-red-400'}`}>
+                      {couponMessage}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 h-fit">
+            <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-white`}>💰 Resumo do Pedido</h3>
+
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between text-gray-300">
+                <span>Subtotal:</span>
+                <span>€{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>IVA (23%):</span>
+                <span>€{vat.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-gray-300">
+                <span>Envio:</span>
+                <span>€{shippingCost.toFixed(2)}</span>
+              </div>
+              <hr className="border-purple-500/30" />
+              <div className={`flex justify-between font-bold ${isMobile ? 'text-lg' : 'text-xl'} text-purple-400`}>
+                <span>Total:</span>
+                <span>€{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/checkout')}
+              className={`w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white ${isMobile ? 'py-3 text-base' : 'py-4 text-lg'} rounded-xl font-bold hover:from-purple-700 hover:via-pink-700 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-2xl`}
+            >
+              🚀 Finalizar Compra
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Checkout = () => {
+  const { cart, sessionId } = useAppContext();
+  const [formData, setFormData] = useState({
+    shippingAddress: '',
+    phone: '',
+    nif: '',
+    paymentMethod: 'card',
+    shippingMethod: 'standard'
+  });
+  const [shippingMethods, setShippingMethods] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [nifError, setNifError] = useState('');
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const loadShippingMethods = async () => {
+      try {
+        const response = await axios.get(`${API}/shipping-methods`);
+        setShippingMethods(response.data);
+      } catch (error) {
+        console.error('Error loading shipping methods:', error);
+      }
+    };
+    loadShippingMethods();
+  }, []);
+
+  const validateNIF = (nif) => {
+    if (!nif) return true; // NIF is optional
+    
+    if (!nif.startsWith('PT')) {
+      return false;
+    }
+    
+    const nifNumbers = nif.slice(2);
+    if (!/^\d{9}$/.test(nifNumbers)) {
+      return false;
+    }
+    
+    // Validate check digit
+    const digits = nifNumbers.slice(0, 8).split('').map(Number);
+    const checkSum = digits.reduce((sum, digit, index) => sum + digit * (9 - index), 0);
+    const remainder = checkSum % 11;
+    const checkDigit = remainder < 2 ? 0 : 11 - remainder;
+    
+    return parseInt(nifNumbers[8]) === checkDigit;
+  };
+
+  const handleNIFChange = (value) => {
+    let formattedNIF = value.toUpperCase();
+    
+    // Auto-add PT prefix if not present and user starts typing numbers
+    if (formattedNIF && !formattedNIF.startsWith('PT') && /^\d/.test(formattedNIF)) {
+      formattedNIF = 'PT' + formattedNIF;
+    }
+    
+    setFormData({...formData, nif: formattedNIF});
+    
+    if (formattedNIF && !validateNIF(formattedNIF)) {
+      setNifError('NIF inválido. Deve começar com PT seguido de 9 dígitos válidos');
+    } else {
+      setNifError('');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (formData.nif && !validateNIF(formData.nif)) {
+      setNifError('NIF inválido. Deve começar com PT seguido de 9 dígitos válidos');
+      return;
+    }
+    
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post(`${API}/checkout`, {
+        cart_id: sessionId,
+        shipping_address: formData.shippingAddress,
+        phone: formData.phone,
+        nif: formData.nif || null,
+        payment_method: formData.paymentMethod,
+        shipping_method: formData.shippingMethod,
+        origin_url: window.location.origin
+      });
+
+      if (response.data.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        navigate(`/order-success/${response.data.order_id}`);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('❌ Erro no checkout. Tente novamente.');
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          🚀 Finalizar Compra
+        </h1>
+
+        <form onSubmit={handleSubmit} className={`max-w-3xl mx-auto ${isMobile ? 'space-y-6' : ''}`}>
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-white`}>📍 Informações de Entrega</h3>
+
+            <div className="mb-6">
+              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Morada Completa *</label>
+              <textarea
+                value={formData.shippingAddress}
+                onChange={(e) => setFormData({...formData, shippingAddress: e.target.value})}
+                required
+                className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 ${isMobile ? 'h-24' : 'h-32'} bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
+                placeholder="Rua, número, código postal, cidade..."
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Número de Telemóvel *</label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                required
+                className="w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300"
+                placeholder="+351 xxx xxx xxx"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>NIF (Opcional)</label>
+              <input
+                type="text"
+                value={formData.nif}
+                onChange={(e) => handleNIFChange(e.target.value)}
+                className={`w-full border ${nifError ? 'border-red-500' : 'border-purple-500/30'} rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
+                placeholder="PT123456789"
+                maxLength={11}
+              />
+              {nifError && (
+                <p className="text-red-400 text-sm mt-2">{nifError}</p>
+              )}
+              <p className="text-gray-400 text-sm mt-2">
+                Digite PT seguido de 9 dígitos (ex: PT123456789). Campo opcional.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-white`}>🚚 Método de Envio</h3>
+
+            <div className="space-y-4">
+              {shippingMethods.map(method => (
+                <label key={method.id} className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="shippingMethod"
+                    value={method.id}
+                    checked={formData.shippingMethod === method.id}
+                    onChange={(e) => setFormData({...formData, shippingMethod: e.target.value})}
+                    className="mr-4 scale-125"
+                  />
+                  <span className="flex-1 text-white">{method.name}</span>
+                  <span className="text-purple-400 font-semibold">
+                    {method.price === 0 ? 'Grátis' : `€${method.price}`}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-white`}>💳 Método de Pagamento</h3>
+
+            <div className="space-y-4">
+              <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="card"
+                  checked={formData.paymentMethod === 'card'}
+                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                  className="mr-4 scale-125"
+                />
+                <span className="text-white">💳 Cartão de Crédito/Débito (Stripe)</span>
+              </label>
+
+              <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="bank_transfer"
+                  checked={formData.paymentMethod === 'bank_transfer'}
+                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                  className="mr-4 scale-125"
+                />
+                <span className="text-white">🏦 Transferência Bancária</span>
+              </label>
+
+              <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="cash_on_delivery"
+                  checked={formData.paymentMethod === 'cash_on_delivery'}
+                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+                  className="mr-4 scale-125"
+                />
+                <span className="text-white">💰 Pagamento à Cobrança</span>
+              </label>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading || nifError}
+            className={`w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white ${isMobile ? 'py-4 text-lg' : 'py-6 text-xl'} rounded-2xl font-bold hover:from-purple-700 hover:via-pink-700 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <div className="animate-spin mr-3">🔮</div>
+                Processando...
+              </span>
+            ) : (
+              '🎁 Confirmar Pedido'
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const Success = () => {
+  const [paymentStatus, setPaymentStatus] = useState('checking');
+  const location = useLocation();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      const urlParams = new URLSearchParams(location.search);
+      const sessionId = urlParams.get('session_id');
+
+      if (!sessionId) {
+        setPaymentStatus('error');
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API}/payments/checkout/status/${sessionId}`);
+
+        if (response.data.payment_status === 'paid') {
+          setPaymentStatus('success');
+        } else {
+          setTimeout(checkPaymentStatus, 2000);
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+        setPaymentStatus('error');
+      }
+    };
+
+    checkPaymentStatus();
+  }, [location]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+      <div className={`text-center text-white max-w-2xl mx-auto px-4`}>
+        {paymentStatus === 'checking' && (
+          <div>
+            <div className="text-8xl mb-8 animate-spin">🔮</div>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-4`}>Verificando Pagamento...</h1>
+            <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-400`}>Por favor aguarde enquanto confirmamos o seu pagamento.</p>
+          </div>
+        )}
+
+        {paymentStatus === 'success' && (
+          <div>
+            <div className="text-8xl mb-8 animate-bounce">🎉</div>
+            <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-green-400 mb-6`}>Pagamento Confirmado!</h1>
+            <p className={`${isMobile ? 'text-lg mb-6' : 'text-xl mb-8'} text-gray-300`}>
+              Obrigado pela sua compra! O seu mistério está a caminho.
+              Receberá em breve um email de confirmação com os detalhes do envio.
+            </p>
+            <div className={`${isMobile ? 'space-y-4' : 'space-x-4'} ${isMobile ? 'flex flex-col items-center' : ''}`}>
+              <Link
+                to="/"
+                className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-6 py-3 w-full max-w-xs' : 'px-8 py-4'} rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+              >
+                🏠 Voltar ao Início
+              </Link>
+              <Link
+                to="/produtos"
+                className={`border-2 border-purple-400 text-purple-300 ${isMobile ? 'px-6 py-3 w-full max-w-xs' : 'px-8 py-4'} rounded-xl font-semibold hover:bg-purple-600 hover:text-white transition-all duration-300 transform hover:scale-105`}
+              >
+                🔍 Mais Mistérios
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {paymentStatus === 'error' && (
+          <div>
+            <div className="text-8xl mb-8">❌</div>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-red-400 mb-6`}>Erro no Pagamento</h1>
+            <p className={`${isMobile ? 'text-lg mb-6' : 'text-xl mb-8'} text-gray-400`}>
+              Ocorreu um erro no processamento do pagamento. Por favor, tente novamente.
+            </p>
+            <Link
+              to="/carrinho"
+              className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-6 py-3' : 'px-8 py-4'} rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+            >
+              🛒 Voltar ao Carrinho
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Login = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAppContext();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const response = await axios.post(`${API}${endpoint}`, formData);
+
+      if (response.data.access_token) {
+        login(response.data.access_token, response.data.user);
+        navigate('/');
+      }
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro no sistema');
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleGoogleSuccess = (tokenData) => {
+    login(tokenData.access_token, tokenData.user);
+    navigate('/');
+  };
+
+  const handleGoogleError = (error) => {
+    console.error('Google login error:', error);
+    alert('Erro no login com Google');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black flex items-center justify-center">
+      <div className={`${isMobile ? 'max-w-sm' : 'max-w-md'} mx-auto bg-gray-800/50 rounded-2xl shadow-2xl p-8 border border-purple-500/30 ${isMobile ? 'mx-4' : ''}`}>
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">🔮</div>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-white mb-2`}>
+            {isLogin ? 'Entrar' : 'Criar Conta'}
+          </h1>
+          <p className="text-gray-400">Junte-se aos exploradores de mistérios!</p>
+        </div>
+
+        {/* Google Login */}
+        <div className="mb-6">
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
+        </div>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-gray-800 text-gray-400">ou</span>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2 text-gray-300">Nome</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required={!isLogin}
+                className="w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300"
+                placeholder="Seu nome completo"
+              />
+            </div>
+          )}
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 text-gray-300">Email</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              required
+              className="w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300"
+              placeholder="seu@email.com"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2 text-gray-300">Senha</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              required
+              className="w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <div className="animate-spin mr-2">🔮</div>
+                Processando...
+              </span>
+            ) : (
+              isLogin ? '🚀 Entrar' : '✨ Criar Conta'
+            )}
+          </button>
+        </form>
+
+        <p className="text-center mt-6 text-gray-400">
+          {isLogin ? 'Não tem conta?' : 'Já tem conta?'}
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-purple-400 hover:text-purple-300 ml-2 font-semibold transition-colors duration-300"
+          >
+            {isLogin ? 'Criar conta' : 'Fazer login'}
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Admin Components
+const AdminDashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [newAdmin, setNewAdmin] = useState({ email: '', name: '' });
+  const [coupons, setCoupons] = useState([]);
+  const [promotions, setPromotions] = useState([]);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadDashboardData();
+      loadUsers();
+      loadCoupons();
+      loadPromotions();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/dashboard`);
+      setDashboardData(response.data);
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/users`);
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
+  const loadCoupons = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/coupons`);
+      setCoupons(response.data);
+    } catch (error) {
+      console.error('Error loading coupons:', error);
+    }
+  };
+
+  const loadPromotions = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/promotions`);
+      setPromotions(response.data);
+    } catch (error) {
+      console.error('Error loading promotions:', error);
+    }
+  };
+
+  const handleMakeAdmin = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/admin/users/make-admin`, newAdmin);
+      alert('Admin criado com sucesso!');
+      setNewAdmin({ email: '', name: '' });
+      loadUsers();
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao criar admin');
+    }
+  };
+
+  const handleRemoveAdmin = async (userId) => {
+    if (window.confirm('Tem certeza que quer remover este admin?')) {
+      try {
+        await axios.delete(`${API}/admin/users/${userId}/remove-admin`);
+        alert('Admin removido!');
+        loadUsers();
+      } catch (error) {
+        alert(error.response?.data?.detail || 'Erro ao remover admin');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-4`}>Acesso Negado</h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-400`}>Apenas administradores podem aceder a esta área.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          ⚙️ Painel de Administração
+        </h1>
+
+        {/* Dashboard Stats */}
+        {dashboardData && (
+          <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'md:grid-cols-4 gap-6'} mb-12`}>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <div className="text-4xl mb-2">📦</div>
+              <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold text-white`}>Total Pedidos</h3>
+              <p className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-purple-400`}>{dashboardData.stats.total_orders}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <div className="text-4xl mb-2">👥</div>
+              <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold text-white`}>Total Utilizadores</h3>
+              <p className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-purple-400`}>{dashboardData.stats.total_users}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <div className="text-4xl mb-2">🎁</div>
+              <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold text-white`}>Total Produtos</h3>
+              <p className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-purple-400`}>{dashboardData.stats.total_products}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <div className="text-4xl mb-2">💰</div>
+              <h3 className={`${isMobile ? 'text-sm' : 'text-lg'} font-semibold text-white`}>Receita Total</h3>
+              <p className={`${isMobile ? 'text-lg' : 'text-3xl'} font-bold text-green-400`}>€{dashboardData.stats.total_revenue.toFixed(2)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Management - Only for super admin */}
+        {user?.is_super_admin && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-12 border border-purple-500/30">
+            <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold mb-6 text-white`}>👑 Gestão de Administradores</h2>
+
+            {/* Add new admin */}
+            <form onSubmit={handleMakeAdmin} className="mb-8">
+              <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-3 gap-4'}`}>
+                <input
+                  type="email"
+                  placeholder="Email do novo admin"
+                  value={newAdmin.email}
+                  onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                  required
+                  className="bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Nome do novo admin"
+                  value={newAdmin.name}
+                  onChange={(e) => setNewAdmin({...newAdmin, name: e.target.value})}
+                  required
+                  className="bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                >
+                  ➕ Adicionar Admin
+                </button>
+              </div>
+            </form>
+
+            {/* Users list */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead>
+                  <tr className="border-b border-purple-500/30">
+                    <th className="text-left py-3">Nome</th>
+                    <th className="text-left py-3">Email</th>
+                    <th className="text-left py-3">Tipo</th>
+                    <th className="text-left py-3">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(userItem => (
+                    <tr key={userItem.id} className="border-b border-gray-700/50">
+                      <td className="py-3">{userItem.name}</td>
+                      <td className="py-3">{userItem.email}</td>
+                      <td className="py-3">
+                        {userItem.email === 'eduardocorreia3344@gmail.com' ? (
+                          <span className="text-yellow-400">👑 Super Admin</span>
+                        ) : userItem.is_admin ? (
+                          <span className="text-purple-400">⚙️ Admin</span>
+                        ) : (
+                          <span className="text-gray-400">👤 Utilizador</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        {userItem.is_admin && userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                          <button
+                            onClick={() => handleRemoveAdmin(userItem.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                          >
+                            🗑️ Remover Admin
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'md:grid-cols-3 gap-6'}`}>
+          <Link
+            to="/admin/orders"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">📋</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Pedidos</h3>
+          </Link>
+          <Link
+            to="/admin/products"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🎁</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Produtos</h3>
+          </Link>
+          <Link
+            to="/admin/coupons"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🎫</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Cupões</h3>
+          </Link>
+          <Link
+            to="/admin/promotions"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🏷️</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Promoções</h3>
+          </Link>
+          <Link
+            to="/admin/categories"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🏷️</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Categorias</h3>
+          </Link>
+          <Link
+            to="/admin/emails"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">📧</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Emails</h3>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <AppProvider>
+      <div className="App min-h-screen bg-gray-900">
+        <BrowserRouter>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/produtos" element={<Products />} />
+            <Route path="/produto/:id" element={<ProductDetail />} />
+            <Route path="/carrinho" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
+        </BrowserRouter>
+      </div>
+    </AppProvider>
+  );
+};
 
 export default App;
