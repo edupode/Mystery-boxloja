@@ -1420,6 +1420,12 @@ async def create_checkout(checkout_data: CheckoutRequest):
                 {"$inc": {"current_uses": 1}}
             )
         
+        # Clear the cart after successful order creation
+        await db.carts.update_one(
+            {"session_id": cart.session_id},
+            {"$set": {"items": [], "coupon_code": None, "updated_at": datetime.utcnow()}}
+        )
+        
         return {"checkout_url": session.url, "order_id": order.id}
 
     else:
