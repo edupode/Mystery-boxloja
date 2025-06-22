@@ -137,6 +137,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Testado o endpoint PUT /api/admin/orders/{order_id}/status com diferentes status (pending, confirmed, processing, shipped, delivered, cancelled). A atualização de status funciona corretamente e o timestamp é atualizado. No entanto, a validação de status inválidos não está funcionando corretamente - o endpoint aceita status inválidos sem retornar erro."
+      - working: true
+        agent: "testing"
+        comment: "Retestado o endpoint PUT /api/admin/orders/{order_id}/status com diferentes status válidos e inválidos. A validação de status agora funciona corretamente, rejeitando status inválidos com código 400. O timestamp também é atualizado corretamente."
 
   - task: "FASE 1 - Correção chat admin - Melhorar sistema de chat com aprovação/rejeição"
     implemented: true
