@@ -1290,7 +1290,19 @@ async def update_order_status(order_id: str, status: str, admin_user: User = Dep
 @api_router.get("/admin/users")
 async def get_all_users(admin_user: User = Depends(get_admin_user)):
     users = await db.users.find().sort("created_at", -1).to_list(1000)
-    return [{"id": u["id"], "name": u["name"], "email": u["email"], "is_admin": u.get("is_admin", False), "created_at": u["created_at"]} for u in users]
+    # Convert ObjectId to string and prepare user data
+    user_list = []
+    for u in users:
+        if "_id" in u:
+            u["_id"] = str(u["_id"])
+        user_list.append({
+            "id": u["id"], 
+            "name": u["name"], 
+            "email": u["email"], 
+            "is_admin": u.get("is_admin", False), 
+            "created_at": u["created_at"]
+        })
+    return user_list
 
 @api_router.post("/admin/users/make-admin")
 async def make_user_admin(admin_data: AdminUser, admin_user: User = Depends(get_admin_user)):
