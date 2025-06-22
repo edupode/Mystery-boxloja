@@ -725,7 +725,7 @@ SAMPLE_PRODUCTS = [
             "6_months": 24.99,
             "12_months": 22.99
         },
-        "image_url": "https://images.pexels.com/photos/8728561/pexels-photo-8728561.jpeg",
+        "image_url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxnYW1pbmd8ZW58MHx8fGJsdWV8MTc1MDU5NzA1OXww&ixlib=rb-4.1.0&q=85",
         "featured": True
     },
     {
@@ -739,7 +739,7 @@ SAMPLE_PRODUCTS = [
             "6_months": 29.99,
             "12_months": 27.99
         },
-        "image_url": "https://cdn.pixabay.com/photo/2014/12/21/23/27/treasure-chest-575386_1280.png",
+        "image_url": "https://images.unsplash.com/photo-1633555690973-b736f84f3c1b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxob3Jyb3J8ZW58MHx8fHwxNzUwNTk5MzA0fDA&ixlib=rb-4.1.0&q=85",
         "featured": True
     },
     {
@@ -753,7 +753,7 @@ SAMPLE_PRODUCTS = [
             "6_months": 21.99,
             "12_months": 19.99
         },
-        "image_url": "https://cdn.pixabay.com/photo/2016/12/09/04/02/presents-1893642_1280.jpg",
+        "image_url": "https://images.pexels.com/photos/1739093/pexels-photo-1739093.jpeg",
         "featured": True
     },
     {
@@ -767,7 +767,7 @@ SAMPLE_PRODUCTS = [
             "6_months": 34.99,
             "12_months": 32.99
         },
-        "image_url": "https://cdn.pixabay.com/photo/2020/12/09/13/59/gifts-5817555_1280.jpg"
+        "image_url": "https://images.unsplash.com/photo-1647221597996-54f3d0f73809?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxteXN0ZXJ5JTIwYm94fGVufDB8fHxibHVlfDE3NTA1OTkyNTR8MA&ixlib=rb-4.1.0&q=85"
     },
     {
         "name": "Mystery Box Marvel 🦸‍♂️",
@@ -780,7 +780,7 @@ SAMPLE_PRODUCTS = [
             "6_months": 37.99,
             "12_months": 35.99
         },
-        "image_url": "https://cdn.pixabay.com/photo/2017/06/30/11/05/gift-box-2458012_1280.jpg"
+        "image_url": "https://images.unsplash.com/photo-1635404617144-8e262a622e41?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwyfHxteXN0ZXJ5JTIwYm94fGVufDB8fHxibHVlfDE3NTA1OTkyNTR8MA&ixlib=rb-4.1.0&q=85"
     },
     {
         "name": "Mystery Box Livros 📚",
@@ -793,7 +793,33 @@ SAMPLE_PRODUCTS = [
             "6_months": 23.99,
             "12_months": 21.99
         },
-        "image_url": "https://images.unsplash.com/photo-1600417118520-b87c3656c0d8"
+        "image_url": "https://images.unsplash.com/photo-1604866830893-c13cafa515d5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxib29rc3xlbnwwfHx8fDE3NTA1OTkzMTZ8MA&ixlib=rb-4.1.0&q=85"
+    },
+    {
+        "name": "Mystery Box Auto-cuidado 🧘‍♀️",
+        "description": "Produtos de bem-estar e relaxamento: velas aromáticas, óleos essenciais, produtos spa, máscaras faciais e muito mais! Cuide de si mesmo.",
+        "category": "auto_cuidado",
+        "price": 32.99,
+        "subscription_prices": {
+            "1_month": 32.99,
+            "3_months": 29.99,
+            "6_months": 27.99,
+            "12_months": 25.99
+        },
+        "image_url": "https://images.pexels.com/photos/289586/pexels-photo-289586.jpeg"
+    },
+    {
+        "name": "Mystery Box Stitch 🌺",
+        "description": "Produtos do adorável alienígena azul: pelúcias, acessórios, produtos oficiais Disney e muito mais! Ohana significa família.",
+        "category": "stitch",
+        "price": 36.99,
+        "subscription_prices": {
+            "1_month": 36.99,
+            "3_months": 33.99,
+            "6_months": 31.99,
+            "12_months": 29.99
+        },
+        "image_url": "https://images.unsplash.com/photo-1504370164829-8c6ef0c41d06?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxnYW1pbmd8ZW58MHx8fGJsdWV8MTc1MDU5NzA1OXww&ixlib=rb-4.1.0&q=85"
     }
 ]
 
