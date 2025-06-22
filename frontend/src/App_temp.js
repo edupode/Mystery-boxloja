@@ -1958,3 +1958,2899 @@ const AdminDashboard = () => {
     </div>
   );
 };
+
+// Admin sub-pages
+const AdminOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadOrders();
+    }
+  }, [user]);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/orders`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await axios.put(`${API}/admin/orders/${orderId}/status`, null, {
+        params: { status: newStatus }
+      });
+      alert('Status atualizado com sucesso!');
+      loadOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Erro ao atualizar status: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            📋 Gestão de Pedidos
+          </h1>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando pedidos...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">ID do Pedido</th>
+                    <th className="text-left p-4">Cliente</th>
+                    <th className="text-left p-4">Total</th>
+                    <th className="text-left p-4">Status Pagamento</th>
+                    <th className="text-left p-4">Status Pedido</th>
+                    <th className="text-left p-4">Data</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-mono text-sm">#{order.id.slice(0, 8)}</td>
+                      <td className="p-4">{order.user_id || 'Convidado'}</td>
+                      <td className="p-4 font-bold text-green-400">€{order.total_amount?.toFixed(2)}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          order.payment_status === 'paid' ? 'bg-green-900 text-green-300' : 
+                          order.payment_status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                          'bg-red-900 text-red-300'
+                        }`}>
+                          {order.payment_status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <select
+                          value={order.order_status}
+                          onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                          className="bg-gray-700 text-white border border-purple-500/30 rounded px-2 py-1 text-sm"
+                        >
+                          <option value="pending">Pendente</option>
+                          <option value="confirmed">Confirmado</option>
+                          <option value="processing">Processando</option>
+                          <option value="shipped">Enviado</option>
+                          <option value="delivered">Entregue</option>
+                          <option value="cancelled">Cancelado</option>
+                        </select>
+                      </td>
+                      <td className="p-4 text-sm text-gray-400">
+                        {new Date(order.created_at).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <button className="text-purple-400 hover:text-purple-300 text-sm">
+                          📋 Ver Detalhes
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {orders.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">📦</div>
+                <p>Nenhum pedido encontrado</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminProducts = () => {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    price: '',
+    image_url: '',
+    image_base64: '', // Para armazenar a imagem em base64
+    stock_quantity: '100',
+    featured: false
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadProducts();
+      loadCategories();
+    }
+  }, [user]);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/categories`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  // Função para converter imagem para base64
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('A imagem deve ter menos de 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64String = event.target.result;
+        setFormData({
+          ...formData,
+          image_base64: base64String,
+          image_url: '' // Clear URL if uploading file
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock_quantity: parseInt(formData.stock_quantity),
+        // Use base64 image if uploaded, otherwise use URL
+        image_url: formData.image_base64 || formData.image_url
+      };
+
+      if (editingProduct) {
+        await axios.put(`${API}/admin/products/${editingProduct.id}`, productData);
+        alert('Produto atualizado com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/products`, productData);
+        alert('Produto criado com sucesso!');
+      }
+
+      setFormData({
+        name: '',
+        description: '',
+        category: '',
+        price: '',
+        image_url: '',
+        image_base64: '',
+        stock_quantity: '100',
+        featured: false
+      });
+      setShowAddForm(false);
+      setEditingProduct(null);
+      loadProducts();
+    } catch (error) {
+      alert('Erro ao salvar produto');
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price.toString(),
+      image_url: product.image_url,
+      image_base64: '',
+      stock_quantity: product.stock_quantity.toString(),
+      featured: product.featured
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Tem certeza que quer remover este produto?')) {
+      try {
+        await axios.delete(`${API}/admin/products/${productId}`);
+        alert('Produto removido!');
+        loadProducts();
+      } catch (error) {
+        alert('Erro ao remover produto');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🎁 Gestão de Produtos
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingProduct(null);
+              setFormData({
+                name: '',
+                description: '',
+                category: '',
+                price: '',
+                image_url: '',
+                stock_quantity: '100',
+                featured: false
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Novo Produto
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingProduct ? '✏️ Editar Produto' : '➕ Novo Produto'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome do Produto</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Mystery Box Geek..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Categoria</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="">Selecionar categoria</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  rows="4"
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Descrição detalhada do produto..."
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Preço (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="29.99"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Stock</label>
+                  <input
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={(e) => setFormData({...formData, stock_quantity: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="100"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.featured}
+                      onChange={(e) => setFormData({...formData, featured: e.target.checked})}
+                      className="mr-3 scale-125"
+                    />
+                    ⭐ Produto em Destaque
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-lg font-medium mb-3 text-gray-300">Imagem do Produto</label>
+                
+                {/* Preview da imagem atual */}
+                {(formData.image_base64 || formData.image_url) && (
+                  <div className="mb-4">
+                    <img 
+                      src={formData.image_base64 || formData.image_url} 
+                      alt="Preview" 
+                      className="w-32 h-32 object-cover rounded-lg border border-purple-500/30"
+                    />
+                  </div>
+                )}
+                
+                {/* Upload de arquivo */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-400">Enviar Imagem (Max: 5MB)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                  />
+                </div>
+                
+                <div className="text-center text-gray-400">OU</div>
+                
+                {/* URL da imagem */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-400">URL da Imagem</label>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({...formData, image_url: e.target.value, image_base64: ''})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingProduct ? '💾 Atualizar' : '➕ Criar'} Produto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingProduct(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando produtos...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden hover:border-purple-400 transition-colors duration-300">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                    {product.featured && (
+                      <span className="bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
+                        ⭐ Destaque
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">{product.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-bold text-purple-400">€{product.price}</span>
+                    <span className="text-sm text-gray-400">Stock: {product.stock_quantity}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm"
+                    >
+                      🗑️ Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {products.length === 0 && !loading && (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-6xl mb-4">🎁</div>
+            <p>Nenhum produto encontrado</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminCoupons = () => {
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [formData, setFormData] = useState({
+    code: '',
+    description: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    min_order_value: '',
+    max_uses: '',
+    valid_from: '',
+    valid_until: ''
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadCoupons();
+    }
+  }, [user]);
+
+  const loadCoupons = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/coupons`);
+      setCoupons(response.data);
+    } catch (error) {
+      console.error('Error loading coupons:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const couponData = {
+        ...formData,
+        code: formData.code.toUpperCase(),
+        discount_value: parseFloat(formData.discount_value),
+        min_order_value: formData.min_order_value ? parseFloat(formData.min_order_value) : null,
+        max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
+        valid_from: new Date(formData.valid_from).toISOString(),
+        valid_until: new Date(formData.valid_until).toISOString()
+      };
+
+      if (editingCoupon) {
+        await axios.put(`${API}/admin/coupons/${editingCoupon.id}`, couponData);
+        alert('Cupão atualizado com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/coupons`, couponData);
+        alert('Cupão criado com sucesso!');
+      }
+
+      setFormData({
+        code: '',
+        description: '',
+        discount_type: 'percentage',
+        discount_value: '',
+        min_order_value: '',
+        max_uses: '',
+        valid_from: '',
+        valid_until: ''
+      });
+      setShowAddForm(false);
+      setEditingCoupon(null);
+      loadCoupons();
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao salvar cupão');
+    }
+  };
+
+  const handleEdit = (coupon) => {
+    setEditingCoupon(coupon);
+    setFormData({
+      code: coupon.code,
+      description: coupon.description,
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value.toString(),
+      min_order_value: coupon.min_order_value?.toString() || '',
+      max_uses: coupon.max_uses?.toString() || '',
+      valid_from: coupon.valid_from ? new Date(coupon.valid_from).toISOString().split('T')[0] : '',
+      valid_until: coupon.valid_until ? new Date(coupon.valid_until).toISOString().split('T')[0] : ''
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (couponId) => {
+    if (window.confirm('Tem certeza que quer desativar este cupão?')) {
+      try {
+        await axios.delete(`${API}/admin/coupons/${couponId}`);
+        alert('Cupão desativado!');
+        loadCoupons();
+      } catch (error) {
+        alert('Erro ao desativar cupão');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🎫 Gestão de Cupões
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingCoupon(null);
+              setFormData({
+                code: '',
+                description: '',
+                discount_type: 'percentage',
+                discount_value: '',
+                min_order_value: '',
+                max_uses: '',
+                valid_from: '',
+                valid_until: ''
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Novo Cupão
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingCoupon ? '✏️ Editar Cupão' : '➕ Novo Cupão'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código do Cupão</label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="DESCONTO10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Desconto</label>
+                  <select
+                    value={formData.discount_type}
+                    onChange={(e) => setFormData({...formData, discount_type: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem (%)</option>
+                    <option value="fixed">Valor Fixo (€)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Desconto de 10% em todos os produtos"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">
+                    Valor do Desconto {formData.discount_type === 'percentage' ? '(%)' : '(€)'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.discount_value}
+                    onChange={(e) => setFormData({...formData, discount_value: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder={formData.discount_type === 'percentage' ? '10' : '5.00'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Valor Mínimo (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.min_order_value}
+                    onChange={(e) => setFormData({...formData, min_order_value: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Máximo de Usos</label>
+                  <input
+                    type="number"
+                    value={formData.max_uses}
+                    onChange={(e) => setFormData({...formData, max_uses: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Ilimitado"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido De</label>
+                  <input
+                    type="date"
+                    value={formData.valid_from}
+                    onChange={(e) => setFormData({...formData, valid_from: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido Até</label>
+                  <input
+                    type="date"
+                    value={formData.valid_until}
+                    onChange={(e) => setFormData({...formData, valid_until: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingCoupon ? '💾 Atualizar' : '➕ Criar'} Cupão
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingCoupon(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando cupões...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">Código</th>
+                    <th className="text-left p-4">Descrição</th>
+                    <th className="text-left p-4">Desconto</th>
+                    <th className="text-left p-4">Usos</th>
+                    <th className="text-left p-4">Validade</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {coupons.map((coupon) => (
+                    <tr key={coupon.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-mono font-bold text-purple-400">{coupon.code}</td>
+                      <td className="p-4">{coupon.description}</td>
+                      <td className="p-4 font-bold text-green-400">
+                        {coupon.discount_type === 'percentage' 
+                          ? `${coupon.discount_value}%` 
+                          : `€${coupon.discount_value}`}
+                      </td>
+                      <td className="p-4">
+                        {coupon.current_uses}/{coupon.max_uses || '∞'}
+                      </td>
+                      <td className="p-4 text-sm">
+                        {new Date(coupon.valid_from).toLocaleDateString('pt-PT')} - {new Date(coupon.valid_until).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          coupon.is_active 
+                            ? 'bg-green-900 text-green-300' 
+                            : 'bg-red-900 text-red-300'
+                        }`}>
+                          {coupon.is_active ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(coupon)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(coupon.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                          >
+                            🗑️ Desativar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {coupons.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">🎫</div>
+                <p>Nenhum cupão encontrado</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminCategories = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    emoji: '',
+    color: '#8B5CF6'
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadCategories();
+    }
+  }, [user]);
+
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/categories`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/admin/categories`, formData);
+      alert('Categoria criada com sucesso!');
+      setFormData({
+        name: '',
+        description: '',
+        emoji: '',
+        color: '#8B5CF6'
+      });
+      setShowAddForm(false);
+      loadCategories();
+    } catch (error) {
+      alert('Erro ao criar categoria');
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🏷️ Gestão de Categorias
+            </h1>
+          </div>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Nova Categoria
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">➕ Nova Categoria</h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome da Categoria</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Geek, Terror, etc."
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Emoji</label>
+                  <input
+                    type="text"
+                    value={formData.emoji}
+                    onChange={(e) => setFormData({...formData, emoji: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="🤓"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Produtos relacionados com..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Cor da Categoria</label>
+                <input
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => setFormData({...formData, color: e.target.value})}
+                  className="w-32 h-12 bg-gray-700 border border-purple-500/30 rounded-lg focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  ➕ Criar Categoria
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando categorias...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <div key={category.id} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 p-6 text-center hover:border-purple-400 transition-colors duration-300">
+                <div className="text-6xl mb-4">{category.emoji}</div>
+                <h3 className="text-xl font-semibold text-white mb-2">{category.name}</h3>
+                <p className="text-gray-300 text-sm mb-4">{category.description}</p>
+                <div 
+                  className="w-full h-4 rounded-full mb-4"
+                  style={{ backgroundColor: category.color }}
+                ></div>
+                <div className="text-xs text-gray-400">
+                  ID: {category.id}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {categories.length === 0 && !loading && (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-6xl mb-4">🏷️</div>
+            <p>Nenhuma categoria encontrada</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminEmails = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [emailForm, setEmailForm] = useState({
+    type: 'discount',
+    user_email: '',
+    user_name: '',
+    coupon_code: '',
+    discount_value: '',
+    discount_type: 'percentage',
+    expiry_date: ''
+  });
+  const [sending, setSending] = useState(false);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadUsers();
+    }
+  }, [user]);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/users`);
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    setSending(true);
+
+    try {
+      if (emailForm.type === 'discount') {
+        await axios.post(`${API}/admin/emails/send-discount`, {
+          user_email: emailForm.user_email,
+          user_name: emailForm.user_name,
+          coupon_code: emailForm.coupon_code,
+          discount_value: parseFloat(emailForm.discount_value),
+          discount_type: emailForm.discount_type,
+          expiry_date: emailForm.expiry_date
+        });
+      } else if (emailForm.type === 'birthday') {
+        await axios.post(`${API}/admin/emails/send-birthday`, {
+          user_email: emailForm.user_email,
+          user_name: emailForm.user_name,
+          coupon_code: emailForm.coupon_code,
+          discount_value: parseFloat(emailForm.discount_value)
+        });
+      }
+
+      alert('Email enviado com sucesso!');
+      setEmailForm({
+        type: 'discount',
+        user_email: '',
+        user_name: '',
+        coupon_code: '',
+        discount_value: '',
+        discount_type: 'percentage',
+        expiry_date: ''
+      });
+    } catch (error) {
+      alert('Erro ao enviar email');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleUserSelect = (selectedUser) => {
+    setEmailForm({
+      ...emailForm,
+      user_email: selectedUser.email,
+      user_name: selectedUser.name
+    });
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            📧 Gestão de Emails
+          </h1>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Email Form */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">📧 Enviar Email</h3>
+            
+            <form onSubmit={handleSendEmail} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Email</label>
+                <select
+                  value={emailForm.type}
+                  onChange={(e) => setEmailForm({...emailForm, type: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                >
+                  <option value="discount">Email de Desconto</option>
+                  <option value="birthday">Email de Aniversário</option>
+                </select>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Email do Utilizador</label>
+                  <input
+                    type="email"
+                    value={emailForm.user_email}
+                    onChange={(e) => setEmailForm({...emailForm, user_email: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="user@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome do Utilizador</label>
+                  <input
+                    type="text"
+                    value={emailForm.user_name}
+                    onChange={(e) => setEmailForm({...emailForm, user_name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="João Silva"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código do Cupão</label>
+                  <input
+                    type="text"
+                    value={emailForm.coupon_code}
+                    onChange={(e) => setEmailForm({...emailForm, coupon_code: e.target.value.toUpperCase()})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="DESCONTO20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Valor do Desconto</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={emailForm.discount_value}
+                    onChange={(e) => setEmailForm({...emailForm, discount_value: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo</label>
+                  <select
+                    value={emailForm.discount_type}
+                    onChange={(e) => setEmailForm({...emailForm, discount_type: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem</option>
+                    <option value="fixed">Valor Fixo</option>
+                  </select>
+                </div>
+              </div>
+
+              {emailForm.type === 'discount' && (
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Data de Expiração</label>
+                  <input
+                    type="date"
+                    value={emailForm.expiry_date}
+                    onChange={(e) => setEmailForm({...emailForm, expiry_date: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+              >
+                {sending ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin mr-2">📧</div>
+                    Enviando...
+                  </span>
+                ) : (
+                  '📧 Enviar Email'
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Users List */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">👥 Selecionar Utilizador</h3>
+            
+            {loading ? (
+              <div className="text-center text-white">
+                <div className="animate-spin text-4xl mb-4">🔮</div>
+                <p>Carregando utilizadores...</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {users.map((userItem) => (
+                  <div
+                    key={userItem.id}
+                    onClick={() => handleUserSelect(userItem)}
+                    className="p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-semibold">{userItem.name}</h4>
+                        <p className="text-gray-400 text-sm">{userItem.email}</p>
+                      </div>
+                      {userItem.is_admin && (
+                        <span className="text-purple-400 text-xs">⚙️ Admin</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdminPromotions = () => {
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    valid_from: '',
+    valid_until: ''
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadPromotions();
+    }
+  }, [user]);
+
+  const loadPromotions = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/promotions`);
+      setPromotions(response.data);
+    } catch (error) {
+      console.error('Error loading promotions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const promotionData = {
+        ...formData,
+        discount_value: parseFloat(formData.discount_value),
+        valid_from: new Date(formData.valid_from).toISOString(),
+        valid_until: new Date(formData.valid_until).toISOString()
+      };
+
+      if (editingPromotion) {
+        await axios.put(`${API}/admin/promotions/${editingPromotion.id}`, promotionData);
+        alert('Promoção atualizada com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/promotions`, promotionData);
+        alert('Promoção criada com sucesso!');
+      }
+
+      setFormData({
+        name: '',
+        description: '',
+        discount_type: 'percentage',
+        discount_value: '',
+        valid_from: '',
+        valid_until: ''
+      });
+      setShowAddForm(false);
+      setEditingPromotion(null);
+      loadPromotions();
+    } catch (error) {
+      alert('Erro ao salvar promoção');
+    }
+  };
+
+  const handleEdit = (promotion) => {
+    setEditingPromotion(promotion);
+    setFormData({
+      name: promotion.name,
+      description: promotion.description,
+      discount_type: promotion.discount_type,
+      discount_value: promotion.discount_value.toString(),
+      valid_from: promotion.valid_from ? new Date(promotion.valid_from).toISOString().split('T')[0] : '',
+      valid_until: promotion.valid_until ? new Date(promotion.valid_until).toISOString().split('T')[0] : ''
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (promotionId) => {
+    if (window.confirm('Tem certeza que quer desativar esta promoção?')) {
+      try {
+        await axios.delete(`${API}/admin/promotions/${promotionId}`);
+        alert('Promoção desativada!');
+        loadPromotions();
+      } catch (error) {
+        alert('Erro ao desativar promoção');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🏷️ Gestão de Promoções
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingPromotion(null);
+              setFormData({
+                name: '',
+                description: '',
+                discount_type: 'percentage',
+                discount_value: '',
+                valid_from: '',
+                valid_until: ''
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Nova Promoção
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingPromotion ? '✏️ Editar Promoção' : '➕ Nova Promoção'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome da Promoção</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Promoção de Verão"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Desconto</label>
+                  <select
+                    value={formData.discount_type}
+                    onChange={(e) => setFormData({...formData, discount_type: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem (%)</option>
+                    <option value="fixed">Valor Fixo (€)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  rows="3"
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Descrição da promoção..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">
+                  Valor do Desconto {formData.discount_type === 'percentage' ? '(%)' : '(€)'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.discount_value}
+                  onChange={(e) => setFormData({...formData, discount_value: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder={formData.discount_type === 'percentage' ? '25' : '10.00'}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido De</label>
+                  <input
+                    type="date"
+                    value={formData.valid_from}
+                    onChange={(e) => setFormData({...formData, valid_from: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido Até</label>
+                  <input
+                    type="date"
+                    value={formData.valid_until}
+                    onChange={(e) => setFormData({...formData, valid_until: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingPromotion ? '💾 Atualizar' : '➕ Criar'} Promoção
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingPromotion(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando promoções...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">Nome</th>
+                    <th className="text-left p-4">Descrição</th>
+                    <th className="text-left p-4">Desconto</th>
+                    <th className="text-left p-4">Validade</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {promotions.map((promotion) => (
+                    <tr key={promotion.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-semibold">{promotion.name}</td>
+                      <td className="p-4 text-sm text-gray-300 max-w-xs truncate">{promotion.description}</td>
+                      <td className="p-4 font-bold text-green-400">
+                        {promotion.discount_type === 'percentage' 
+                          ? `${promotion.discount_value}%` 
+                          : `€${promotion.discount_value}`}
+                      </td>
+                      <td className="p-4 text-sm">
+                        {new Date(promotion.valid_from).toLocaleDateString('pt-PT')} - {new Date(promotion.valid_until).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          promotion.is_active 
+                            ? 'bg-green-900 text-green-300' 
+                            : 'bg-red-900 text-red-300'
+                        }`}>
+                          {promotion.is_active ? 'Ativa' : 'Inativa'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(promotion)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(promotion.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                          >
+                            🗑️ Desativar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {promotions.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">🏷️</div>
+                <p>Nenhuma promoção encontrada</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Live Chat Components
+const LiveChatButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isNewTicket, setIsNewTicket] = useState(false);
+  const { user } = useAppContext();
+
+  if (!user) return null;
+
+  return (
+    <>
+      {/* Chat Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 z-50"
+      >
+        💬
+      </button>
+
+      {/* Chat Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl w-full max-w-md border border-purple-500/30">
+            <div className="flex items-center justify-between p-4 border-b border-purple-500/30">
+              <h3 className="text-lg font-semibold text-white">💬 Live Chat</h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {!isNewTicket ? (
+              <NewChatForm onSubmit={() => setIsNewTicket(true)} onClose={() => setIsOpen(false)} />
+            ) : (
+              <ChatInterface onClose={() => setIsOpen(false)} />
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const NewChatForm = ({ onSubmit, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    reason: ''
+  });
+  const { user } = useAppContext();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`${API}/chat/sessions`, {
+        client_name: formData.name,
+        reason: formData.reason
+      });
+      onSubmit();
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+      alert('Erro ao criar sessão de chat');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-2 text-gray-300">Nome</label>
+        <input
+          type="text"
+          value={formData.name}
+          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          required
+          className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+          placeholder="Digite seu nome"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium mb-2 text-gray-300">Motivo do Contacto</label>
+        <textarea
+          value={formData.reason}
+          onChange={(e) => setFormData({...formData, reason: e.target.value})}
+          required
+          className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 h-24 focus:border-purple-400 focus:outline-none resize-none"
+          placeholder="Descreva o motivo do seu contacto"
+        />
+      </div>
+      
+      <div className="flex space-x-3">
+        <button
+          type="submit"
+          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+        >
+          Iniciar Chat
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-6 py-3 text-gray-400 hover:text-white transition-colors duration-300"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const ChatInterface = ({ onClose }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+
+  useEffect(() => {
+    // Load chat session and messages
+    loadChatSession();
+  }, []);
+
+  const loadChatSession = async () => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions`);
+      if (response.data.length > 0) {
+        const session = response.data[0];
+        setSessionId(session.id);
+        loadMessages(session.id);
+      }
+    } catch (error) {
+      console.error('Error loading chat session:', error);
+    }
+  };
+
+  const loadMessages = async (id) => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions/${id}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !sessionId) return;
+
+    try {
+      await axios.post(`${API}/chat/sessions/${sessionId}/messages`, {
+        content: newMessage
+      });
+      setNewMessage('');
+      loadMessages(sessionId);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-96">
+      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">
+            <p>🔄 Aguardando agente...</p>
+            <p className="text-sm mt-2">Um agente irá atendê-lo em breve</p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div key={index} className={`flex ${message.sender_type === 'client' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xs px-4 py-2 rounded-lg ${
+                message.sender_type === 'client' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-700 text-white'
+              }`}>
+                <p className="text-sm">{message.content}</p>
+                <p className="text-xs opacity-70 mt-1">
+                  {new Date(message.created_at).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      
+      <form onSubmit={sendMessage} className="p-4 border-t border-purple-500/30">
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-2 focus:border-purple-400 focus:outline-none"
+            placeholder="Digite sua mensagem..."
+          />
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+          >
+            ➤
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Admin Chat Management
+const AdminChatDashboard = () => {
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [newTicketSound, setNewTicketSound] = useState(null);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadSessions();
+      // Check for new tickets every 5 seconds
+      const interval = setInterval(checkForNewTickets, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadSessions = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      setSessions(response.data);
+    } catch (error) {
+      console.error('Error loading sessions:', error);
+    }
+  };
+
+  const checkForNewTickets = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      const newSessions = response.data;
+      
+      // Check if there are new unassigned sessions
+      const newUnassigned = newSessions.filter(session => 
+        !session.assigned_agent && 
+        !sessions.find(s => s.id === session.id)
+      );
+      
+      if (newUnassigned.length > 0) {
+        playNotificationSound();
+      }
+      
+      setSessions(newSessions);
+    } catch (error) {
+      console.error('Error checking for new tickets:', error);
+    }
+  };
+
+  const playNotificationSound = () => {
+    // Create a simple "plim" sound using Web Audio API
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.3);
+  };
+
+  const assignSession = async (sessionId, accept) => {
+    try {
+      if (accept) {
+        await axios.put(`${API}/admin/chat/sessions/${sessionId}/assign`);
+        alert('Sessão aceita com sucesso!');
+      } else {
+        await axios.put(`${API}/admin/chat/sessions/${sessionId}/reject`);
+        alert('Sessão rejeitada.');
+      }
+      loadSessions();
+    } catch (error) {
+      console.error('Error assigning session:', error);
+      alert('Erro ao processar sessão: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            💬 Gestão de Chat
+          </h1>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Sessions List */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">🎫 Sessões de Chat</h3>
+            
+            <div className="space-y-4">
+              {sessions.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">Nenhuma sessão de chat ativa</p>
+              ) : (
+                sessions.map(session => (
+                  <div key={session.id} className={`p-4 rounded-lg border ${
+                    session.status === 'active' && session.agent_id
+                      ? 'bg-green-900/30 border-green-500/30' 
+                      : session.status === 'pending'
+                      ? 'bg-yellow-900/30 border-yellow-500/30'
+                      : session.status === 'rejected'
+                      ? 'bg-red-900/30 border-red-500/30'
+                      : session.status === 'auto_closed'
+                      ? 'bg-gray-900/30 border-gray-500/30'
+                      : 'bg-blue-900/30 border-blue-500/30'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white">
+                          {session.user_name} ({session.user_email})
+                        </h4>
+                        <p className="text-sm text-gray-300 mb-1">
+                          <strong>Assunto:</strong> {session.subject}
+                        </p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-400">
+                          <span>📅 {new Date(session.created_at).toLocaleString('pt-PT')}</span>
+                          <span className={`px-2 py-1 rounded-full ${
+                            session.status === 'active' ? 'bg-green-900 text-green-300' :
+                            session.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                            session.status === 'rejected' ? 'bg-red-900 text-red-300' :
+                            session.status === 'auto_closed' ? 'bg-gray-900 text-gray-300' :
+                            'bg-blue-900 text-blue-300'
+                          }`}>
+                            {session.status === 'active' ? '🟢 Ativo' :
+                             session.status === 'pending' ? '🟡 Pendente' :
+                             session.status === 'rejected' ? '🔴 Rejeitado' :
+                             session.status === 'auto_closed' ? '⚫ Auto-fechado' :
+                             session.status}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {session.status === 'pending' ? (
+                        <div className="flex space-x-2 ml-4">
+                          <button
+                            onClick={() => assignSession(session.id, true)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                          >
+                            ✓ Aceitar
+                          </button>
+                          <button
+                            onClick={() => assignSession(session.id, false)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                          >
+                            ✗ Rejeitar
+                          </button>
+                        </div>
+                      ) : session.status === 'active' && session.agent_id ? (
+                        <button
+                          onClick={() => setSelectedSession(session)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm ml-4 transition-colors duration-300"
+                        >
+                          💬 Abrir Chat
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Chat Interface */}
+          {selectedSession && (
+            <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">
+                  💬 Chat com {selectedSession.client_name}
+                </h3>
+                <button
+                  onClick={() => setSelectedSession(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <AdminChatInterface session={selectedSession} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdminChatInterface = ({ session }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+
+  useEffect(() => {
+    loadMessages();
+    const interval = setInterval(loadMessages, 2000);
+    return () => clearInterval(interval);
+  }, [session.id]);
+
+  const loadMessages = async () => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions/${session.id}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      await axios.post(`${API}/chat/sessions/${session.id}/messages`, {
+        content: newMessage
+      });
+      setNewMessage('');
+      loadMessages();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-96">
+      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+        {messages.map((message, index) => (
+          <div key={index} className={`flex ${message.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs px-4 py-2 rounded-lg ${
+              message.sender_type === 'agent' 
+                ? 'bg-purple-600 text-white' 
+                : 'bg-gray-700 text-white'
+            }`}>
+              <p className="text-sm">{message.content}</p>
+              <p className="text-xs opacity-70 mt-1">
+                {new Date(message.created_at).toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <form onSubmit={sendMessage}>
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-2 focus:border-purple-400 focus:outline-none"
+            placeholder="Digite sua mensagem..."
+          />
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+          >
+            ➤
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// User Profile Page
+const UserProfile = () => {
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    street: '',
+    postalCode: '',
+    city: '',
+    birthDate: ''
+  });
+  const [orders, setOrders] = useState([]);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    otpCode: ''
+  });
+  const [otpSent, setOtpSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, setUser } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user) {
+      loadProfileData();
+      loadOrders();
+    }
+  }, [user]);
+
+  const loadProfileData = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`);
+      setProfileData(response.data);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/orders`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    }
+  };
+
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.put(`${API}/auth/profile`, profileData);
+      setUser(response.data);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert('Erro ao atualizar perfil');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendOtp = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post(`${API}/auth/send-otp`, {
+        email: user.email
+      });
+      setOtpSent(true);
+      alert('Código OTP enviado para seu email!');
+    } catch (error) {
+      alert('Erro ao enviar OTP');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('As senhas não coincidem');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await axios.post(`${API}/auth/change-password`, {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        otp_code: passwordData.otpCode
+      });
+      
+      alert('Senha alterada com sucesso!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+        otpCode: ''
+      });
+      setOtpSent(false);
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao alterar senha');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+          <p>Faça login para aceder ao seu perfil</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          👤 Meu Perfil
+        </h1>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Profile Information */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">📝 Informações Pessoais</h3>
+            
+            <form onSubmit={updateProfile} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Nome</label>
+                <input
+                  type="text"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Email</label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  disabled
+                  className="w-full bg-gray-600 text-gray-300 border border-purple-500/30 rounded-lg px-4 py-3 cursor-not-allowed"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Telemóvel</label>
+                <input
+                  type="tel"
+                  value={profileData.phone || ''}
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="+351 xxx xxx xxx"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Endereço</label>
+                <input
+                  type="text"
+                  value={profileData.street || ''}
+                  onChange={(e) => setProfileData({...profileData, street: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Rua e número da porta"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código Postal</label>
+                  <input
+                    type="text"
+                    value={profileData.postalCode || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d-]/g, '');
+                      if (value.length <= 8) {
+                        let formatted = value;
+                        if (value.length > 4 && !value.includes('-')) {
+                          formatted = value.slice(0, 4) + '-' + value.slice(4);
+                        }
+                        setProfileData({...profileData, postalCode: formatted});
+                      }
+                    }}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="1234-567"
+                    maxLength="8"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Localidade</label>
+                  <input
+                    type="text"
+                    value={profileData.city || ''}
+                    onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Lisboa"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Data de Nascimento</label>
+                <input
+                  type="date"
+                  value={profileData.birthDate || ''}
+                  onChange={(e) => setProfileData({...profileData, birthDate: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+              >
+                {isLoading ? 'Atualizando...' : 'Atualizar Perfil'}
+              </button>
+            </form>
+          </div>
+
+          {/* Password Change */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">🔒 Alterar Senha</h3>
+            
+            <form onSubmit={changePassword} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Senha Atual</label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Nova Senha</label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Confirmar Nova Senha</label>
+                <input
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              {!otpSent ? (
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  disabled={isLoading}
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50"
+                >
+                  {isLoading ? 'Enviando...' : 'Enviar Código OTP'}
+                </button>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-lg font-medium mb-3 text-gray-300">Código OTP</label>
+                    <input
+                      type="text"
+                      value={passwordData.otpCode}
+                      onChange={(e) => setPasswordData({...passwordData, otpCode: e.target.value})}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="Digite o código recebido no email"
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Alterando...' : 'Alterar Senha'}
+                  </button>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* Order History */}
+        <div className="mt-12 bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <h3 className="text-2xl font-bold mb-6 text-white">📦 Histórico de Encomendas</h3>
+          
+          {orders.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">Ainda não fez nenhuma encomenda</p>
+          ) : (
+            <div className="space-y-4">
+              {orders.map(order => (
+                <div key={order.id} className="bg-gray-700/50 rounded-lg p-6 border border-purple-500/20">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-white">Encomenda #{order.id.slice(0, 8)}</h4>
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      order.status === 'completed' ? 'bg-green-900/50 text-green-300' :
+                      order.status === 'processing' ? 'bg-yellow-900/50 text-yellow-300' :
+                      'bg-gray-900/50 text-gray-300'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
+                    <div>
+                      <p><strong>Data:</strong> {new Date(order.created_at).toLocaleDateString()}</p>
+                      <p><strong>Total:</strong> €{order.total}</p>
+                    </div>
+                    <div>
+                      <p><strong>Produtos:</strong> {order.items?.length || 0}</p>
+                      <p><strong>Pagamento:</strong> {order.payment_method}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Subscriptions Component
+const Subscriptions = () => {
+  const { isMobile } = useContext(AppContext);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [newSubscription, setNewSubscription] = useState({
+    type: 'monthly',
+    category: '',
+    price: 0
+  });
+
+  const subscriptionTypes = [
+    {
+      id: 'monthly',
+      name: 'Mensal',
+      description: 'Receba uma mystery box todos os meses',
+      price: 29.99,
+      features: ['3-5 produtos exclusivos', 'Envio grátis', 'Surpresas mensais']
+    },
+    {
+      id: 'quarterly',
+      name: 'Trimestral',
+      description: 'Receba uma mystery box a cada 3 meses',
+      price: 79.99,
+      features: ['5-7 produtos exclusivos', 'Envio grátis', 'Itens premium', 'Desconto de 10%']
+    },
+    {
+      id: 'yearly',
+      name: 'Anual',
+      description: 'Receba uma mystery box a cada mês por um ano',
+      price: 299.99,
+      features: ['3-5 produtos exclusivos mensais', 'Envio grátis', 'Itens exclusivos anuais', 'Desconto de 20%']
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-8 text-center text-white`}>
+          🎯 Assinaturas Mystery Box
+        </h1>
+        
+        <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300 text-center mb-12 max-w-2xl mx-auto`}>
+          Escolha o plano perfeito e receba surpresas incríveis regularmente!
+        </p>
+
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-8'} mb-12`}>
+          {subscriptionTypes.map((subscription) => (
+            <div key={subscription.id} className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+              <div className="text-center mb-6">
+                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-2`}>
+                  {subscription.name}
+                </h3>
+                <p className="text-gray-400 mb-4">{subscription.description}</p>
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400 mb-4`}>
+                  €{subscription.price}
+                </div>
+              </div>
+
+              <ul className="mb-8 space-y-2">
+                {subscription.features.map((feature, index) => (
+                  <li key={index} className="text-gray-300 flex items-center">
+                    <span className="text-green-400 mr-2">✓</span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold">
+                Subscrever Agora
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold mb-6 text-white text-center`}>
+            💎 Vantagens das Assinaturas
+          </h2>
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🎁</div>
+              <h3 className="font-semibold text-white mb-2">Produtos Exclusivos</h3>
+              <p className="text-gray-400 text-sm">Itens únicos apenas para subscritores</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🚚</div>
+              <h3 className="font-semibold text-white mb-2">Envio Grátis</h3>
+              <p className="text-gray-400 text-sm">Entrega gratuita em todos os envios</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">⏰</div>
+              <h3 className="font-semibold text-white mb-2">Flexibilidade</h3>
+              <p className="text-gray-400 text-sm">Pause ou cancele a qualquer momento</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">💰</div>
+              <h3 className="font-semibold text-white mb-2">Melhor Preço</h3>
+              <p className="text-gray-400 text-sm">Economia garantida vs compras individuais</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// FAQ Component
+const FAQ = () => {
+  const isMobile = useIsMobile();
+  const [openQuestions, setOpenQuestions] = useState({});
+
+  const faqData = [
+    {
+      question: "O que são as Mystery Boxes?",
+      answer: "As Mystery Boxes são caixas surpresa que contêm produtos selecionados cuidadosamente dentro de uma temática específica. Cada caixa é uma aventura única com itens que podem valer muito mais do que o preço pago!"
+    },
+    {
+      question: "Como funcionam as assinaturas?",
+      answer: "Com as assinaturas, recebes uma Mystery Box regularmente (mensal, trimestral ou anual) com desconto especial. Podes pausar ou cancelar a qualquer momento através do teu perfil."
+    },
+    {
+      question: "Posso escolher os produtos da minha Mystery Box?",
+      answer: "Não, essa é a magia! Os produtos são selecionados pela nossa equipa para garantir surpresas incríveis. Podes escolher a categoria temática, mas os produtos específicos são sempre uma surpresa."
+    },
+    {
+      question: "Qual é a política de devolução?",
+      answer: "Devido à natureza surpresa dos nossos produtos, não aceitamos devoluções, exceto em casos de produtos danificados durante o transporte. Nestes casos, contacta-nos em 48h após a receção."
+    },
+    {
+      question: "Quanto tempo demora a entrega?",
+      answer: "As entregas são realizadas entre 3-5 dias úteis para Portugal Continental. Ilhas e outros destinos podem demorar 7-10 dias úteis."
+    },
+    {
+      question: "Posso oferecer uma Mystery Box?",
+      answer: "Claro! Podes comprar uma Mystery Box como presente. Durante o checkout, simplesmente indica o endereço de entrega do destinatário."
+    },
+    {
+      question: "Como contactar o apoio ao cliente?",
+      answer: "Podes usar o chat ao vivo no canto inferior direito da página, enviar email para suporte@mysteryboxstore.pt ou ligar para +351 123 456 789."
+    },
+    {
+      question: "Há garantia de qualidade dos produtos?",
+      answer: "Sim! Todos os produtos são verificados pela nossa equipa antes do envio. Trabalhamos apenas com fornecedores de confiança para garantir a melhor qualidade."
+    }
+  ];
+
+  const toggleQuestion = (index) => {
+    setOpenQuestions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-white mb-6`}>
+            ❓ Perguntas Frequentes
+          </h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-300 max-w-2xl mx-auto`}>
+            Encontra respostas para as dúvidas mais comuns sobre as nossas Mystery Boxes
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto space-y-4">
+          {faqData.map((faq, index) => (
+            <div key={index} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+              <button
+                onClick={() => toggleQuestion(index)}
+                className="w-full text-left p-6 hover:bg-gray-700/30 transition-colors duration-300 flex items-center justify-between"
+              >
+                <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-white pr-4`}>
+                  {faq.question}
+                </h3>
+                <span className={`text-purple-400 text-2xl transform transition-transform duration-300 ${openQuestions[index] ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              
+              {openQuestions[index] && (
+                <div className="px-6 pb-6 border-t border-purple-500/20">
+                  <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300 leading-relaxed pt-4`}>
+                    {faq.answer}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 inline-block">
+            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-4`}>
+              Não encontraste a resposta?
+            </h3>
+            <p className="text-gray-300 mb-6">
+              A nossa equipa está aqui para ajudar! Contacta-nos através do chat ao vivo.
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <div className="flex items-center text-purple-400">
+                <span className="mr-2">💬</span>
+                <span>Chat ao vivo</span>
+              </div>
+              <div className="flex items-center text-purple-400">
+                <span className="mr-2">📧</span>
+                <span>suporte@mysteryboxstore.pt</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Terms and Conditions Component
+const TermsAndConditions = () => {
+  const isMobile = useIsMobile();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-white mb-6`}>
+            📋 Termos e Condições
+          </h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-300`}>
+            Última atualização: {new Date().toLocaleDateString('pt-PT')}
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <div className="prose prose-invert max-w-none">
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">1. Definições e Interpretação</h2>
+              <p className="text-gray-300 mb-4">
+                Os presentes termos e condições regem o uso do website Mystery Box Store e a compra de produtos através do mesmo.
+                Ao utilizar os nossos serviços, aceitas integralmente estes termos.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">2. Produtos e Serviços</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>2.1 Mystery Boxes:</strong> Os produtos incluídos nas Mystery Boxes são selecionados pela nossa equipa e podem variar. Não garantimos produtos específicos.</p>
+                <p><strong>2.2 Disponibilidade:</strong> Os produtos estão sujeitos a disponibilidade de stock.</p>
+                <p><strong>2.3 Preços:</strong> Todos os preços incluem IVA à taxa legal em vigor. Reservamo-nos o direito de alterar preços sem aviso prévio.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">3. Encomendas e Pagamento</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>3.1 Processamento:</strong> As encomendas são processadas após confirmação do pagamento.</p>
+                <p><strong>3.2 Métodos de Pagamento:</strong> Aceitamos cartão de crédito/débito, transferência bancária e pagamento à cobrança.</p>
+                <p><strong>3.3 Faturação:</strong> A fatura será enviada por email após confirmação do pagamento.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">4. Entrega</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>4.1 Prazos:</strong> Portugal Continental: 3-5 dias úteis. Ilhas e outros destinos: 7-10 dias úteis.</p>
+                <p><strong>4.2 Custos:</strong> Os custos de envio são calculados no checkout conforme o destino.</p>
+                <p><strong>4.3 Responsabilidade:</strong> Após a entrega, a responsabilidade pelos produtos é transferida para o cliente.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">5. Devoluções e Reclamações</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>5.1 Política:</strong> Devido à natureza surpresa dos produtos, não aceitamos devoluções, exceto em caso de produtos danificados.</p>
+                <p><strong>5.2 Produtos Danificados:</strong> Reporta produtos danificados em 48h após receção através do nosso apoio ao cliente.</p>
+                <p><strong>5.3 Livro de Reclamações:</strong> Disponível online ou nas nossas instalações.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">6. Assinaturas</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>6.1 Renovação:</strong> As assinaturas renovam automaticamente conforme a periodicidade escolhida.</p>
+                <p><strong>6.2 Cancelamento:</strong> Podes cancelar a assinatura a qualquer momento através do teu perfil.</p>
+                <p><strong>6.3 Pausar:</strong> É possível pausar temporariamente a assinatura por até 3 meses.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">7. Proteção de Dados</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>7.1 RGPD:</strong> Cumprimos integralmente o Regulamento Geral de Proteção de Dados.</p>
+                <p><strong>7.2 Finalidade:</strong> Os dados pessoais são utilizados apenas para processamento de encomendas e comunicação.</p>
+                <p><strong>7.3 Direitos:</strong> Tens direito a aceder, retificar ou eliminar os teus dados pessoais.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">8. Limitação de Responsabilidade</h2>
+              <p className="text-gray-300">
+                A nossa responsabilidade está limitada ao valor pago pelos produtos. Não nos responsabilizamos por danos indiretos ou lucros cessantes.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">9. Alterações aos Termos</h2>
+              <p className="text-gray-300">
+                Reservamo-nos o direito de alterar estes termos a qualquer momento. As alterações entram em vigor após publicação no website.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">10. Lei Aplicável</h2>
+              <p className="text-gray-300">
+                Estes termos são regidos pela lei portuguesa. Qualquer litígio será resolvido pelos tribunais competentes em Portugal.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-white mb-4">11. Contactos</h2>
+              <div className="text-gray-300">
+                <p><strong>Mystery Box Store</strong></p>
+                <p>Email: legal@mysteryboxstore.pt</p>
+                <p>Telefone: +351 123 456 789</p>
+                <p>Morada: Rua das Mystery Boxes, 123, 1000-001 Lisboa</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Footer Component
+const Footer = () => {
+  const isMobile = useIsMobile();
+
+  return (
+    <footer className="bg-gradient-to-t from-black to-gray-900 text-white border-t border-purple-500/30">
+      <div className="container mx-auto px-4 py-12">
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'md:grid-cols-4 gap-8'} mb-8`}>
+          {/* Logo and Description */}
+          <div className={`${isMobile ? 'text-center' : ''} md:col-span-1`}>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+              🎁 Mystery Box Store
+            </h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Descobre o inesperado com as nossas mystery boxes temáticas. 
+              Cada caixa é uma aventura única cheia de surpresas incríveis!
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">🔗 Links Rápidos</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/produtos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📦 Produtos</Link></li>
+              <li><Link to="/assinaturas" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🎯 Assinaturas</Link></li>
+              <li><Link to="/perfil" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">👤 Meu Perfil</Link></li>
+              <li><Link to="/carrinho" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🛒 Carrinho</Link></li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">🛟 Apoio</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/faq" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">❓ FAQ</Link></li>
+              <li><Link to="/termos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📋 Termos e Condições</Link></li>
+              <li><span className="text-gray-400">📧 suporte@mysteryboxstore.pt</span></li>
+              <li><span className="text-gray-400">📞 +351 123 456 789</span></li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">📬 Newsletter</h4>
+            <p className="text-gray-400 text-sm mb-4">
+              Recebe novidades e ofertas exclusivas!
+            </p>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-2'}`}>
+              <input
+                type="email"
+                placeholder="teu@email.com"
+                className={`${isMobile ? 'w-full' : 'flex-1'} bg-gray-800 border border-purple-500/30 rounded-lg px-3 py-2 text-sm focus:border-purple-400 focus:outline-none`}
+              />
+              <button className={`${isMobile ? 'w-full' : ''} bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-pink-700 transition-all duration-300`}>
+                Subscrever
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Social Media and Copyright */}
+        <div className={`border-t border-purple-500/30 pt-6 ${isMobile ? 'text-center' : 'flex items-center justify-between'}`}>
+          <div className={`${isMobile ? 'mb-4' : ''}`}>
+            <p className="text-gray-400 text-sm">
+              © 2025 Mystery Box Store. Todos os direitos reservados.
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-center space-x-4">
+            <span className="text-gray-400 text-sm">Segue-nos:</span>
+            <div className="flex space-x-3">
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📘</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📷</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🐦</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📺</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+const App = () => {
+  return (
+    <AppProvider>
+      <div className="App min-h-screen bg-gray-900">
+        <BrowserRouter>
+          <Header />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/produtos" element={<Products />} />
+            <Route path="/produto/:id" element={<ProductDetail />} />
+            <Route path="/carrinho" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/promotions" element={<AdminPromotions />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/emails" element={<AdminEmails />} />
+            <Route path="/admin/chat" element={<AdminChatDashboard />} />
+            <Route path="/perfil" element={<UserProfile />} />
+            <Route path="/assinaturas" element={<Subscriptions />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/termos" element={<TermsAndConditions />} />
+          </Routes>
+          <Footer />
+          <LiveChatButton />
+        </BrowserRouter>
+      </div>
+    </AppProvider>
+  );
+};
+
+export default App;
