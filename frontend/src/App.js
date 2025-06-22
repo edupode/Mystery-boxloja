@@ -4282,6 +4282,316 @@ const Subscriptions = () => {
   );
 };
 
+// FAQ Component
+const FAQ = () => {
+  const isMobile = useIsMobile();
+  const [openQuestions, setOpenQuestions] = useState({});
+
+  const faqData = [
+    {
+      question: "O que são as Mystery Boxes?",
+      answer: "As Mystery Boxes são caixas surpresa que contêm produtos selecionados cuidadosamente dentro de uma temática específica. Cada caixa é uma aventura única com itens que podem valer muito mais do que o preço pago!"
+    },
+    {
+      question: "Como funcionam as assinaturas?",
+      answer: "Com as assinaturas, recebes uma Mystery Box regularmente (mensal, trimestral ou anual) com desconto especial. Podes pausar ou cancelar a qualquer momento através do teu perfil."
+    },
+    {
+      question: "Posso escolher os produtos da minha Mystery Box?",
+      answer: "Não, essa é a magia! Os produtos são selecionados pela nossa equipa para garantir surpresas incríveis. Podes escolher a categoria temática, mas os produtos específicos são sempre uma surpresa."
+    },
+    {
+      question: "Qual é a política de devolução?",
+      answer: "Devido à natureza surpresa dos nossos produtos, não aceitamos devoluções, exceto em casos de produtos danificados durante o transporte. Nestes casos, contacta-nos em 48h após a receção."
+    },
+    {
+      question: "Quanto tempo demora a entrega?",
+      answer: "As entregas são realizadas entre 3-5 dias úteis para Portugal Continental. Ilhas e outros destinos podem demorar 7-10 dias úteis."
+    },
+    {
+      question: "Posso oferecer uma Mystery Box?",
+      answer: "Claro! Podes comprar uma Mystery Box como presente. Durante o checkout, simplesmente indica o endereço de entrega do destinatário."
+    },
+    {
+      question: "Como contactar o apoio ao cliente?",
+      answer: "Podes usar o chat ao vivo no canto inferior direito da página, enviar email para suporte@mysteryboxstore.pt ou ligar para +351 123 456 789."
+    },
+    {
+      question: "Há garantia de qualidade dos produtos?",
+      answer: "Sim! Todos os produtos são verificados pela nossa equipa antes do envio. Trabalhamos apenas com fornecedores de confiança para garantir a melhor qualidade."
+    }
+  ];
+
+  const toggleQuestion = (index) => {
+    setOpenQuestions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-white mb-6`}>
+            ❓ Perguntas Frequentes
+          </h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-300 max-w-2xl mx-auto`}>
+            Encontra respostas para as dúvidas mais comuns sobre as nossas Mystery Boxes
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto space-y-4">
+          {faqData.map((faq, index) => (
+            <div key={index} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+              <button
+                onClick={() => toggleQuestion(index)}
+                className="w-full text-left p-6 hover:bg-gray-700/30 transition-colors duration-300 flex items-center justify-between"
+              >
+                <h3 className={`${isMobile ? 'text-lg' : 'text-xl'} font-semibold text-white pr-4`}>
+                  {faq.question}
+                </h3>
+                <span className={`text-purple-400 text-2xl transform transition-transform duration-300 ${openQuestions[index] ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
+              </button>
+              
+              {openQuestions[index] && (
+                <div className="px-6 pb-6 border-t border-purple-500/20">
+                  <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300 leading-relaxed pt-4`}>
+                    {faq.answer}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 inline-block">
+            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-4`}>
+              Não encontraste a resposta?
+            </h3>
+            <p className="text-gray-300 mb-6">
+              A nossa equipa está aqui para ajudar! Contacta-nos através do chat ao vivo.
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <div className="flex items-center text-purple-400">
+                <span className="mr-2">💬</span>
+                <span>Chat ao vivo</span>
+              </div>
+              <div className="flex items-center text-purple-400">
+                <span className="mr-2">📧</span>
+                <span>suporte@mysteryboxstore.pt</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Terms and Conditions Component
+const TermsAndConditions = () => {
+  const isMobile = useIsMobile();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-12">
+          <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-white mb-6`}>
+            📋 Termos e Condições
+          </h1>
+          <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-300`}>
+            Última atualização: {new Date().toLocaleDateString('pt-PT')}
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <div className="prose prose-invert max-w-none">
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">1. Definições e Interpretação</h2>
+              <p className="text-gray-300 mb-4">
+                Os presentes termos e condições regem o uso do website Mystery Box Store e a compra de produtos através do mesmo.
+                Ao utilizar os nossos serviços, aceitas integralmente estes termos.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">2. Produtos e Serviços</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>2.1 Mystery Boxes:</strong> Os produtos incluídos nas Mystery Boxes são selecionados pela nossa equipa e podem variar. Não garantimos produtos específicos.</p>
+                <p><strong>2.2 Disponibilidade:</strong> Os produtos estão sujeitos a disponibilidade de stock.</p>
+                <p><strong>2.3 Preços:</strong> Todos os preços incluem IVA à taxa legal em vigor. Reservamo-nos o direito de alterar preços sem aviso prévio.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">3. Encomendas e Pagamento</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>3.1 Processamento:</strong> As encomendas são processadas após confirmação do pagamento.</p>
+                <p><strong>3.2 Métodos de Pagamento:</strong> Aceitamos cartão de crédito/débito, transferência bancária e pagamento à cobrança.</p>
+                <p><strong>3.3 Faturação:</strong> A fatura será enviada por email após confirmação do pagamento.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">4. Entrega</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>4.1 Prazos:</strong> Portugal Continental: 3-5 dias úteis. Ilhas e outros destinos: 7-10 dias úteis.</p>
+                <p><strong>4.2 Custos:</strong> Os custos de envio são calculados no checkout conforme o destino.</p>
+                <p><strong>4.3 Responsabilidade:</strong> Após a entrega, a responsabilidade pelos produtos é transferida para o cliente.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">5. Devoluções e Reclamações</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>5.1 Política:</strong> Devido à natureza surpresa dos produtos, não aceitamos devoluções, exceto em caso de produtos danificados.</p>
+                <p><strong>5.2 Produtos Danificados:</strong> Reporta produtos danificados em 48h após receção através do nosso apoio ao cliente.</p>
+                <p><strong>5.3 Livro de Reclamações:</strong> Disponível online ou nas nossas instalações.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">6. Assinaturas</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>6.1 Renovação:</strong> As assinaturas renovam automaticamente conforme a periodicidade escolhida.</p>
+                <p><strong>6.2 Cancelamento:</strong> Podes cancelar a assinatura a qualquer momento através do teu perfil.</p>
+                <p><strong>6.3 Pausar:</strong> É possível pausar temporariamente a assinatura por até 3 meses.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">7. Proteção de Dados</h2>
+              <div className="text-gray-300 space-y-3">
+                <p><strong>7.1 RGPD:</strong> Cumprimos integralmente o Regulamento Geral de Proteção de Dados.</p>
+                <p><strong>7.2 Finalidade:</strong> Os dados pessoais são utilizados apenas para processamento de encomendas e comunicação.</p>
+                <p><strong>7.3 Direitos:</strong> Tens direito a aceder, retificar ou eliminar os teus dados pessoais.</p>
+              </div>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">8. Limitação de Responsabilidade</h2>
+              <p className="text-gray-300">
+                A nossa responsabilidade está limitada ao valor pago pelos produtos. Não nos responsabilizamos por danos indiretos ou lucros cessantes.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">9. Alterações aos Termos</h2>
+              <p className="text-gray-300">
+                Reservamo-nos o direito de alterar estes termos a qualquer momento. As alterações entram em vigor após publicação no website.
+              </p>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">10. Lei Aplicável</h2>
+              <p className="text-gray-300">
+                Estes termos são regidos pela lei portuguesa. Qualquer litígio será resolvido pelos tribunais competentes em Portugal.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-white mb-4">11. Contactos</h2>
+              <div className="text-gray-300">
+                <p><strong>Mystery Box Store</strong></p>
+                <p>Email: legal@mysteryboxstore.pt</p>
+                <p>Telefone: +351 123 456 789</p>
+                <p>Morada: Rua das Mystery Boxes, 123, 1000-001 Lisboa</p>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Footer Component
+const Footer = () => {
+  const isMobile = useIsMobile();
+
+  return (
+    <footer className="bg-gradient-to-t from-black to-gray-900 text-white border-t border-purple-500/30">
+      <div className="container mx-auto px-4 py-12">
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'md:grid-cols-4 gap-8'} mb-8`}>
+          {/* Logo and Description */}
+          <div className={`${isMobile ? 'text-center' : ''} md:col-span-1`}>
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+              🎁 Mystery Box Store
+            </h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Descobre o inesperado com as nossas mystery boxes temáticas. 
+              Cada caixa é uma aventura única cheia de surpresas incríveis!
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">🔗 Links Rápidos</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/produtos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📦 Produtos</Link></li>
+              <li><Link to="/assinaturas" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🎯 Assinaturas</Link></li>
+              <li><Link to="/perfil" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">👤 Meu Perfil</Link></li>
+              <li><Link to="/carrinho" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🛒 Carrinho</Link></li>
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">🛟 Apoio</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/faq" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">❓ FAQ</Link></li>
+              <li><Link to="/termos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📋 Termos e Condições</Link></li>
+              <li><span className="text-gray-400">📧 suporte@mysteryboxstore.pt</span></li>
+              <li><span className="text-gray-400">📞 +351 123 456 789</span></li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h4 className="text-lg font-semibold mb-4 text-purple-300">📬 Newsletter</h4>
+            <p className="text-gray-400 text-sm mb-4">
+              Recebe novidades e ofertas exclusivas!
+            </p>
+            <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-2'}`}>
+              <input
+                type="email"
+                placeholder="teu@email.com"
+                className={`${isMobile ? 'w-full' : 'flex-1'} bg-gray-800 border border-purple-500/30 rounded-lg px-3 py-2 text-sm focus:border-purple-400 focus:outline-none`}
+              />
+              <button className={`${isMobile ? 'w-full' : ''} bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg text-sm hover:from-purple-700 hover:to-pink-700 transition-all duration-300`}>
+                Subscrever
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Social Media and Copyright */}
+        <div className={`border-t border-purple-500/30 pt-6 ${isMobile ? 'text-center' : 'flex items-center justify-between'}`}>
+          <div className={`${isMobile ? 'mb-4' : ''}`}>
+            <p className="text-gray-400 text-sm">
+              © 2025 Mystery Box Store. Todos os direitos reservados.
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-center space-x-4">
+            <span className="text-gray-400 text-sm">Segue-nos:</span>
+            <div className="flex space-x-3">
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📘</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📷</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🐦</a>
+              <a href="#" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📺</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
 const App = () => {
   return (
     <AppProvider>
@@ -4306,7 +4616,10 @@ const App = () => {
             <Route path="/admin/chat" element={<AdminChatDashboard />} />
             <Route path="/perfil" element={<UserProfile />} />
             <Route path="/assinaturas" element={<Subscriptions />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/termos" element={<TermsAndConditions />} />
           </Routes>
+          <Footer />
           <LiveChatButton />
         </BrowserRouter>
       </div>
