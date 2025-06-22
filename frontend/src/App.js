@@ -350,24 +350,9 @@ const Header = () => {
                 </Link>
               )}
               <hr className="border-purple-500/30" />
-              {user ? (
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center space-x-2">
-                    {user.avatar_url && (
-                      <img src={user.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
-                    )}
-                    <span className="text-purple-200">Olá, {user.name}</span>
-                  </div>
-                  <button
-                    onClick={logout}
-                    className="text-left hover:text-purple-300 transition-colors duration-300"
-                  >
-                    Sair
-                  </button>
-                </div>
-              ) : (
-                <Link to="/login" className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-all duration-300 text-center">
-                  Entrar
+              {user && (
+                <Link to="/perfil" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
+                  👤 Perfil
                 </Link>
               )}
             </nav>
