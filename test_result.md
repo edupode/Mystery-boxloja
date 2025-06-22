@@ -152,15 +152,18 @@ backend:
 
   - task: "Autenticação - Verificar token JWT"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/auth/me para verificar token JWT e obter informações do utilizador"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente após correções de dependências e serialização"
 
   - task: "Sistema de produtos - Listar produtos"
     implemented: true
