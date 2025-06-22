@@ -525,6 +525,51 @@ backend:
         agent: "testing"
         comment: "Endpoints GET /api/products, POST /api/admin/products, PUT /api/admin/products/{product_id} e DELETE /api/admin/products/{product_id} testados com sucesso"
 
+  - task: "Funcionalidades admin - Gestão de cupões"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para listar, criar, atualizar e desativar cupões"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/admin/coupons, POST /api/admin/coupons, PUT /api/admin/coupons/{coupon_id} e DELETE /api/admin/coupons/{coupon_id} testados com sucesso"
+
+  - task: "Funcionalidades admin - Gestão de promoções"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para listar, criar, atualizar e desativar promoções"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/admin/promotions, POST /api/admin/promotions, PUT /api/admin/promotions/{promotion_id} e DELETE /api/admin/promotions/{promotion_id} testados com sucesso"
+
+  - task: "Funcionalidades admin - Gestão de categorias"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para listar e criar categorias"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/categories e POST /api/admin/categories testados com sucesso"
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
