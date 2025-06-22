@@ -212,17 +212,22 @@ def test_checkout_with_bank_transfer():
         return log_test_result("Checkout with Bank Transfer", False, "No product ID available")
     
     try:
-        # Ensure cart has items
+        # Create a new session ID for this test
+        bank_session_id = str(uuid.uuid4())
+        
+        # Add product to cart
         cart_item = {
             "product_id": test_results["product_id"],
             "quantity": 1
         }
         
-        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
+        response = requests.post(f"{API_URL}/cart/{bank_session_id}/add", json=cart_item)
+        if response.status_code != 200:
+            return log_test_result("Add to Cart for Bank Transfer Checkout", False, f"Failed: {response.text}")
         
         # Create checkout with bank transfer payment
         checkout_data = {
-            "cart_id": SESSION_ID,
+            "cart_id": bank_session_id,
             "shipping_address": "Rua de Teste, 123, Lisboa",
             "phone": "+351912345678",
             "nif": "501964843",  # Valid Portuguese NIF
@@ -242,13 +247,15 @@ def test_checkout_with_bank_transfer():
         test_results["order_id_bank"] = checkout_result["order_id"]
         
         # Check if cart was cleared after checkout
-        response = requests.get(f"{API_URL}/cart/{SESSION_ID}")
+        response = requests.get(f"{API_URL}/cart/{bank_session_id}")
         if response.status_code != 200:
             return log_test_result("Cart Cleared After Bank Transfer Checkout", False, f"Failed to get cart: {response.text}")
         
         cart_after_checkout = response.json()
         if cart_after_checkout.get("items") and len(cart_after_checkout["items"]) > 0:
             return log_test_result("Cart Cleared After Bank Transfer Checkout", False, "Cart not cleared after checkout")
+        
+        log_test_result("Cart Cleared After Bank Transfer Checkout", True, "Cart was cleared after bank transfer checkout")
         
         return log_test_result("Checkout with Bank Transfer", True, f"Order created: {test_results.get('order_id_bank')}")
     except Exception as e:
