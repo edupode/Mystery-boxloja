@@ -8,7 +8,7 @@ services:
     autoDeploy: false
     envVars:
       - key: MONGO_URL
-        sync: false
+        value: mongodb+srv://eduardocorreia3344:ksuCtKCJQayUI0db@cluster0.f2mbcc6.mongodb.net/mystery_box_store?retryWrites=true&w=majority&appName=Cluster0
       - key: DB_NAME
         value: mystery_box_store
       - key: RESEND_API_KEY
@@ -22,7 +22,7 @@ services:
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: ADMIN_EMAIL
-        sync: false
+        value: eduardocorreia3344@gmail.com
       - key: JWT_SECRET
         sync: false
       - key: JWT_ALGORITHM
