@@ -512,3 +512,7 @@ agent_communication:
     message: "Iniciando testes do backend da Mystery Box Store. Vou testar todas as funcionalidades listadas no test_plan."
   - agent: "main"
     message: "Base de dados populada com 4 categorias, 6 produtos e 3 cupões. Iniciando reteste do backend para corrigir erros encontrados."
+  - agent: "testing"
+    message: "Backend testado com sucesso! Todas as funcionalidades principais estão funcionando. Corrigidos problemas de dependências, serialização ObjectId e validação NIF. Sistema operacional."
+  - agent: "main"
+    message: "Backend totalmente funcional! Todas as tarefas marcadas como working: true. Sistema de produtos, carrinho, cupões, checkout, admin e emails operacionais."
