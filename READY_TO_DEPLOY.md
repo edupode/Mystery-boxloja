@@ -41,12 +41,18 @@ FRONTEND_URL=https://mystery-box-store.vercel.app
 
 ### Frontend (Vercel) - Configurações Finais
 
-Copie estas variáveis de ambiente para o seu projeto no Vercel:
+**⚠️ IMPORTANTE: Configure as variáveis no Dashboard do Vercel**
 
-```
-REACT_APP_BACKEND_URL=https://mystery-boxloja.onrender.com
-REACT_APP_GOOGLE_CLIENT_ID=231244828407-jqacf8ombm44aeh5scn544nvokvbkqis.apps.googleusercontent.com
-```
+1. **Acesse seu projeto no Vercel Dashboard**
+2. **Vá para Settings > Environment Variables**
+3. **Adicione estas variáveis:**
+
+| Name | Value | Environment |
+|------|-------|-------------|
+| `REACT_APP_BACKEND_URL` | `https://mystery-boxloja.onrender.com` | Production, Preview, Development |
+| `REACT_APP_GOOGLE_CLIENT_ID` | `231244828407-jqacf8ombm44aeh5scn544nvokvbkqis.apps.googleusercontent.com` | Production, Preview, Development |
+
+4. **Faça redeploy após configurar as variáveis**
 
 ---
 
