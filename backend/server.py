@@ -1023,6 +1023,9 @@ async def get_cart(session_id: str):
         new_cart = Cart(session_id=session_id)
         await db.carts.insert_one(new_cart.dict())
         return new_cart
+    # Convert ObjectId to string
+    if "_id" in cart:
+        cart["_id"] = str(cart["_id"])
     return Cart(**cart)
 
 @api_router.post("/cart/{session_id}/add")
