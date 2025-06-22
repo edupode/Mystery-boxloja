@@ -581,6 +581,12 @@ def test_product_image_upload():
             "description": product_to_update["description"],
             "category": product_to_update["category"],
             "price": product_to_update["price"],
+            "subscription_prices": product_to_update.get("subscription_prices", {
+                "1_month": 29.99,
+                "3_months": 26.99,
+                "6_months": 24.99,
+                "12_months": 22.99
+            }),
             "image_url": product_to_update["image_url"],
             "image_base64": sample_base64,
             "stock_quantity": product_to_update.get("stock_quantity", 100),
