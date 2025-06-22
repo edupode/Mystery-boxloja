@@ -288,6 +288,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint funciona corretamente após correções de dependências e serialização"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint /api/auth/me testado novamente. Confirmado que a verificação de token JWT funciona corretamente, retornando as informações do usuário autenticado."
 
   - task: "Sistema de produtos - Listar produtos"
     implemented: true
