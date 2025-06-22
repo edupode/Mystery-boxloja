@@ -1519,11 +1519,41 @@ async def admin_dashboard(admin_user: User = Depends(get_admin_user)):
 @api_router.get("/admin/orders")
 async def get_all_orders(admin_user: User = Depends(get_admin_user)):
     orders = await db.orders.find().sort("created_at", -1).to_list(1000)
+    
     # Convert ObjectId to string
     for order in orders:
         if "_id" in order:
             order["_id"] = str(order["_id"])
-    return orders
+    
+    # Separate orders by status and priority
+    # Top priority: processing, pending, confirmed
+    # Bottom priority: shipped
+    # Hidden: cancelled, delivered
+    
+    top_priority_orders = []
+    bottom_priority_orders = []
+    
+    for order in orders:
+        status = order.get("order_status", "pending")
+        
+        # Skip cancelled and delivered orders (hide them)
+        if status in ["cancelled", "delivered"]:
+            continue
+        
+        # Top priority orders (new and processing)
+        if status in ["pending", "processing", "confirmed"]:
+            top_priority_orders.append(order)
+        # Bottom priority orders (shipped)
+        elif status == "shipped":
+            bottom_priority_orders.append(order)
+        else:
+            # Any other status goes to top by default
+            top_priority_orders.append(order)
+    
+    # Combine: top priority first, then bottom priority
+    organized_orders = top_priority_orders + bottom_priority_orders
+    
+    return organized_orders
 
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, admin_user: User = Depends(get_admin_user)):
