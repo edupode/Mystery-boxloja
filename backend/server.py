@@ -1959,7 +1959,8 @@ FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ORIGINS = [
     "http://localhost:3000",
     "https://localhost:3000", 
-    FRONTEND_URL
+    FRONTEND_URL,
+    "*"  # Allow all origins for testing
 ]
 
 # Add any additional origins from environment variable
