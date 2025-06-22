@@ -1464,8 +1464,15 @@ async def get_payment_status(session_id: str):
             if order:
                 await db.orders.update_one(
                     {"id": payment_transaction["order_id"]},
-                    {"$set": {"payment_status": "paid", "order_status": "confirmed"}}
+                    {"$set": {"payment_status": "paid", "order_status": "confirmed", "updated_at": datetime.utcnow()}}
                 )
+                
+                # Clear the cart after successful payment
+                if order.get("session_id"):
+                    await db.carts.update_one(
+                        {"session_id": order["session_id"]},
+                        {"$set": {"items": [], "coupon_code": None, "updated_at": datetime.utcnow()}}
+                    )
                 
                 # Send order confirmation email
                 user = await db.users.find_one({"id": order.get("user_id")})
