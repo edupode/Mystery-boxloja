@@ -126,20 +126,39 @@ Aplicação Mystery Box Store com:
 ## **INFORMAÇÕES NECESSÁRIAS**
 
 ### Deploy
+- [x] MongoDB Atlas configurado ✅
+- [x] String de conexão testada ✅
 - [ ] Contas Vercel e Render.com
 - [ ] Credenciais de acesso (se necessário)
 
 ### Resend
+- [x] API Key disponível ✅
 - [ ] Acesso ao painel Resend para verificar domínio
 - [ ] Ou usar domínio alternativo
 
 ### Google OAuth
+- [x] Client ID e Secret disponíveis ✅
 - [ ] Método de restrição preferido para utilizadores existentes
 - [ ] Lista de emails autorizados (se aplicável)
 
 ### Live Chat
 - [ ] Preferência: Tempo real vs Manual refresh
 - [ ] Funcionalidades específicas desejadas
+
+---
+
+## **CONFIGURAÇÕES ATUALIZADAS**
+
+### ✅ MongoDB Atlas
+- **Status:** Configurado e Testado
+- **Database:** mystery_box_store
+- **Admin:** eduardocorreia3344@gmail.com
+- **Categorias:** 8 categorias ativas carregadas
+
+### ✅ APIs Disponíveis
+- **Resend API:** Configurado
+- **Google OAuth:** Client ID e Secret disponíveis
+- **Stripe:** Chaves de teste configuradas
 
 ---
 
