@@ -3239,6 +3239,755 @@ const AdminPromotions = () => {
   );
 };
 
+// Live Chat Components
+const LiveChatButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isNewTicket, setIsNewTicket] = useState(false);
+  const { user } = useAppContext();
+
+  if (!user) return null;
+
+  return (
+    <>
+      {/* Chat Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 z-50"
+      >
+        💬
+      </button>
+
+      {/* Chat Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl w-full max-w-md border border-purple-500/30">
+            <div className="flex items-center justify-between p-4 border-b border-purple-500/30">
+              <h3 className="text-lg font-semibold text-white">💬 Live Chat</h3>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {!isNewTicket ? (
+              <NewChatForm onSubmit={() => setIsNewTicket(true)} onClose={() => setIsOpen(false)} />
+            ) : (
+              <ChatInterface onClose={() => setIsOpen(false)} />
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const NewChatForm = ({ onSubmit, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    reason: ''
+  });
+  const { user } = useAppContext();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`${API}/chat/sessions`, {
+        client_name: formData.name,
+        reason: formData.reason
+      });
+      onSubmit();
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+      alert('Erro ao criar sessão de chat');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-2 text-gray-300">Nome</label>
+        <input
+          type="text"
+          value={formData.name}
+          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          required
+          className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+          placeholder="Digite seu nome"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium mb-2 text-gray-300">Motivo do Contacto</label>
+        <textarea
+          value={formData.reason}
+          onChange={(e) => setFormData({...formData, reason: e.target.value})}
+          required
+          className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 h-24 focus:border-purple-400 focus:outline-none resize-none"
+          placeholder="Descreva o motivo do seu contacto"
+        />
+      </div>
+      
+      <div className="flex space-x-3">
+        <button
+          type="submit"
+          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+        >
+          Iniciar Chat
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-6 py-3 text-gray-400 hover:text-white transition-colors duration-300"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const ChatInterface = ({ onClose }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sessionId, setSessionId] = useState(null);
+
+  useEffect(() => {
+    // Load chat session and messages
+    loadChatSession();
+  }, []);
+
+  const loadChatSession = async () => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions`);
+      if (response.data.length > 0) {
+        const session = response.data[0];
+        setSessionId(session.id);
+        loadMessages(session.id);
+      }
+    } catch (error) {
+      console.error('Error loading chat session:', error);
+    }
+  };
+
+  const loadMessages = async (id) => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions/${id}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !sessionId) return;
+
+    try {
+      await axios.post(`${API}/chat/sessions/${sessionId}/messages`, {
+        content: newMessage
+      });
+      setNewMessage('');
+      loadMessages(sessionId);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-96">
+      <div className="flex-1 p-4 overflow-y-auto space-y-3">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-400 py-8">
+            <p>🔄 Aguardando agente...</p>
+            <p className="text-sm mt-2">Um agente irá atendê-lo em breve</p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div key={index} className={`flex ${message.sender_type === 'client' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-xs px-4 py-2 rounded-lg ${
+                message.sender_type === 'client' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-700 text-white'
+              }`}>
+                <p className="text-sm">{message.content}</p>
+                <p className="text-xs opacity-70 mt-1">
+                  {new Date(message.created_at).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      
+      <form onSubmit={sendMessage} className="p-4 border-t border-purple-500/30">
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-2 focus:border-purple-400 focus:outline-none"
+            placeholder="Digite sua mensagem..."
+          />
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+          >
+            ➤
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Admin Chat Management
+const AdminChatDashboard = () => {
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [newTicketSound, setNewTicketSound] = useState(null);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadSessions();
+      // Check for new tickets every 5 seconds
+      const interval = setInterval(checkForNewTickets, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const loadSessions = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      setSessions(response.data);
+    } catch (error) {
+      console.error('Error loading sessions:', error);
+    }
+  };
+
+  const checkForNewTickets = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      const newSessions = response.data;
+      
+      // Check if there are new unassigned sessions
+      const newUnassigned = newSessions.filter(session => 
+        !session.assigned_agent && 
+        !sessions.find(s => s.id === session.id)
+      );
+      
+      if (newUnassigned.length > 0) {
+        playNotificationSound();
+      }
+      
+      setSessions(newSessions);
+    } catch (error) {
+      console.error('Error checking for new tickets:', error);
+    }
+  };
+
+  const playNotificationSound = () => {
+    // Create a simple "plim" sound using Web Audio API
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.3);
+  };
+
+  const assignSession = async (sessionId, accept) => {
+    try {
+      if (accept) {
+        await axios.put(`${API}/admin/chat/sessions/${sessionId}/assign`);
+      } else {
+        // Close the session if rejected
+        await axios.put(`${API}/chat/sessions/${sessionId}/close`);
+      }
+      loadSessions();
+    } catch (error) {
+      console.error('Error assigning session:', error);
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            💬 Gestão de Chat
+          </h1>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Sessions List */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">🎫 Sessões de Chat</h3>
+            
+            <div className="space-y-4">
+              {sessions.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">Nenhuma sessão de chat ativa</p>
+              ) : (
+                sessions.map(session => (
+                  <div key={session.id} className={`p-4 rounded-lg border ${
+                    session.assigned_agent 
+                      ? 'bg-green-900/30 border-green-500/30' 
+                      : 'bg-yellow-900/30 border-yellow-500/30'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-white">{session.client_name}</h4>
+                        <p className="text-sm text-gray-300">{session.reason}</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(session.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      
+                      {!session.assigned_agent ? (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => assignSession(session.id, true)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                          >
+                            ✓ Aceitar
+                          </button>
+                          <button
+                            onClick={() => assignSession(session.id, false)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                          >
+                            ✗ Recusar
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedSession(session)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
+                        >
+                          💬 Abrir Chat
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Chat Interface */}
+          {selectedSession && (
+            <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">
+                  💬 Chat com {selectedSession.client_name}
+                </h3>
+                <button
+                  onClick={() => setSelectedSession(null)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <AdminChatInterface session={selectedSession} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdminChatInterface = ({ session }) => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+
+  useEffect(() => {
+    loadMessages();
+    const interval = setInterval(loadMessages, 2000);
+    return () => clearInterval(interval);
+  }, [session.id]);
+
+  const loadMessages = async () => {
+    try {
+      const response = await axios.get(`${API}/chat/sessions/${session.id}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      await axios.post(`${API}/chat/sessions/${session.id}/messages`, {
+        content: newMessage
+      });
+      setNewMessage('');
+      loadMessages();
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-96">
+      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+        {messages.map((message, index) => (
+          <div key={index} className={`flex ${message.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs px-4 py-2 rounded-lg ${
+              message.sender_type === 'agent' 
+                ? 'bg-purple-600 text-white' 
+                : 'bg-gray-700 text-white'
+            }`}>
+              <p className="text-sm">{message.content}</p>
+              <p className="text-xs opacity-70 mt-1">
+                {new Date(message.created_at).toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <form onSubmit={sendMessage}>
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-2 focus:border-purple-400 focus:outline-none"
+            placeholder="Digite sua mensagem..."
+          />
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+          >
+            ➤
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// User Profile Page
+const UserProfile = () => {
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
+  const [orders, setOrders] = useState([]);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    otpCode: ''
+  });
+  const [otpSent, setOtpSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user, setUser } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user) {
+      loadProfileData();
+      loadOrders();
+    }
+  }, [user]);
+
+  const loadProfileData = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`);
+      setProfileData(response.data);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/orders`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    }
+  };
+
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.put(`${API}/auth/profile`, profileData);
+      setUser(response.data);
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert('Erro ao atualizar perfil');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendOtp = async () => {
+    setIsLoading(true);
+    try {
+      await axios.post(`${API}/auth/send-otp`, {
+        email: user.email
+      });
+      setOtpSent(true);
+      alert('Código OTP enviado para seu email!');
+    } catch (error) {
+      alert('Erro ao enviar OTP');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('As senhas não coincidem');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await axios.post(`${API}/auth/change-password`, {
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        otp_code: passwordData.otpCode
+      });
+      
+      alert('Senha alterada com sucesso!');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+        otpCode: ''
+      });
+      setOtpSent(false);
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao alterar senha');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+          <p>Faça login para aceder ao seu perfil</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          👤 Meu Perfil
+        </h1>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Profile Information */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">📝 Informações Pessoais</h3>
+            
+            <form onSubmit={updateProfile} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Nome</label>
+                <input
+                  type="text"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Email</label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  disabled
+                  className="w-full bg-gray-600 text-gray-300 border border-purple-500/30 rounded-lg px-4 py-3 cursor-not-allowed"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Telemóvel</label>
+                <input
+                  type="tel"
+                  value={profileData.phone || ''}
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="+351 xxx xxx xxx"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Morada</label>
+                <textarea
+                  value={profileData.address || ''}
+                  onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 h-24 focus:border-purple-400 focus:outline-none resize-none"
+                  placeholder="Sua morada completa"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+              >
+                {isLoading ? 'Atualizando...' : 'Atualizar Perfil'}
+              </button>
+            </form>
+          </div>
+
+          {/* Password Change */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">🔒 Alterar Senha</h3>
+            
+            <form onSubmit={changePassword} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Senha Atual</label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Nova Senha</label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Confirmar Nova Senha</label>
+                <input
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+              
+              {!otpSent ? (
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  disabled={isLoading}
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50"
+                >
+                  {isLoading ? 'Enviando...' : 'Enviar Código OTP'}
+                </button>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-lg font-medium mb-3 text-gray-300">Código OTP</label>
+                    <input
+                      type="text"
+                      value={passwordData.otpCode}
+                      onChange={(e) => setPasswordData({...passwordData, otpCode: e.target.value})}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="Digite o código recebido no email"
+                    />
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Alterando...' : 'Alterar Senha'}
+                  </button>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* Order History */}
+        <div className="mt-12 bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <h3 className="text-2xl font-bold mb-6 text-white">📦 Histórico de Encomendas</h3>
+          
+          {orders.length === 0 ? (
+            <p className="text-gray-400 text-center py-8">Ainda não fez nenhuma encomenda</p>
+          ) : (
+            <div className="space-y-4">
+              {orders.map(order => (
+                <div key={order.id} className="bg-gray-700/50 rounded-lg p-6 border border-purple-500/20">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-semibold text-white">Encomenda #{order.id.slice(0, 8)}</h4>
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      order.status === 'completed' ? 'bg-green-900/50 text-green-300' :
+                      order.status === 'processing' ? 'bg-yellow-900/50 text-yellow-300' :
+                      'bg-gray-900/50 text-gray-300'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
+                    <div>
+                      <p><strong>Data:</strong> {new Date(order.created_at).toLocaleDateString()}</p>
+                      <p><strong>Total:</strong> €{order.total}</p>
+                    </div>
+                    <div>
+                      <p><strong>Produtos:</strong> {order.items?.length || 0}</p>
+                      <p><strong>Pagamento:</strong> {order.payment_method}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <AppProvider>
