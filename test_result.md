@@ -292,6 +292,21 @@ backend:
         agent: "testing"
         comment: "Endpoint /api/auth/me testado novamente. Confirmado que a verificação de token JWT funciona corretamente, retornando as informações do usuário autenticado."
 
+  - task: "Autenticação - Registar novo utilizador"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Implementado endpoint /api/auth/register para registar novos utilizadores"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint /api/auth/register testado com sucesso. Confirmado que o registro de novos usuários funciona corretamente, criando o usuário e retornando token JWT válido."
+
   - task: "Sistema de produtos - Listar produtos"
     implemented: true
     working: true
