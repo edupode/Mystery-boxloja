@@ -939,20 +939,43 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
     }
 
 # Product endpoints
-@api_router.get("/products", response_model=List[Product])
+@api_router.get("/products")
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
     query = {"is_active": True}
     if category:
-        query["category"] = category
+        query["category_id"] = category
     if featured is not None:
-        query["featured"] = featured
+        query["is_featured"] = featured
 
     products = await db.products.find(query).sort("created_at", -1).to_list(1000)
-    # Convert ObjectId to string
+    # Convert ObjectId to string and prepare product data
+    result = []
     for product in products:
         if "_id" in product:
             product["_id"] = str(product["_id"])
-    return [Product(**product) for product in products]
+        
+        # Map database fields to Product model fields
+        product_data = {
+            "id": product.get("id"),
+            "name": product.get("name"),
+            "description": product.get("description"),
+            "category": product.get("category_id", ""),  # Use category_id as category
+            "price": product.get("price", 0.0),
+            "subscription_prices": product.get("subscription_prices", {
+                "1_month": 0.0,
+                "3_months": 0.0,
+                "6_months": 0.0,
+                "12_months": 0.0
+            }),
+            "image_url": product.get("images", [""])[0] if product.get("images") else "",
+            "is_active": product.get("is_active", True),
+            "stock_quantity": product.get("stock", 100),
+            "featured": product.get("is_featured", False),
+            "created_at": product.get("created_at", datetime.utcnow())
+        }
+        result.append(product_data)
+    
+    return result
 
 @api_router.get("/products/{product_id}", response_model=Product)
 async def get_product(product_id: str):
