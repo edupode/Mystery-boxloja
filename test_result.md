@@ -769,5 +769,7 @@ agent_communication:
     message: "Backend testado com sucesso! Todas as funcionalidades principais estão funcionando. Corrigidos problemas de dependências, serialização ObjectId e validação NIF. Sistema operacional."
   - agent: "main"
     message: "Backend totalmente funcional! Todas as tarefas marcadas como working: true. Sistema de produtos, carrinho, cupões, checkout, admin e emails operacionais."
+  - agent: "main"
+    message: "FASE 1 CONCLUÍDA: Página de admin completamente corrigida! Implementadas todas as páginas de gestão em falta (pedidos, produtos, cupões, promoções, categorias, emails). Todos os botões quebrados foram corrigidos. Funcionalidade de criação de admins já existia e está funcionando. Backend testado e 100% operacional."
   - agent: "testing"
     message: "Testadas todas as funcionalidades de admin solicitadas. Todos os endpoints de admin estão funcionando corretamente, incluindo autenticação, gestão de pedidos, produtos, cupões, promoções, categorias, utilizadores, emails e dashboard. Nenhum problema encontrado."
