@@ -784,6 +784,11 @@ SAMPLE_PRODUCTS = [
             "12_months": 27.99
         },
         "image_url": "https://images.unsplash.com/photo-1633555690973-b736f84f3c1b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxob3Jyb3J8ZW58MHx8fHwxNzUwNTk5MzA0fDA&ixlib=rb-4.1.0&q=85",
+        "images": [
+            "https://images.pexels.com/photos/6868409/pexels-photo-6868409.jpeg",
+            "https://images.unsplash.com/photo-1725912634654-384cec97447f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwzfHxob3Jyb3IlMjBjb2xsZWN0aWJsZXN8ZW58MHx8fHwxNzUwNjI0NTkxfDA&ixlib=rb-4.1.0&q=85",
+            "https://images.unsplash.com/photo-1573376670774-4427757f7963?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxteXN0ZXJ5JTIwYm94fGVufDB8fHx8MTc1MDYyNDU3OHww&ixlib=rb-4.1.0&q=85"
+        ],
         "featured": True
     },
     {
