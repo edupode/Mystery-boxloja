@@ -473,10 +473,11 @@ const Home = () => {
               <Link
                 key={category.id}
                 to={`/categoria/${category.id}`}
-                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl ${isMobile ? 'p-4' : 'p-8'} text-center hover:from-purple-800 hover:to-pink-800 transition-all duration-500 transform hover:scale-110 hover:rotate-2 border border-purple-500/30 hover:border-purple-400`}
+                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl ${isMobile ? 'p-4' : 'p-8'} text-center hover:from-purple-800 hover:to-pink-800 transition-all duration-500 transform hover:scale-110 hover:rotate-2 border border-purple-500/30 hover:border-purple-400 animate-fade-in-up`}
                 style={{animationDelay: `${index * 0.1}s`}}
               >
-                <div className={`${isMobile ? 'text-3xl mb-2' : 'text-6xl mb-6'} animate-bounce group-hover:animate-spin transition-all duration-500`}>
+                <div className={`${isMobile ? 'text-3xl mb-2' : 'text-6xl mb-6'} animate-float group-hover:animate-spin transition-all duration-500`}
+                     style={{animationDelay: `${index * 0.3}s`}}>
                   {category.emoji}
                 </div>
                 <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold text-white group-hover:text-purple-200 transition-colors duration-300`}>
@@ -486,6 +487,9 @@ const Home = () => {
                   {category.description}
                 </p>
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="text-yellow-400 animate-bounce">✨</span>
+                </div>
               </Link>
             ))}
           </div>
