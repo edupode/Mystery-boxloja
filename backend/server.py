@@ -867,7 +867,7 @@ SAMPLE_CATEGORIES = [
     {"name": "Marvel", "emoji": "🦸‍♂️", "color": "#EF4444", "description": "Super-heróis e universo Marvel"},
     {"name": "Livros", "emoji": "📚", "color": "#6366F1", "description": "Literatura e acessórios de leitura"},
     {"name": "Auto-cuidado", "emoji": "🧘‍♀️", "color": "#EC4899", "description": "Spa, relaxamento e bem-estar"},
-    {"name": "Stitch", "emoji": "🌺", "color": "#06B6D4", "description": "Produtos do adorável alienígena"}
+    {"name": "Stitch", "emoji": "👽", "color": "#06B6D4", "description": "Produtos do adorável alienígena"}
 ]
 
 # Initialize sample data
