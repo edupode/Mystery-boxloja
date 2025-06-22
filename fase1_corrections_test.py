@@ -530,6 +530,12 @@ def test_product_image_upload():
             "description": "This is a test product with base64 image",
             "category": "geek",
             "price": 29.99,
+            "subscription_prices": {
+                "1_month": 29.99,
+                "3_months": 26.99,
+                "6_months": 24.99,
+                "12_months": 22.99
+            },
             "image_url": "https://example.com/fallback-image.jpg",
             "image_base64": sample_base64,
             "stock_quantity": 50,
