@@ -327,9 +327,9 @@ def test_checkout():
             log_test_result("NIF Validation", True, "Correctly rejected invalid NIF")
         else:
             log_test_result("NIF Validation", False, "Failed to validate NIF")
-        
-        # Try with valid NIF
-        checkout_data["nif"] = "PT501964843"  # Valid Portuguese NIF
+            
+        # Try with valid NIF (without PT prefix)
+        checkout_data["nif"] = "501964843"  # Valid Portuguese NIF
         
         response = requests.post(f"{API_URL}/checkout", json=checkout_data)
         if response.status_code != 200:
