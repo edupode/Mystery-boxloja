@@ -987,3 +987,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "FASE 1 INICIADA: Implementadas correções críticas de funcionalidade. Corrigido processo de checkout para limpar carrinho corretamente, melhorado sistema de atualização de status de pedidos no admin, implementado auto-fechamento de chat após 10min e sistema de aprovação/rejeição, corrigido upload de fotos para suportar base64. Todas as funcionalidades precisam ser testadas."
+  - agent: "testing"
+    message: "Testadas as correções da Fase 1. Encontrados problemas em 3 das 4 funcionalidades: 1) O carrinho não é limpo após checkout; 2) O endpoint de rejeição de chat retorna erro 404; 3) O upload de imagens com base64 retorna erro 500. Apenas a atualização de status de pedidos funciona corretamente, embora aceite status inválidos sem validação."
