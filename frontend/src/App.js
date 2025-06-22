@@ -292,7 +292,7 @@ const Header = () => {
             </div>
           )}
 
-          {/* Mobile User Actions */}
+          {/* Mobile User Actions - Now includes login button */}
           {isMobile && (
             <div className="flex items-center space-x-3">
               <Link to="/carrinho" className="relative">
@@ -303,6 +303,27 @@ const Header = () => {
                   </span>
                 )}
               </Link>
+              
+              {user ? (
+                <div className="flex items-center space-x-2">
+                  {user.avatar_url && (
+                    <img src={user.avatar_url} alt="Avatar" className="w-6 h-6 rounded-full" />
+                  )}
+                  <Link to="/perfil" className="text-xs text-purple-200 hover:text-purple-300">
+                    👤
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="text-xs text-purple-200 hover:text-purple-300"
+                  >
+                    Sair
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded text-sm">
+                  Entrar
+                </Link>
+              )}
             </div>
           )}
         </div>
