@@ -930,6 +930,16 @@ test_plan:
     - "Sistema de cupões - Validar cupão"
     - "Checkout e pagamento - Criar checkout"
     - "Checkout e pagamento - Verificar status de pagamento"
+    - "Perfil de usuário - Obter informações do perfil"
+    - "Perfil de usuário - Atualizar perfil"
+    - "Perfil de usuário - Histórico de pedidos"
+    - "Sistema de chat - Criar sessão"
+    - "Sistema de chat - Listar sessões"
+    - "Sistema de chat - Enviar mensagem"
+    - "Sistema de chat - Listar mensagens"
+    - "Sistema de chat - Fechar sessão"
+    - "Admin chat - Listar todas as sessões"
+    - "Admin chat - Atribuir sessão a admin"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
