@@ -621,6 +621,7 @@ const ProductDetail = () => {
   const id = location.pathname.split('/').pop();
   const [product, setProduct] = useState(null);
   const [selectedSubscription, setSelectedSubscription] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { addToCart } = useAppContext();
   const isMobile = useIsMobile();
 
@@ -634,6 +635,9 @@ const ProductDetail = () => {
       }
     };
     loadProduct();
+    
+    // Scroll to top when component loads (fixes the "discover" button issue)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id]);
 
   const handleAddToCart = async () => {
@@ -656,17 +660,80 @@ const ProductDetail = () => {
     ? product.subscription_prices[selectedSubscription]
     : product.price;
 
+  // Create array of all images (primary + gallery)
+  const allImages = [product.image_url, ...(product.images || [])].filter(Boolean);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
       <div className="container mx-auto px-4 py-12">
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-8' : 'md:grid-cols-2 gap-12'}`}>
+          {/* Image Gallery Section */}
           <div className="relative">
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl"></div>
+            {/* Main Image */}
+            <div className="relative group">
+              <img
+                src={allImages[currentImageIndex]}
+                alt={product.name}
+                className="w-full h-96 object-cover rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-2xl"></div>
+              
+              {/* Navigation Arrows */}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
+                  >
+                    ←
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100"
+                  >
+                    →
+                  </button>
+                </>
+              )}
+              
+              {/* Image Counter */}
+              {allImages.length > 1 && (
+                <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                  {currentImageIndex + 1} / {allImages.length}
+                </div>
+              )}
+            </div>
+            
+            {/* Thumbnail Gallery */}
+            {allImages.length > 1 && (
+              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                {allImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
+                      index === currentImageIndex 
+                        ? 'border-purple-400 opacity-100' 
+                        : 'border-gray-600 opacity-60 hover:opacity-80'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="text-white">
