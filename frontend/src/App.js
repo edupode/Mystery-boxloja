@@ -277,6 +277,9 @@ const Header = () => {
                     <img src={user.avatar_url} alt="Avatar" className="w-8 h-8 rounded-full" />
                   )}
                   <span className="text-purple-200">Olá, {user.name}</span>
+                  <Link to="/perfil" className="text-purple-200 hover:text-purple-300 transition-colors duration-300">
+                    👤 Perfil
+                  </Link>
                   <button
                     onClick={logout}
                     className="text-sm hover:text-purple-300 transition-colors duration-300"
