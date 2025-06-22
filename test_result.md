@@ -799,3 +799,5 @@ agent_communication:
     message: "Testadas todas as funcionalidades de admin solicitadas. Todos os endpoints de admin estão funcionando corretamente, incluindo autenticação, gestão de pedidos, produtos, cupões, promoções, categorias, utilizadores, emails e dashboard. Nenhum problema encontrado."
   - agent: "testing"
     message: "Testados os endpoints de autenticação: /api/auth/register, /api/auth/login e /api/auth/google. Todos estão funcionando corretamente. O endpoint Google OAuth está configurado corretamente e rejeita tokens inválidos como esperado. O GOOGLE_CLIENT_ID está configurado corretamente no backend."
+  - agent: "testing"
+    message: "Testados todos os novos endpoints de perfil de usuário e chat. Todos os endpoints estão funcionando corretamente, incluindo: GET /api/auth/me, PUT /api/auth/profile, GET /api/auth/orders, POST /api/chat/sessions, GET /api/chat/sessions, POST /api/chat/sessions/{session_id}/messages, GET /api/chat/sessions/{session_id}/messages, PUT /api/chat/sessions/{session_id}/close, GET /api/admin/chat/sessions, e PUT /api/admin/chat/sessions/{session_id}/assign."
