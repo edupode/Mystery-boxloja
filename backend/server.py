@@ -1839,6 +1839,16 @@ async def close_chat_session(session_id: str, current_user: User = Depends(get_c
 # Admin Chat Endpoints
 @api_router.get("/admin/chat/sessions")
 async def get_all_chat_sessions(admin_user: User = Depends(get_admin_user)):
+    # Auto-close sessions inactive for more than 10 minutes
+    inactive_threshold = datetime.utcnow() - timedelta(minutes=10)
+    await db.chat_sessions.update_many(
+        {
+            "status": {"$in": ["pending", "active"]},
+            "updated_at": {"$lt": inactive_threshold}
+        },
+        {"$set": {"status": "auto_closed", "updated_at": datetime.utcnow()}}
+    )
+    
     sessions = await db.chat_sessions.find().sort("updated_at", -1).to_list(1000)
     
     # Get user info for each session
@@ -1850,6 +1860,13 @@ async def get_all_chat_sessions(admin_user: User = Depends(get_admin_user)):
         user = await db.users.find_one({"id": session["user_id"]})
         session["user_name"] = user["name"] if user else "Usuário desconhecido"
         session["user_email"] = user["email"] if user else ""
+        
+        # Get first message (subject/initial request)
+        first_message = await db.chat_messages.find_one(
+            {"chat_session_id": session["id"]},
+            sort=[("timestamp", 1)]
+        )
+        session["subject"] = first_message["message"][:100] + "..." if first_message and len(first_message["message"]) > 100 else (first_message["message"] if first_message else "Sem mensagem inicial")
         
         # Get last message
         last_message = await db.chat_messages.find_one(
