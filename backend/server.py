@@ -1507,11 +1507,21 @@ async def get_all_orders(admin_user: User = Depends(get_admin_user)):
 
 @api_router.put("/admin/orders/{order_id}/status")
 async def update_order_status(order_id: str, status: str, admin_user: User = Depends(get_admin_user)):
-    await db.orders.update_one(
+    # Validate status
+    valid_statuses = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Status inválido")
+    
+    # Update order status
+    result = await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"order_status": status}}
+        {"$set": {"order_status": status, "updated_at": datetime.utcnow()}}
     )
-    return {"message": "Status atualizado"}
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado")
+    
+    return {"message": "Status atualizado com sucesso", "status": status}
 
 @api_router.get("/admin/users")
 async def get_all_users(admin_user: User = Depends(get_admin_user)):
