@@ -143,9 +143,9 @@ backend:
 
   - task: "FASE 1 - Correção chat admin - Melhorar sistema de chat com aprovação/rejeição"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
@@ -155,6 +155,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "Testado o endpoint GET /api/admin/chat/sessions que retorna corretamente as sessões com auto-fechamento após 10min. O endpoint inclui corretamente o nome do usuário, email e assunto da mensagem. O endpoint PUT /api/admin/chat/sessions/{session_id}/assign funciona corretamente. No entanto, o endpoint PUT /api/admin/chat/sessions/{session_id}/reject retorna erro 404 (Not Found)."
+      - working: true
+        agent: "testing"
+        comment: "Retestado o sistema de chat admin. O endpoint PUT /api/admin/chat/sessions/{session_id}/reject agora funciona corretamente. O auto-fechamento de sessões antigas (>10min) está funcionando, e as informações do usuário (nome, email) e o assunto da mensagem são retornados corretamente."
 
   - task: "FASE 1 - Correção upload de fotos - Melhorar sistema de upload"
     implemented: true
