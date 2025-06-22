@@ -34,10 +34,10 @@
 
 #### Obrigatórias
 ```
-MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/
+MONGO_URL=mongodb+srv://eduardocorreia3344:ksuCtKCJQayUI0db@cluster0.f2mbcc6.mongodb.net/mystery_box_store?retryWrites=true&w=majority&appName=Cluster0
 DB_NAME=mystery_box_store
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
-ADMIN_EMAIL=your-admin@email.com
+ADMIN_EMAIL=eduardocorreia3344@gmail.com
 ```
 
 #### APIs Externas
