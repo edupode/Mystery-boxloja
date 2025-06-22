@@ -1981,6 +1981,7 @@ const AdminProducts = () => {
       category: product.category,
       price: product.price.toString(),
       image_url: product.image_url,
+      image_base64: '',
       stock_quantity: product.stock_quantity.toString(),
       featured: product.featured
     });
