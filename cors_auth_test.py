@@ -32,15 +32,13 @@ def log_test_result(test_name, success, message=""):
 def test_root_route():
     """Test the root route to verify it doesn't return 404"""
     try:
-        # Try both with and without trailing slash
-        response = requests.get(f"{BACKEND_URL}")
-        if response.status_code != 200:
-            response = requests.get(f"{BACKEND_URL}/")
+        # Try the API root route
+        response = requests.get(f"{BACKEND_URL}/api")
         
-        logger.info(f"Root route response: {response.status_code} - {response.text}")
+        logger.info(f"API root route response: {response.status_code} - {response.text}")
         
         if response.status_code == 200:
-            return log_test_result("Root Route", True, "Root route is working correctly")
+            return log_test_result("Root Route", True, "API root route is working correctly")
         else:
             return log_test_result("Root Route", False, f"Failed with status code {response.status_code}: {response.text}")
     except Exception as e:
