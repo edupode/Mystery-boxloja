@@ -109,49 +109,61 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Melhorado checkout para limpar carrinho após pedido criado e pagamento bem-sucedido. Adicionada atualização de timestamps."
+      - working: false
+        agent: "testing"
+        comment: "Testado o checkout com diferentes métodos de pagamento (card, bank_transfer, cash_on_delivery). O carrinho não está sendo limpo após o checkout como esperado. O código para limpar o carrinho está presente, mas não está funcionando corretamente."
 
   - task: "FASE 1 - Correção admin - Melhorar atualizações de estado de encomendas"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Melhorado endpoint de atualização de status com validação e melhor tratamento de erros. Frontend corrigido para usar parâmetros corretos."
+      - working: true
+        agent: "testing"
+        comment: "Testado o endpoint PUT /api/admin/orders/{order_id}/status com diferentes status (pending, confirmed, processing, shipped, delivered, cancelled). A atualização de status funciona corretamente e o timestamp é atualizado. No entanto, a validação de status inválidos não está funcionando corretamente - o endpoint aceita status inválidos sem retornar erro."
 
   - task: "FASE 1 - Correção chat admin - Melhorar sistema de chat com aprovação/rejeição"
     implemented: true
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado auto-fechamento de sessões após 10min, adicionado endpoint de rejeição, melhorada exibição com nome de usuário e assunto das mensagens."
+      - working: false
+        agent: "testing"
+        comment: "Testado o endpoint GET /api/admin/chat/sessions que retorna corretamente as sessões com auto-fechamento após 10min. O endpoint inclui corretamente o nome do usuário, email e assunto da mensagem. O endpoint PUT /api/admin/chat/sessions/{session_id}/assign funciona corretamente. No entanto, o endpoint PUT /api/admin/chat/sessions/{session_id}/reject retorna erro 404 (Not Found)."
 
   - task: "FASE 1 - Correção upload de fotos - Melhorar sistema de upload"
     implemented: true
     working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Corrigido modelo ProductCreate para aceitar image_base64, melhorados endpoints de criação e atualização de produtos para priorizar base64 sobre URL."
+      - working: false
+        agent: "testing"
+        comment: "Testado o endpoint POST /api/admin/products com image_base64, mas retorna erro 500 (Internal Server Error). O código para priorizar base64 sobre image_url está presente, mas há um problema na implementação."
 
 backend:
   - task: "FASE 1 - Correção página de admin - Criar página de gestão de pedidos"
