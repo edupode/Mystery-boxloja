@@ -1949,6 +1949,11 @@ async def change_password(request: dict, current_user: User = Depends(get_curren
 # Include router
 app.include_router(api_router)
 
+# Add root route to avoid 404
+@app.get("/")
+async def root():
+    return {"message": "Mystery Box Store API", "version": "2.0.0", "status": "running"}
+
 # Configure CORS based on environment
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ORIGINS = [
