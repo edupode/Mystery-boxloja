@@ -1277,6 +1277,10 @@ async def admin_dashboard(admin_user: User = Depends(get_admin_user)):
 @api_router.get("/admin/orders")
 async def get_all_orders(admin_user: User = Depends(get_admin_user)):
     orders = await db.orders.find().sort("created_at", -1).to_list(1000)
+    # Convert ObjectId to string
+    for order in orders:
+        if "_id" in order:
+            order["_id"] = str(order["_id"])
     return orders
 
 @api_router.put("/admin/orders/{order_id}/status")
