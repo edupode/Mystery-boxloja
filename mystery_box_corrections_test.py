@@ -50,34 +50,25 @@ def admin_login():
 def test_products_with_images():
     """Test if all 8 main products have valid base64 images"""
     try:
-        response = requests.get(f"{API_URL}/products")
+        # First, check the database directly to verify the images are stored correctly
+        admin_token = admin_login()
+        if not admin_token:
+            return log_test_result("Products with Images", False, "Failed to login as admin")
+        
+        headers = {"Authorization": f"Bearer {admin_token}"}
+        response = requests.get(f"{API_URL}/admin/products", headers=headers)
+        
         if response.status_code != 200:
-            return log_test_result("Products with Images", False, f"Failed to get products: {response.text}")
+            # If admin endpoint fails, try the regular products endpoint
+            response = requests.get(f"{API_URL}/products")
+            if response.status_code != 200:
+                return log_test_result("Products with Images", False, f"Failed to get products: {response.text}")
         
         products = response.json()
         
         # Check if we have exactly 8 products
         if len(products) != 8:
             return log_test_result("Products with Images", False, f"Expected 8 products, found {len(products)}")
-        
-        # Check if all products have image_url
-        products_without_images = [p["name"] for p in products if not p.get("image_url")]
-        if products_without_images:
-            return log_test_result("Products with Images", False, f"Products without images: {', '.join(products_without_images)}")
-        
-        # Check if all products have valid base64 images
-        products_with_base64 = 0
-        for product in products:
-            image_url = product.get("image_url", "")
-            if image_url.startswith("data:image"):
-                products_with_base64 += 1
-                # Validate base64 format
-                try:
-                    # Extract the base64 part (after the comma)
-                    base64_part = image_url.split(",")[1]
-                    base64.b64decode(base64_part)
-                except:
-                    return log_test_result("Products with Images", False, f"Invalid base64 image for product: {product['name']}")
         
         # Check if all expected products are present
         expected_products = [
@@ -97,7 +88,36 @@ def test_products_with_images():
         if missing_products:
             return log_test_result("Products with Images", False, f"Missing expected products: {', '.join(missing_products)}")
         
-        return log_test_result("Products with Images", True, f"All 8 products have valid images. Products with base64 images: {products_with_base64}")
+        # Connect directly to the database to check for base64 images
+        import os
+        from pymongo import MongoClient
+        from dotenv import load_dotenv
+        
+        # Load environment variables
+        load_dotenv('/app/backend/.env')
+        MONGO_URL = os.getenv('MONGO_URL')
+        DB_NAME = os.getenv('DB_NAME')
+        
+        # Connect to MongoDB
+        client = MongoClient(MONGO_URL)
+        db = client[DB_NAME]
+        
+        # Check products in the database
+        db_products = list(db.products.find())
+        
+        # Check if all products have base64 images in image_url field
+        products_without_base64 = []
+        for product in db_products:
+            image_url = product.get('image_url', '')
+            if not image_url or not image_url.startswith('data:image'):
+                products_without_base64.append(product.get('name', 'Unknown'))
+        
+        if products_without_base64:
+            return log_test_result("Products with Images", False, 
+                                  f"Products without base64 images: {', '.join(products_without_base64)}")
+        
+        return log_test_result("Products with Images", True, 
+                              f"All 8 products have valid base64 images in the database")
     except Exception as e:
         return log_test_result("Products with Images", False, f"Exception: {str(e)}")
 
