@@ -107,15 +107,18 @@ user_problem_statement: "Teste completo do backend da Mystery Box Store com as s
 backend:
   - task: "Autenticação - Registar novo utilizador"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/auth/register para registar novos utilizadores"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint de registo funciona corretamente. Testado com sucesso."
 
   - task: "Autenticação - Login com email/password"
     implemented: true
