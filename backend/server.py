@@ -998,9 +998,99 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
         "id": current_user.id,
         "name": current_user.name,
         "email": current_user.email,
+        "phone": current_user.phone,
+        "address": current_user.address,
+        "city": current_user.city,
+        "postal_code": current_user.postal_code,
+        "nif": current_user.nif,
+        "birth_date": current_user.birth_date,
         "is_admin": current_user.is_admin,
-        "avatar_url": current_user.avatar_url
+        "avatar_url": current_user.avatar_url,
+        "created_at": current_user.created_at
     }
+
+@api_router.put("/auth/profile")
+async def update_user_profile(profile_data: UserProfileUpdate, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    update_data = {}
+    if profile_data.name is not None:
+        update_data["name"] = profile_data.name
+    if profile_data.phone is not None:
+        update_data["phone"] = profile_data.phone
+    if profile_data.address is not None:
+        update_data["address"] = profile_data.address
+    if profile_data.city is not None:
+        update_data["city"] = profile_data.city
+    if profile_data.postal_code is not None:
+        update_data["postal_code"] = profile_data.postal_code
+    if profile_data.nif is not None:
+        if profile_data.nif and not validate_nif(profile_data.nif):
+            raise HTTPException(status_code=400, detail="NIF inválido")
+        update_data["nif"] = profile_data.nif
+    if profile_data.birth_date is not None:
+        update_data["birth_date"] = profile_data.birth_date
+    if profile_data.avatar_base64 is not None:
+        update_data["avatar_url"] = profile_data.avatar_base64
+
+    if update_data:
+        await db.users.update_one(
+            {"id": current_user.id},
+            {"$set": update_data}
+        )
+    
+    return {"message": "Perfil atualizado com sucesso"}
+
+@api_router.get("/auth/orders")
+async def get_user_orders(current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get orders for the current user
+    orders = await db.orders.find({"user_id": current_user.id}).sort("created_at", -1).to_list(1000)
+    
+    # Convert ObjectId to string and prepare order data
+    result = []
+    for order in orders:
+        if "_id" in order:
+            order["_id"] = str(order["_id"])
+        
+        # Get product details for each order item
+        order_items_with_details = []
+        for item in order.get("items", []):
+            product = await db.products.find_one({"id": item["product_id"]})
+            if product:
+                price = item.get("subscription_type") and product["subscription_prices"].get(item["subscription_type"]) or product["price"]
+                order_items_with_details.append({
+                    "product_id": item["product_id"],
+                    "product_name": product["name"],
+                    "quantity": item["quantity"],
+                    "subscription_type": item.get("subscription_type"),
+                    "unit_price": price,
+                    "total_price": price * item["quantity"]
+                })
+        
+        order_data = {
+            "id": order.get("id"),
+            "created_at": order.get("created_at"),
+            "items": order_items_with_details,
+            "subtotal": order.get("subtotal", 0),
+            "discount_amount": order.get("discount_amount", 0),
+            "vat_amount": order.get("vat_amount", 0),
+            "shipping_cost": order.get("shipping_cost", 0),
+            "total_amount": order.get("total_amount", 0),
+            "coupon_code": order.get("coupon_code"),
+            "payment_status": order.get("payment_status", "pending"),
+            "order_status": order.get("order_status", "pending"),
+            "shipping_address": order.get("shipping_address"),
+            "phone": order.get("phone"),
+            "nif": order.get("nif"),
+            "tracking_number": order.get("tracking_number")
+        }
+        result.append(order_data)
+    
+    return result
 
 # Product endpoints
 @api_router.get("/products")
