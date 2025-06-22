@@ -252,6 +252,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint de login funciona corretamente. Testado com sucesso."
+      - working: true
+        agent: "testing"
+        comment: "Endpoint /api/auth/login testado novamente. Confirmado que o login com email/password funciona corretamente, retornando token JWT válido."
 
   - task: "Autenticação - Login com Google OAuth"
     implemented: true
