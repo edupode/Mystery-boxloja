@@ -105,7 +105,125 @@
 user_problem_statement: "A pagina de admin não funciona, todos os botoes estao quebrados, falta o botão para fazer outros emails(contas) de admin, eu quero que seja possivel adicionar informações no perfil e que as pessoas possam ver o historico de encomendas, gostaria também de ter um botão para fazer chat em direto entre o cliente e um agente e as conversas ficariam salvas ou seriam enviadas por email, depois quero que refaças as caixas temáticas (Geek, Pet, Auto-cuidado, Terror, Livros, Harry Potter, Stitch, Marvel) com produtos e preços detalhados."
 
 backend:
-  - task: "Autenticação - Registar novo utilizador"
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de pedidos"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminOrders com listagem e atualização de status de pedidos"
+      - working: true
+        agent: "main"
+        comment: "Página AdminOrders implementada com sucesso - permite visualizar e atualizar status de pedidos"
+
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de produtos"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminProducts com CRUD completo de produtos"
+      - working: true
+        agent: "main"
+        comment: "Página AdminProducts implementada com sucesso - permite criar, editar, visualizar e remover produtos"
+
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de cupões"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminCoupons com CRUD completo de cupões"
+      - working: true
+        agent: "main"
+        comment: "Página AdminCoupons implementada com sucesso - permite criar, editar e desativar cupões"
+
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de promoções"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminPromotions com CRUD completo de promoções"
+      - working: true
+        agent: "main"
+        comment: "Página AdminPromotions implementada com sucesso - permite criar, editar e desativar promoções"
+
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de categorias"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminCategories com criação de categorias"
+      - working: true
+        agent: "main"
+        comment: "Página AdminCategories implementada com sucesso - permite criar novas categorias"
+
+  - task: "FASE 1 - Correção página de admin - Criar página de gestão de emails"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada página completa AdminEmails para envio de emails promocionais"
+      - working: true
+        agent: "main"
+        comment: "Página AdminEmails implementada com sucesso - permite enviar emails de desconto e aniversário"
+
+  - task: "FASE 1 - Correção página de admin - Corrigir funcionalidade de criação de admins"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Verificada e confirmada funcionalidade existente de criação de admins no AdminDashboard"
+      - working: true
+        agent: "main"
+        comment: "Funcionalidade de criar admins já existia e está funcionando corretamente"
+
+  - task: "FASE 1 - Adicionar rotas de admin em falta"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Adicionadas todas as rotas em falta: /admin/orders, /admin/products, /admin/coupons, /admin/promotions, /admin/categories, /admin/emails"
+      - working: true
+        agent: "main"
+        comment: "Todas as rotas de admin implementadas e funcionando corretamente"
     implemented: true
     working: true
     file: "/app/backend/server.py"
