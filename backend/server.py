@@ -1389,6 +1389,10 @@ async def delete_coupon(coupon_id: str, admin_user: User = Depends(get_admin_use
 @api_router.get("/admin/promotions")
 async def get_all_promotions(admin_user: User = Depends(get_admin_user)):
     promotions = await db.promotions.find().sort("created_at", -1).to_list(1000)
+    # Convert ObjectId to string
+    for promotion in promotions:
+        if "_id" in promotion:
+            promotion["_id"] = str(promotion["_id"])
     return promotions
 
 @api_router.post("/admin/promotions")
