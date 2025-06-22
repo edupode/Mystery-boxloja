@@ -332,51 +332,78 @@ backend:
 
   - task: "Sistema de emails - Email de boas-vindas"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementada função send_welcome_email para enviar email de boas-vindas para novos utilizadores"
+      - working: true
+        agent: "testing"
+        comment: "Função está implementada e operacional com Resend API"
 
   - task: "Sistema de emails - Email de confirmação de pedido"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementada função send_order_confirmation_email para enviar email de confirmação de pedido"
+      - working: true
+        agent: "testing"
+        comment: "Função está implementada e operacional com Resend API"
 
   - task: "Sistema de emails - Email de desconto/promoção"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementada função send_discount_email para enviar email de desconto/promoção"
+      - working: true
+        agent: "testing"
+        comment: "Função está implementada e operacional com Resend API"
 
   - task: "Sistema de emails - Email de aniversário"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementada função send_birthday_email para enviar email de aniversário"
+      - working: true
+        agent: "testing"
+        comment: "Função está implementada e operacional com Resend API"
+
+  - task: "Funcionalidades admin - Envio de emails"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para envio de emails de desconto e aniversário"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints funcionam corretamente para envio de emails admin"
 
   - task: "Funcionalidades admin - Dashboard"
     implemented: true
