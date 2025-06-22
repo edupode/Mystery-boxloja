@@ -967,6 +967,10 @@ async def get_product(product_id: str):
 @api_router.get("/categories")
 async def get_categories():
     categories = await db.categories.find({"is_active": True}).to_list(1000)
+    # Convert ObjectId to string
+    for category in categories:
+        if "_id" in category:
+            category["_id"] = str(category["_id"])
     return categories
 
 # Coupon endpoints
