@@ -1888,10 +1888,8 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
-    </div>
-  );
-
-  return (
+    );
+  }
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
       <div className="container mx-auto px-4 py-12">
         <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
