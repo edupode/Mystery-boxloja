@@ -1155,7 +1155,7 @@ async def create_checkout(checkout_data: CheckoutRequest):
     
     # Validate NIF if provided
     if checkout_data.nif and not validate_nif(checkout_data.nif):
-        raise HTTPException(status_code=400, detail="NIF inválido. Deve começar com 'PT' seguido de 9 dígitos válidos.")
+        raise HTTPException(status_code=400, detail="NIF inválido. Deve ter 9 dígitos válidos, com ou sem prefixo 'PT'.")
 
     # Calculate subtotal
     subtotal = 0.0
@@ -1166,10 +1166,10 @@ async def create_checkout(checkout_data: CheckoutRequest):
             continue
         products.append(product)
 
-        if item.subscription_type:
-            price = product["subscription_prices"].get(item.subscription_type, product["price"])
-        else:
-            price = product["price"]
+        # Handle subscription prices if they exist
+        price = product.get("price", 0.0)
+        if item.subscription_type and "subscription_prices" in product:
+            price = product["subscription_prices"].get(item.subscription_type, price)
 
         subtotal += price * item.quantity
 
