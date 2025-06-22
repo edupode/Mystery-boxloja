@@ -1954,6 +1954,10 @@ app.include_router(api_router)
 async def root():
     return {"message": "Mystery Box Store API", "version": "2.0.0", "status": "running"}
 
+@app.get("/api")
+async def api_root():
+    return {"message": "Mystery Box Store API", "version": "2.0.0", "status": "running"}
+
 # Configure CORS based on environment
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ORIGINS = [
