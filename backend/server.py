@@ -328,6 +328,41 @@ class PromotionCreate(BaseModel):
     valid_from: datetime
     valid_until: datetime
 
+class UserProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    postal_code: Optional[str] = None
+    nif: Optional[str] = None
+    birth_date: Optional[datetime] = None
+    avatar_base64: Optional[str] = None
+
+class ChatMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    chat_session_id: str
+    sender_id: str
+    sender_type: str  # "user" or "agent"
+    message: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    is_read: bool = False
+
+class ChatSession(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    agent_id: Optional[str] = None
+    status: str = "active"  # "active", "closed", "waiting"
+    subject: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class ChatMessageCreate(BaseModel):
+    message: str
+    chat_session_id: Optional[str] = None
+
+class ChatSessionCreate(BaseModel):
+    subject: Optional[str] = None
+
 # Utility functions
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
