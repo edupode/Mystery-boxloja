@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Teste completo do backend da Mystery Box Store com as seguintes funcionalidades: autenticação, sistema de produtos e categorias, sistema de carrinho, sistema de cupões de desconto, checkout e pagamento, sistema de emails Resend, funcionalidades admin, e validações específicas."
+user_problem_statement: "A pagina de admin não funciona, todos os botoes estao quebrados, falta o botão para fazer outros emails(contas) de admin, eu quero que seja possivel adicionar informações no perfil e que as pessoas possam ver o historico de encomendas, gostaria também de ter um botão para fazer chat em direto entre o cliente e um agente e as conversas ficariam salvas ou seriam enviadas por email, depois quero que refaças as caixas temáticas (Geek, Pet, Auto-cuidado, Terror, Livros, Harry Potter, Stitch, Marvel) com produtos e preços detalhados."
 
 backend:
   - task: "Autenticação - Registar novo utilizador"
