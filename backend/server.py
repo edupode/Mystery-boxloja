@@ -1600,6 +1600,79 @@ async def remove_admin(user_id: str, admin_user: User = Depends(get_admin_user))
     )
     return {"message": "Admin removido"}
 
+# New admin user management endpoints
+@api_router.put("/admin/users/{user_id}/password")
+async def change_user_password(user_id: str, request: dict, admin_user: User = Depends(get_admin_user)):
+    """Admin endpoint to change any user's password"""
+    if not admin_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    new_password = request.get("new_password")
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Nova senha deve ter pelo menos 6 caracteres")
+    
+    # Find user
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Update password
+    hashed_password = hash_password(new_password)
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": hashed_password, "updated_at": datetime.utcnow()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    return {"message": f"Senha do usuário alterada com sucesso"}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin_user: User = Depends(get_admin_user)):
+    """Admin endpoint to delete a user"""
+    if not admin_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Find user to check if it's super admin
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    # Cannot delete super admin
+    if user.get("is_super_admin"):
+        raise HTTPException(status_code=400, detail="Não é possível deletar super admin")
+    
+    # Cannot delete yourself
+    if user["email"] == admin_user.email:
+        raise HTTPException(status_code=400, detail="Não é possível deletar sua própria conta")
+    
+    # Delete user
+    result = await db.users.delete_one({"id": user_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    return {"message": f"Usuário {user['name']} ({user['email']}) deletado com sucesso"}
+
+@api_router.post("/admin/users/bulk-make-admin")
+async def bulk_make_admin(request: dict, admin_user: User = Depends(get_admin_user)):
+    """Admin endpoint to make multiple users admin at once"""
+    if not admin_user.is_super_admin:
+        raise HTTPException(status_code=403, detail="Super admin access required")
+    
+    user_ids = request.get("user_ids", [])
+    if not user_ids or not isinstance(user_ids, list):
+        raise HTTPException(status_code=400, detail="Lista de IDs de usuários é obrigatória")
+    
+    # Update multiple users to admin
+    result = await db.users.update_many(
+        {"id": {"$in": user_ids}},
+        {"$set": {"is_admin": True, "updated_at": datetime.utcnow()}}
+    )
+    
+    return {"message": f"{result.modified_count} usuários promovidos a admin com sucesso"}
+
 # Coupon management endpoints
 @api_router.get("/admin/coupons")
 async def get_all_coupons(admin_user: User = Depends(get_admin_user)):
