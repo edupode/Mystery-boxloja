@@ -3919,12 +3919,56 @@ const UserProfile = () => {
               </div>
               
               <div>
-                <label className="block text-lg font-medium mb-3 text-gray-300">Morada</label>
-                <textarea
-                  value={profileData.address || ''}
-                  onChange={(e) => setProfileData({...profileData, address: e.target.value})}
-                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 h-24 focus:border-purple-400 focus:outline-none resize-none"
-                  placeholder="Sua morada completa"
+                <label className="block text-lg font-medium mb-3 text-gray-300">Endereço</label>
+                <input
+                  type="text"
+                  value={profileData.street || ''}
+                  onChange={(e) => setProfileData({...profileData, street: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Rua e número da porta"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código Postal</label>
+                  <input
+                    type="text"
+                    value={profileData.postalCode || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d-]/g, '');
+                      if (value.length <= 8) {
+                        let formatted = value;
+                        if (value.length > 4 && !value.includes('-')) {
+                          formatted = value.slice(0, 4) + '-' + value.slice(4);
+                        }
+                        setProfileData({...profileData, postalCode: formatted});
+                      }
+                    }}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="1234-567"
+                    maxLength="8"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Localidade</label>
+                  <input
+                    type="text"
+                    value={profileData.city || ''}
+                    onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Lisboa"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Data de Nascimento</label>
+                <input
+                  type="date"
+                  value={profileData.birthDate || ''}
+                  onChange={(e) => setProfileData({...profileData, birthDate: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
                 />
               </div>
               
