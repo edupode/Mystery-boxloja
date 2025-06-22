@@ -4012,6 +4012,7 @@ const App = () => {
             <Route path="/admin/chat" element={<AdminChatDashboard />} />
             <Route path="/perfil" element={<UserProfile />} />
           </Routes>
+          <LiveChatButton />
         </BrowserRouter>
       </div>
     </AppProvider>
