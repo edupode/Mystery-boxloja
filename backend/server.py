@@ -1842,6 +1842,110 @@ async def assign_chat_session(session_id: str, admin_user: User = Depends(get_ad
     )
     return {"message": "Sessão atribuída"}
 
+# OTP and password change endpoints
+@api_router.post("/auth/send-otp")
+async def send_otp(request: dict, current_user: User = Depends(get_current_user)):
+    """Send OTP to user's email for password change"""
+    try:
+        email = request.get("email")
+        if not email or email != current_user.email:
+            raise HTTPException(status_code=400, detail="Email inválido")
+        
+        # Generate 6-digit OTP
+        otp_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+        
+        # Store OTP in database with expiration (10 minutes)
+        expiry_time = datetime.utcnow() + timedelta(minutes=10)
+        
+        # Create encrypted OTP (store hash, not plain text)
+        otp_hash = pwd_context.hash(otp_code)
+        
+        await db.otps.insert_one({
+            "user_id": current_user.id,
+            "otp_hash": otp_hash,
+            "created_at": datetime.utcnow(),
+            "expires_at": expiry_time,
+            "used": False
+        })
+        
+        # Send OTP via email
+        subject = "Código de Verificação - Mystery Box Store"
+        html_content = f"""
+        <h2>Código de Verificação</h2>
+        <p>Olá {current_user.name},</p>
+        <p>Seu código de verificação para alterar a senha é:</p>
+        <h1 style="color: #8B5CF6; font-size: 2em; text-align: center; letter-spacing: 0.5em;">{otp_code}</h1>
+        <p>Este código expira em 10 minutos.</p>
+        <p>Se não solicitou esta alteração, ignore este email.</p>
+        """
+        
+        try:
+            resend.emails.send({
+                "from": "noreply@mysteryboxstore.com",
+                "to": [email],
+                "subject": subject,
+                "html": html_content
+            })
+        except Exception as e:
+            logger.warning(f"Email send failed: {str(e)}")
+            # Continue anyway - user might still have OTP for testing
+            
+        return {"message": "Código OTP enviado para seu email"}
+        
+    except Exception as e:
+        logger.error(f"Send OTP error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
+
+@api_router.post("/auth/change-password")
+async def change_password(request: dict, current_user: User = Depends(get_current_user)):
+    """Change user password with OTP verification"""
+    try:
+        current_password = request.get("current_password")
+        new_password = request.get("new_password")
+        otp_code = request.get("otp_code")
+        
+        if not all([current_password, new_password, otp_code]):
+            raise HTTPException(status_code=400, detail="Todos os campos são obrigatórios")
+        
+        # Verify current password
+        if not pwd_context.verify(current_password, current_user.password):
+            raise HTTPException(status_code=400, detail="Senha atual incorreta")
+        
+        # Find and verify OTP
+        otp_record = await db.otps.find_one({
+            "user_id": current_user.id,
+            "used": False,
+            "expires_at": {"$gt": datetime.utcnow()}
+        })
+        
+        if not otp_record:
+            raise HTTPException(status_code=400, detail="Código OTP inválido ou expirado")
+        
+        # Verify OTP code
+        if not pwd_context.verify(otp_code, otp_record["otp_hash"]):
+            raise HTTPException(status_code=400, detail="Código OTP incorreto")
+        
+        # Mark OTP as used
+        await db.otps.update_one(
+            {"_id": otp_record["_id"]},
+            {"$set": {"used": True}}
+        )
+        
+        # Update password
+        new_password_hash = pwd_context.hash(new_password)
+        await db.users.update_one(
+            {"id": current_user.id},
+            {"$set": {"password": new_password_hash, "updated_at": datetime.utcnow()}}
+        )
+        
+        return {"message": "Senha alterada com sucesso"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Change password error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
+
 # Include router
 app.include_router(api_router)
 
