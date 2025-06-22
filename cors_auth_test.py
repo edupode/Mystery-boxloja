@@ -68,13 +68,20 @@ def test_google_oauth_structure():
         # but we can test that the endpoint exists and accepts OPTIONS requests
         
         # First test OPTIONS request for CORS
-        response = requests.options(f"{API_URL}/auth/google")
+        response = requests.options(f"{API_URL}/auth/google", headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Content-Type, Authorization"
+        })
+        
+        logger.info(f"Google OAuth OPTIONS response status: {response.status_code}")
+        logger.info(f"Google OAuth OPTIONS response headers: {response.headers}")
         
         if response.status_code == 200:
             cors_headers = {
-                'Access-Control-Allow-Origin': True,
-                'Access-Control-Allow-Methods': True,
-                'Access-Control-Allow-Headers': True
+                'access-control-allow-origin': True,
+                'access-control-allow-methods': True,
+                'access-control-allow-headers': True
             }
             
             headers_present = all(
