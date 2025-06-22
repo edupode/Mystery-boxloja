@@ -302,27 +302,33 @@ backend:
 
   - task: "Checkout e pagamento - Criar checkout"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/checkout para criar checkout com validação de NIF português"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, valida NIF e cria checkout Stripe"
 
   - task: "Checkout e pagamento - Verificar status de pagamento"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/payments/checkout/status/{session_id} para verificar status de pagamento Stripe"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, integração Stripe operacional"
 
   - task: "Sistema de emails - Email de boas-vindas"
     implemented: true
