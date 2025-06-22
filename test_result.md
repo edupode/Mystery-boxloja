@@ -212,75 +212,93 @@ backend:
 
   - task: "Sistema de carrinho - Obter carrinho"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/cart/{session_id} para obter carrinho por session_id"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, cria carrinho automaticamente se não existir"
 
   - task: "Sistema de carrinho - Adicionar produtos"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/cart/{session_id}/add para adicionar produtos ao carrinho"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, adiciona produtos e atualiza quantidades"
 
   - task: "Sistema de carrinho - Remover produtos"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/cart/{session_id}/remove/{product_id} para remover produtos do carrinho"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, remove produtos do carrinho"
 
   - task: "Sistema de carrinho - Aplicar cupão"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/cart/{session_id}/apply-coupon para aplicar cupão de desconto ao carrinho"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente com cupões válidos da base de dados"
 
   - task: "Sistema de carrinho - Remover cupão"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/cart/{session_id}/remove-coupon para remover cupão do carrinho"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente, remove cupão do carrinho"
 
   - task: "Sistema de cupões - Validar cupão"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/coupons/validate/{code} para validar cupão por código"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente com cupões: WELCOME10, SAVE5, PREMIUM20"
 
   - task: "Checkout e pagamento - Criar checkout"
     implemented: true
