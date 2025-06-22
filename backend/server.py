@@ -948,6 +948,10 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
         query["featured"] = featured
 
     products = await db.products.find(query).sort("created_at", -1).to_list(1000)
+    # Convert ObjectId to string
+    for product in products:
+        if "_id" in product:
+            product["_id"] = str(product["_id"])
     return [Product(**product) for product in products]
 
 @api_router.get("/products/{product_id}", response_model=Product)
