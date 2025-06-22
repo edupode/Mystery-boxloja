@@ -2915,6 +2915,321 @@ const AdminEmails = () => {
   );
 };
 
+const AdminPromotions = () => {
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    valid_from: '',
+    valid_until: ''
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadPromotions();
+    }
+  }, [user]);
+
+  const loadPromotions = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/promotions`);
+      setPromotions(response.data);
+    } catch (error) {
+      console.error('Error loading promotions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const promotionData = {
+        ...formData,
+        discount_value: parseFloat(formData.discount_value),
+        valid_from: new Date(formData.valid_from).toISOString(),
+        valid_until: new Date(formData.valid_until).toISOString()
+      };
+
+      if (editingPromotion) {
+        await axios.put(`${API}/admin/promotions/${editingPromotion.id}`, promotionData);
+        alert('Promoção atualizada com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/promotions`, promotionData);
+        alert('Promoção criada com sucesso!');
+      }
+
+      setFormData({
+        name: '',
+        description: '',
+        discount_type: 'percentage',
+        discount_value: '',
+        valid_from: '',
+        valid_until: ''
+      });
+      setShowAddForm(false);
+      setEditingPromotion(null);
+      loadPromotions();
+    } catch (error) {
+      alert('Erro ao salvar promoção');
+    }
+  };
+
+  const handleEdit = (promotion) => {
+    setEditingPromotion(promotion);
+    setFormData({
+      name: promotion.name,
+      description: promotion.description,
+      discount_type: promotion.discount_type,
+      discount_value: promotion.discount_value.toString(),
+      valid_from: promotion.valid_from ? new Date(promotion.valid_from).toISOString().split('T')[0] : '',
+      valid_until: promotion.valid_until ? new Date(promotion.valid_until).toISOString().split('T')[0] : ''
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (promotionId) => {
+    if (window.confirm('Tem certeza que quer desativar esta promoção?')) {
+      try {
+        await axios.delete(`${API}/admin/promotions/${promotionId}`);
+        alert('Promoção desativada!');
+        loadPromotions();
+      } catch (error) {
+        alert('Erro ao desativar promoção');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🏷️ Gestão de Promoções
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingPromotion(null);
+              setFormData({
+                name: '',
+                description: '',
+                discount_type: 'percentage',
+                discount_value: '',
+                valid_from: '',
+                valid_until: ''
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Nova Promoção
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingPromotion ? '✏️ Editar Promoção' : '➕ Nova Promoção'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome da Promoção</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Promoção de Verão"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Desconto</label>
+                  <select
+                    value={formData.discount_type}
+                    onChange={(e) => setFormData({...formData, discount_type: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem (%)</option>
+                    <option value="fixed">Valor Fixo (€)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  rows="3"
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Descrição da promoção..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">
+                  Valor do Desconto {formData.discount_type === 'percentage' ? '(%)' : '(€)'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.discount_value}
+                  onChange={(e) => setFormData({...formData, discount_value: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder={formData.discount_type === 'percentage' ? '25' : '10.00'}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido De</label>
+                  <input
+                    type="date"
+                    value={formData.valid_from}
+                    onChange={(e) => setFormData({...formData, valid_from: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido Até</label>
+                  <input
+                    type="date"
+                    value={formData.valid_until}
+                    onChange={(e) => setFormData({...formData, valid_until: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingPromotion ? '💾 Atualizar' : '➕ Criar'} Promoção
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingPromotion(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando promoções...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">Nome</th>
+                    <th className="text-left p-4">Descrição</th>
+                    <th className="text-left p-4">Desconto</th>
+                    <th className="text-left p-4">Validade</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {promotions.map((promotion) => (
+                    <tr key={promotion.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-semibold">{promotion.name}</td>
+                      <td className="p-4 text-sm text-gray-300 max-w-xs truncate">{promotion.description}</td>
+                      <td className="p-4 font-bold text-green-400">
+                        {promotion.discount_type === 'percentage' 
+                          ? `${promotion.discount_value}%` 
+                          : `€${promotion.discount_value}`}
+                      </td>
+                      <td className="p-4 text-sm">
+                        {new Date(promotion.valid_from).toLocaleDateString('pt-PT')} - {new Date(promotion.valid_until).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          promotion.is_active 
+                            ? 'bg-green-900 text-green-300' 
+                            : 'bg-red-900 text-red-300'
+                        }`}>
+                          {promotion.is_active ? 'Ativa' : 'Inativa'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(promotion)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(promotion.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                          >
+                            🗑️ Desativar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {promotions.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">🏷️</div>
+                <p>Nenhuma promoção encontrada</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <AppProvider>
