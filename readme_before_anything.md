@@ -17,24 +17,33 @@ Aplicação Mystery Box Store com:
 ---
 
 ## **FASE 1: PREPARAÇÃO PARA DEPLOY** ✅
-**Status: EM PROGRESSO**
+**Status: CONCLUÍDO**
 
 ### Frontend (Vercel)
-- [ ] Criar vercel.json para configuração de deploy
-- [ ] Configurar variáveis de ambiente para produção
-- [ ] Ajustar build scripts no package.json
-- [ ] Configurar redirects e rewrites necessários
+- [x] Criar vercel.json para configuração de deploy
+- [x] Configurar variáveis de ambiente para produção
+- [x] Ajustar build scripts no package.json
+- [x] Configurar redirects e rewrites necessários
 
 ### Backend (Render.com)
-- [ ] Criar render.yaml para configuração de deploy
-- [ ] Configurar variáveis de ambiente para produção
-- [ ] Ajustar requirements.txt se necessário
-- [ ] Configurar comando de start para produção
+- [x] Criar render.yaml para configuração de deploy
+- [x] Configurar variáveis de ambiente para produção
+- [x] Ajustar requirements.txt se necessário
+- [x] Configurar comando de start para produção
 
 ### Configurações de URL
-- [ ] Preparar URLs de produção
-- [ ] Configurar CORS para domínios de produção
-- [ ] Ajustar configurações de segurança
+- [x] Preparar URLs de produção
+- [x] Configurar CORS para domínios de produção
+- [x] Ajustar configurações de segurança
+
+### Arquivos Criados
+- [x] `/app/frontend/vercel.json` - Configuração Vercel
+- [x] `/app/backend/render.yaml` - Configuração Render.com
+- [x] `/app/backend/.env.production.example` - Exemplo env backend
+- [x] `/app/frontend/.env.production.example` - Exemplo env frontend
+- [x] `/app/backend/requirements.production.txt` - Dependências otimizadas
+- [x] `/app/DEPLOY_INSTRUCTIONS.md` - Instruções completas de deploy
+- [x] `/app/deploy_helper.sh` - Script auxiliar de deploy
 
 ---
 
