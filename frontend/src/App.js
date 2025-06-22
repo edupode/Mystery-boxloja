@@ -1682,44 +1682,7 @@ const AdminDashboard = () => {
       )}
     </div>
   );
-      {showPasswordModal && passwordModalUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 p-6 rounded-2xl border border-purple-500/30 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">
-              Alterar Senha de {passwordModalUser.name}
-            </h3>
-            <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Nova Senha:</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Digite a nova senha (mín. 6 caracteres)"
-                className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleSavePassword}
-                className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
-              >
-                💾 Salvar Nova Senha
-              </button>
-              <button
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPasswordModalUser(null);
-                  setNewPassword('');
-                }}
-                className="flex-1 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-4 py-2 rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-300"
-              >
-                ❌ Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    );
+};
   }
 
   return (
