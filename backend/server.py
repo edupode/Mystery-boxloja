@@ -977,15 +977,37 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
     
     return result
 
-@api_router.get("/products/{product_id}", response_model=Product)
+@api_router.get("/products/{product_id}")
 async def get_product(product_id: str):
     product = await db.products.find_one({"id": product_id})
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
     # Convert ObjectId to string
     if "_id" in product:
         product["_id"] = str(product["_id"])
-    return Product(**product)
+    
+    # Map database fields to Product model fields
+    product_data = {
+        "id": product.get("id"),
+        "name": product.get("name"),
+        "description": product.get("description"),
+        "category": product.get("category_id", ""),  # Use category_id as category
+        "price": product.get("price", 0.0),
+        "subscription_prices": product.get("subscription_prices", {
+            "1_month": 0.0,
+            "3_months": 0.0,
+            "6_months": 0.0,
+            "12_months": 0.0
+        }),
+        "image_url": product.get("images", [""])[0] if product.get("images") else "",
+        "is_active": product.get("is_active", True),
+        "stock_quantity": product.get("stock", 100),
+        "featured": product.get("is_featured", False),
+        "created_at": product.get("created_at", datetime.utcnow())
+    }
+    
+    return product_data
 
 @api_router.get("/categories")
 async def get_categories():
