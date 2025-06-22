@@ -1710,11 +1710,27 @@ const AdminDashboard = () => {
               </div>
             </form>
 
+            {/* Bulk actions for selecting multiple users */}
+            {user?.email === 'eduardocorreia3344@gmail.com' && selectedUsers.length > 0 && (
+              <div className="mb-4 p-4 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                <p className="text-white mb-3">{selectedUsers.length} usuário(s) selecionado(s)</p>
+                <button
+                  onClick={handleBulkMakeAdmin}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300"
+                >
+                  ⚙️ Tornar Admins Selecionados
+                </button>
+              </div>
+            )}
+
             {/* Users list */}
             <div className="overflow-x-auto">
               <table className="w-full text-white">
                 <thead>
                   <tr className="border-b border-purple-500/30">
+                    {user?.email === 'eduardocorreia3344@gmail.com' && (
+                      <th className="text-left py-3">Selecionar</th>
+                    )}
                     <th className="text-left py-3">Nome</th>
                     <th className="text-left py-3">Email</th>
                     <th className="text-left py-3">Tipo</th>
@@ -1724,6 +1740,18 @@ const AdminDashboard = () => {
                 <tbody>
                   {users.map(userItem => (
                     <tr key={userItem.id} className="border-b border-gray-700/50">
+                      {user?.email === 'eduardocorreia3344@gmail.com' && (
+                        <td className="py-3">
+                          {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <input
+                              type="checkbox"
+                              checked={selectedUsers.includes(userItem.id)}
+                              onChange={() => handleUserSelection(userItem.id)}
+                              className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                            />
+                          )}
+                        </td>
+                      )}
                       <td className="py-3">{userItem.name}</td>
                       <td className="py-3">{userItem.email}</td>
                       <td className="py-3">
@@ -1736,14 +1764,37 @@ const AdminDashboard = () => {
                         )}
                       </td>
                       <td className="py-3">
-                        {userItem.is_admin && userItem.email !== 'eduardocorreia3344@gmail.com' && (
-                          <button
-                            onClick={() => handleRemoveAdmin(userItem.id)}
-                            className="text-red-400 hover:text-red-300 text-sm"
-                          >
-                            🗑️ Remover Admin
-                          </button>
-                        )}
+                        <div className="flex gap-2 flex-wrap">
+                          {/* Change Password Button */}
+                          {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleChangePassword(userItem)}
+                              className="text-blue-400 hover:text-blue-300 text-sm px-2 py-1 bg-blue-900/20 rounded"
+                            >
+                              🔑 Alterar Senha
+                            </button>
+                          )}
+                          
+                          {/* Remove Admin Button */}
+                          {userItem.is_admin && userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleRemoveAdmin(userItem.id)}
+                              className="text-orange-400 hover:text-orange-300 text-sm px-2 py-1 bg-orange-900/20 rounded"
+                            >
+                              🗑️ Remover Admin
+                            </button>
+                          )}
+                          
+                          {/* Delete User Button */}
+                          {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleDeleteUser(userItem.id, userItem.name)}
+                              className="text-red-400 hover:text-red-300 text-sm px-2 py-1 bg-red-900/20 rounded"
+                            >
+                              ⚠️ Deletar Usuário
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
