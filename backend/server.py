@@ -1098,9 +1098,9 @@ async def get_user_orders(current_user: User = Depends(get_current_user)):
 async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
     query = {"is_active": True}
     if category:
-        query["category_id"] = category
+        query["category"] = category
     if featured is not None:
-        query["is_featured"] = featured
+        query["featured"] = featured
 
     products = await db.products.find(query).sort("created_at", -1).to_list(1000)
     # Convert ObjectId to string and prepare product data
@@ -1114,7 +1114,7 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
             "id": product.get("id"),
             "name": product.get("name"),
             "description": product.get("description"),
-            "category": product.get("category_id", ""),  # Use category_id as category
+            "category": product.get("category", ""),
             "price": product.get("price", 0.0),
             "subscription_prices": product.get("subscription_prices", {
                 "1_month": 0.0,
@@ -1124,8 +1124,8 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
             }),
             "image_url": product.get("image_url", ""),
             "is_active": product.get("is_active", True),
-            "stock_quantity": product.get("stock", 100),
-            "featured": product.get("is_featured", False),
+            "stock_quantity": product.get("stock_quantity", 100),
+            "featured": product.get("featured", False),
             "created_at": product.get("created_at", datetime.utcnow())
         }
         result.append(product_data)
