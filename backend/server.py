@@ -1718,11 +1718,27 @@ async def create_product(product_data: ProductCreate, admin_user: User = Depends
 
 @api_router.put("/admin/products/{product_id}")
 async def update_product(product_id: str, product_data: ProductCreate, admin_user: User = Depends(get_admin_user)):
-    await db.products.update_one(
+    # Prioritize base64 image over URL if both are provided
+    update_data = product_data.dict()
+    if update_data.get("image_base64"):
+        update_data["image_url"] = update_data["image_base64"]
+    
+    # Remove image_base64 from the final product data
+    if "image_base64" in update_data:
+        del update_data["image_base64"]
+    
+    # Add updated timestamp
+    update_data["updated_at"] = datetime.utcnow()
+    
+    result = await db.products.update_one(
         {"id": product_id},
-        {"$set": product_data.dict()}
+        {"$set": update_data}
     )
-    return {"message": "Produto atualizado"}
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    return {"message": "Produto atualizado com sucesso"}
 
 @api_router.delete("/admin/products/{product_id}")
 async def delete_product(product_id: str, admin_user: User = Depends(get_admin_user)):
