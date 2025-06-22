@@ -1879,6 +1879,7 @@ const AdminProducts = () => {
     category: '',
     price: '',
     image_url: '',
+    image_base64: '', // Para armazenar a imagem em base64
     stock_quantity: '100',
     featured: false
   });
