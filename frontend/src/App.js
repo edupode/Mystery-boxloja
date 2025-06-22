@@ -3673,42 +3673,65 @@ const AdminChatDashboard = () => {
               ) : (
                 sessions.map(session => (
                   <div key={session.id} className={`p-4 rounded-lg border ${
-                    session.assigned_agent 
+                    session.status === 'active' && session.agent_id
                       ? 'bg-green-900/30 border-green-500/30' 
-                      : 'bg-yellow-900/30 border-yellow-500/30'
+                      : session.status === 'pending'
+                      ? 'bg-yellow-900/30 border-yellow-500/30'
+                      : session.status === 'rejected'
+                      ? 'bg-red-900/30 border-red-500/30'
+                      : session.status === 'auto_closed'
+                      ? 'bg-gray-900/30 border-gray-500/30'
+                      : 'bg-blue-900/30 border-blue-500/30'
                   }`}>
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-white">{session.client_name}</h4>
-                        <p className="text-sm text-gray-300">{session.reason}</p>
-                        <p className="text-xs text-gray-400">
-                          {new Date(session.created_at).toLocaleString()}
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white">
+                          {session.user_name} ({session.user_email})
+                        </h4>
+                        <p className="text-sm text-gray-300 mb-1">
+                          <strong>Assunto:</strong> {session.subject}
                         </p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-400">
+                          <span>📅 {new Date(session.created_at).toLocaleString('pt-PT')}</span>
+                          <span className={`px-2 py-1 rounded-full ${
+                            session.status === 'active' ? 'bg-green-900 text-green-300' :
+                            session.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                            session.status === 'rejected' ? 'bg-red-900 text-red-300' :
+                            session.status === 'auto_closed' ? 'bg-gray-900 text-gray-300' :
+                            'bg-blue-900 text-blue-300'
+                          }`}>
+                            {session.status === 'active' ? '🟢 Ativo' :
+                             session.status === 'pending' ? '🟡 Pendente' :
+                             session.status === 'rejected' ? '🔴 Rejeitado' :
+                             session.status === 'auto_closed' ? '⚫ Auto-fechado' :
+                             session.status}
+                          </span>
+                        </div>
                       </div>
                       
-                      {!session.assigned_agent ? (
-                        <div className="flex space-x-2">
+                      {session.status === 'pending' ? (
+                        <div className="flex space-x-2 ml-4">
                           <button
                             onClick={() => assignSession(session.id, true)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
                           >
                             ✓ Aceitar
                           </button>
                           <button
                             onClick={() => assignSession(session.id, false)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
                           >
-                            ✗ Recusar
+                            ✗ Rejeitar
                           </button>
                         </div>
-                      ) : (
+                      ) : session.status === 'active' && session.agent_id ? (
                         <button
                           onClick={() => setSelectedSession(session)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
+                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm ml-4 transition-colors duration-300"
                         >
                           💬 Abrir Chat
                         </button>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 ))
