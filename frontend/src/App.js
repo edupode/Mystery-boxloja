@@ -3760,7 +3760,10 @@ const UserProfile = () => {
     name: '',
     email: '',
     phone: '',
-    address: ''
+    street: '',
+    postalCode: '',
+    city: '',
+    birthDate: ''
   });
   const [orders, setOrders] = useState([]);
   const [passwordData, setPasswordData] = useState({
