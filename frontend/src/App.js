@@ -3627,13 +3627,15 @@ const AdminChatDashboard = () => {
     try {
       if (accept) {
         await axios.put(`${API}/admin/chat/sessions/${sessionId}/assign`);
+        alert('Sessão aceita com sucesso!');
       } else {
-        // Close the session if rejected
-        await axios.put(`${API}/chat/sessions/${sessionId}/close`);
+        await axios.put(`${API}/admin/chat/sessions/${sessionId}/reject`);
+        alert('Sessão rejeitada.');
       }
       loadSessions();
     } catch (error) {
       console.error('Error assigning session:', error);
+      alert('Erro ao processar sessão: ' + (error.response?.data?.detail || 'Erro desconhecido'));
     }
   };
 
