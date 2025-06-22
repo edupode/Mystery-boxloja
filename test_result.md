@@ -101,3 +101,337 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Teste completo do backend da Mystery Box Store com as seguintes funcionalidades: autenticação, sistema de produtos e categorias, sistema de carrinho, sistema de cupões de desconto, checkout e pagamento, sistema de emails Resend, funcionalidades admin, e validações específicas."
+
+backend:
+  - task: "Autenticação - Registar novo utilizador"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/register para registar novos utilizadores"
+
+  - task: "Autenticação - Login com email/password"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/login para autenticação com email/password"
+
+  - task: "Autenticação - Login com Google OAuth"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/google para autenticação com Google OAuth"
+
+  - task: "Autenticação - Verificar token JWT"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/me para verificar token JWT e obter informações do utilizador"
+
+  - task: "Sistema de produtos - Listar produtos"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/products para listar produtos com filtros por categoria e featured"
+
+  - task: "Sistema de produtos - Obter detalhes de produto"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/products/{product_id} para obter detalhes de produto específico"
+
+  - task: "Sistema de categorias - Listar categorias"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/categories para listar categorias ativas"
+
+  - task: "Sistema de carrinho - Obter carrinho"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/cart/{session_id} para obter carrinho por session_id"
+
+  - task: "Sistema de carrinho - Adicionar produtos"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/cart/{session_id}/add para adicionar produtos ao carrinho"
+
+  - task: "Sistema de carrinho - Remover produtos"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/cart/{session_id}/remove/{product_id} para remover produtos do carrinho"
+
+  - task: "Sistema de carrinho - Aplicar cupão"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/cart/{session_id}/apply-coupon para aplicar cupão de desconto ao carrinho"
+
+  - task: "Sistema de carrinho - Remover cupão"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/cart/{session_id}/remove-coupon para remover cupão do carrinho"
+
+  - task: "Sistema de cupões - Validar cupão"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/coupons/validate/{code} para validar cupão por código"
+
+  - task: "Checkout e pagamento - Criar checkout"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/checkout para criar checkout com validação de NIF português"
+
+  - task: "Checkout e pagamento - Verificar status de pagamento"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/payments/checkout/status/{session_id} para verificar status de pagamento Stripe"
+
+  - task: "Sistema de emails - Email de boas-vindas"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada função send_welcome_email para enviar email de boas-vindas para novos utilizadores"
+
+  - task: "Sistema de emails - Email de confirmação de pedido"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada função send_order_confirmation_email para enviar email de confirmação de pedido"
+
+  - task: "Sistema de emails - Email de desconto/promoção"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada função send_discount_email para enviar email de desconto/promoção"
+
+  - task: "Sistema de emails - Email de aniversário"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada função send_birthday_email para enviar email de aniversário"
+
+  - task: "Funcionalidades admin - Dashboard"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/admin/dashboard para dashboard com estatísticas"
+
+  - task: "Funcionalidades admin - Gestão de utilizadores"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints /api/admin/users/make-admin e /api/admin/users/{user_id}/remove-admin para gestão de utilizadores"
+
+  - task: "Funcionalidades admin - Gestão de cupões"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para criar, listar, atualizar e desativar cupões"
+
+  - task: "Funcionalidades admin - Gestão de promoções"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para criar, listar, atualizar e desativar promoções"
+
+  - task: "Funcionalidades admin - Envio de emails"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para envio de emails de desconto e aniversário"
+
+  - task: "Validações específicas - Validação NIF português"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada função validate_nif para validação de NIF português"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Autenticação - Registar novo utilizador"
+    - "Autenticação - Login com email/password"
+    - "Autenticação - Login com Google OAuth"
+    - "Autenticação - Verificar token JWT"
+    - "Sistema de produtos - Listar produtos"
+    - "Sistema de produtos - Obter detalhes de produto"
+    - "Sistema de categorias - Listar categorias"
+    - "Sistema de carrinho - Obter carrinho"
+    - "Sistema de carrinho - Adicionar produtos"
+    - "Sistema de carrinho - Remover produtos"
+    - "Sistema de carrinho - Aplicar cupão"
+    - "Sistema de carrinho - Remover cupão"
+    - "Sistema de cupões - Validar cupão"
+    - "Checkout e pagamento - Criar checkout"
+    - "Checkout e pagamento - Verificar status de pagamento"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Iniciando testes do backend da Mystery Box Store. Vou testar todas as funcionalidades listadas no test_plan."
