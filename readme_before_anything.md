@@ -169,13 +169,14 @@ Aplicação Mystery Box Store com:
 - Produção: Será definido após deploy no Render.com
 
 ### Database
-- MongoDB local atual
-- Precisará de MongoDB Atlas ou similar para produção
+- ✅ MongoDB Atlas configurado: `cluster0.f2mbcc6.mongodb.net`
+- ✅ Database: mystery_box_store
+- ✅ Conexão testada e funcionando
 
 ### APIs Externas
-- Stripe: Configurado para teste
-- Google OAuth: Configurado
-- Resend: Configurado mas domínio não verificado
+- ✅ Stripe: Configurado para teste
+- ✅ Google OAuth: Client ID e Secret disponíveis
+- ✅ Resend: API Key disponível (domínio pendente verificação)
 
 ---
 
