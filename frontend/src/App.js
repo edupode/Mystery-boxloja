@@ -1077,13 +1077,60 @@ const Checkout = () => {
             <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-6 text-white`}>📍 Informações de Entrega</h3>
 
             <div className="mb-6">
-              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Morada Completa *</label>
-              <textarea
-                value={formData.shippingAddress}
-                onChange={(e) => setFormData({...formData, shippingAddress: e.target.value})}
+              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Endereço *</label>
+              <input
+                type="text"
+                value={formData.street}
+                onChange={(e) => setFormData({...formData, street: e.target.value})}
                 required
-                className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 ${isMobile ? 'h-24' : 'h-32'} bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
-                placeholder="Rua, número, código postal, cidade..."
+                className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
+                placeholder="Rua e número da porta"
+              />
+            </div>
+
+            <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-2 gap-6'} mb-6`}>
+              <div>
+                <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Código Postal *</label>
+                <input
+                  type="text"
+                  value={formData.postalCode}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d-]/g, ''); // Only digits and dash
+                    if (value.length <= 8) { // Max length for XXXX-XXX format
+                      let formatted = value;
+                      if (value.length > 4 && !value.includes('-')) {
+                        formatted = value.slice(0, 4) + '-' + value.slice(4);
+                      }
+                      setFormData({...formData, postalCode: formatted});
+                    }
+                  }}
+                  required
+                  className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
+                  placeholder="1234-567"
+                  maxLength="8"
+                />
+              </div>
+              <div>
+                <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Localidade *</label>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  required
+                  className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
+                  placeholder="Lisboa"
+                />
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Data de Nascimento *</label>
+              <input
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                required
+                className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
               />
             </div>
 
