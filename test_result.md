@@ -102,7 +102,56 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "A pagina de admin não funciona, todos os botoes estao quebrados, falta o botão para fazer outros emails(contas) de admin, eu quero que seja possivel adicionar informações no perfil e que as pessoas possam ver o historico de encomendas, gostaria também de ter um botão para fazer chat em direto entre o cliente e um agente e as conversas ficariam salvas ou seriam enviadas por email, depois quero que refaças as caixas temáticas (Geek, Pet, Auto-cuidado, Terror, Livros, Harry Potter, Stitch, Marvel) com produtos e preços detalhados."
+user_problem_statement: "Fase 1 - Correções Críticas de Funcionalidade: 1. Corrigir o processo de checkout para funcionar completamente 2. Corrigir atualizações de estado de encomendas no admin 3. Corrigir sistema de chat do admin (aprovação/negação, mostrar informações, auto-fecho) 4. Corrigir upload de fotos"
+
+backend:
+  - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Melhorado checkout para limpar carrinho após pedido criado e pagamento bem-sucedido. Adicionada atualização de timestamps."
+
+  - task: "FASE 1 - Correção admin - Melhorar atualizações de estado de encomendas"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Melhorado endpoint de atualização de status com validação e melhor tratamento de erros. Frontend corrigido para usar parâmetros corretos."
+
+  - task: "FASE 1 - Correção chat admin - Melhorar sistema de chat com aprovação/rejeição"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado auto-fechamento de sessões após 10min, adicionado endpoint de rejeição, melhorada exibição com nome de usuário e assunto das mensagens."
+
+  - task: "FASE 1 - Correção upload de fotos - Melhorar sistema de upload"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Corrigido modelo ProductCreate para aceitar image_base64, melhorados endpoints de criação e atualização de produtos para priorizar base64 sobre URL."
 
 backend:
   - task: "FASE 1 - Correção página de admin - Criar página de gestão de pedidos"
