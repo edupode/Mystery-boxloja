@@ -1490,6 +1490,10 @@ const AdminDashboard = () => {
   const [newAdmin, setNewAdmin] = useState({ email: '', name: '' });
   const [coupons, setCoupons] = useState([]);
   const [promotions, setPromotions] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordModalUser, setPasswordModalUser] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
   const { user } = useAppContext();
   const isMobile = useIsMobile();
 
