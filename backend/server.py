@@ -1368,11 +1368,11 @@ async def create_coupon(coupon_data: CouponCreate, admin_user: User = Depends(ge
     if existing:
         raise HTTPException(status_code=400, detail="Código de cupão já existe")
     
-    coupon = CouponCode(
-        **coupon_data.dict(),
-        code=coupon_data.code.upper(),
-        created_by=admin_user.id
-    )
+    coupon_dict = coupon_data.dict()
+    coupon_dict["code"] = coupon_data.code.upper()
+    coupon_dict["created_by"] = admin_user.id
+    
+    coupon = CouponCode(**coupon_dict)
     await db.coupons.insert_one(coupon.dict())
     return coupon
 
