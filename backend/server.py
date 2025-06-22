@@ -196,6 +196,7 @@ class ProductCreate(BaseModel):
     price: float
     subscription_prices: Optional[Dict[str, float]] = None
     image_url: str
+    image_base64: Optional[str] = None  # For base64 image uploads
     stock_quantity: Optional[int] = 100
     featured: Optional[bool] = False
 
