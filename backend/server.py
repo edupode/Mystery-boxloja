@@ -959,6 +959,9 @@ async def get_product(product_id: str):
     product = await db.products.find_one({"id": product_id})
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
+    # Convert ObjectId to string
+    if "_id" in product:
+        product["_id"] = str(product["_id"])
     return Product(**product)
 
 @api_router.get("/categories")
