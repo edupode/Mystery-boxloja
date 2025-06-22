@@ -444,3 +444,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Iniciando testes do backend da Mystery Box Store. Vou testar todas as funcionalidades listadas no test_plan."
+  - agent: "main"
+    message: "Base de dados populada com 4 categorias, 6 produtos e 3 cupões. Iniciando reteste do backend para corrigir erros encontrados."
