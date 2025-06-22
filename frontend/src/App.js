@@ -436,17 +436,20 @@ const Home = () => {
                     className={`w-full ${isMobile ? 'h-48' : 'h-64'} object-cover transition-transform duration-500 hover:scale-110`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+                  <div className="absolute top-4 right-4 animate-float">
+                    <span className="text-2xl">✨</span>
+                  </div>
                 </div>
                 <div className={`${isMobile ? 'p-6' : 'p-8'} bg-gradient-to-b from-gray-800 to-gray-900`}>
                   <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-4 text-white`}>{product.name}</h3>
                   <p className="text-gray-300 mb-6 leading-relaxed">{product.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400`}>
+                    <span className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400 animate-pulse-glow`}>
                       €{product.price}
                     </span>
                     <Link
                       to={`/produto/${product.id}`}
-                      className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+                      className={`btn-mystery bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
                     >
                       🔮 Descobrir
                     </Link>
