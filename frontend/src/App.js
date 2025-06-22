@@ -1760,11 +1760,14 @@ const AdminOrders = () => {
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`${API}/admin/orders/${orderId}/status?status=${newStatus}`);
+      await axios.put(`${API}/admin/orders/${orderId}/status`, null, {
+        params: { status: newStatus }
+      });
       alert('Status atualizado com sucesso!');
       loadOrders();
     } catch (error) {
-      alert('Erro ao atualizar status');
+      console.error('Error updating order status:', error);
+      alert('Erro ao atualizar status: ' + (error.response?.data?.detail || 'Erro desconhecido'));
     }
   };
 
