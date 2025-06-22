@@ -1641,6 +1641,214 @@ const AdminDashboard = () => {
           <p className={`${isMobile ? 'text-lg' : 'text-xl'} text-gray-400`}>Apenas administradores podem aceder a esta área.</p>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-12 text-center text-white`}>
+          ⚙️ Painel de Administração
+        </h1>
+
+        {/* Dashboard Stats */}
+        {dashboardData && (
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-4 gap-6'} mb-12`}>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className="text-purple-400 text-lg font-semibold mb-2">📦 Total Pedidos</h3>
+              <p className="text-3xl font-bold text-white">{dashboardData.total_orders}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className="text-purple-400 text-lg font-semibold mb-2">👥 Utilizadores</h3>
+              <p className="text-3xl font-bold text-white">{dashboardData.total_users}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className="text-purple-400 text-lg font-semibold mb-2">🎁 Produtos</h3>
+              <p className="text-3xl font-bold text-white">{dashboardData.total_products}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30">
+              <h3 className="text-purple-400 text-lg font-semibold mb-2">💰 Receita</h3>
+              <p className="text-3xl font-bold text-white">€{dashboardData.total_revenue?.toFixed(2) || '0.00'}</p>
+            </div>
+          </div>
+        )}
+
+        {/* User Management Section */}
+        {user?.email === 'eduardocorreia3344@gmail.com' && (
+          <div className="bg-gray-800/50 rounded-2xl p-6 border border-purple-500/30 mb-8">
+            <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold mb-6 text-white`}>👥 Gestão de Utilizadores</h2>
+            
+            {/* Create Admin Form */}
+            <form onSubmit={handleMakeAdmin} className="mb-6">
+              <div className={`${isMobile ? 'space-y-4' : 'flex gap-4 items-end'}`}>
+                <input
+                  type="email"
+                  placeholder="Email do novo admin"
+                  value={newAdmin.email}
+                  onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
+                  required
+                  className="bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none flex-1"
+                />
+                <input
+                  type="text"
+                  placeholder="Nome do novo admin"
+                  value={newAdmin.name}
+                  onChange={(e) => setNewAdmin({...newAdmin, name: e.target.value})}
+                  required
+                  className="bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none flex-1"
+                />
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                >
+                  ➕ Adicionar Admin
+                </button>
+              </div>
+            </form>
+
+            {/* Bulk actions for selecting multiple users */}
+            {selectedUsers.length > 0 && (
+              <div className="mb-4 p-4 bg-purple-900/20 rounded-lg border border-purple-500/30">
+                <p className="text-white mb-3">{selectedUsers.length} usuário(s) selecionado(s)</p>
+                <button
+                  onClick={handleBulkMakeAdmin}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300"
+                >
+                  ⚙️ Tornar Admins Selecionados
+                </button>
+              </div>
+            )}
+
+            {/* Users list */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead>
+                  <tr className="border-b border-purple-500/30">
+                    <th className="text-left py-3">Selecionar</th>
+                    <th className="text-left py-3">Nome</th>
+                    <th className="text-left py-3">Email</th>
+                    <th className="text-left py-3">Tipo</th>
+                    <th className="text-left py-3">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(userItem => (
+                    <tr key={userItem.id} className="border-b border-gray-700/50">
+                      <td className="py-3">
+                        {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(userItem.id)}
+                            onChange={() => handleUserSelection(userItem.id)}
+                            className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                          />
+                        )}
+                      </td>
+                      <td className="py-3">{userItem.name}</td>
+                      <td className="py-3">{userItem.email}</td>
+                      <td className="py-3">
+                        {userItem.email === 'eduardocorreia3344@gmail.com' ? (
+                          <span className="text-yellow-400">👑 Super Admin</span>
+                        ) : userItem.is_admin ? (
+                          <span className="text-purple-400">⚙️ Admin</span>
+                        ) : (
+                          <span className="text-gray-400">👤 Utilizador</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <div className="flex gap-2 flex-wrap">
+                          {/* Change Password Button */}
+                          {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleChangePassword(userItem)}
+                              className="text-blue-400 hover:text-blue-300 text-sm px-2 py-1 bg-blue-900/20 rounded"
+                            >
+                              🔑 Alterar Senha
+                            </button>
+                          )}
+                          
+                          {/* Remove Admin Button */}
+                          {userItem.is_admin && userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleRemoveAdmin(userItem.id)}
+                              className="text-orange-400 hover:text-orange-300 text-sm px-2 py-1 bg-orange-900/20 rounded"
+                            >
+                              🗑️ Remover Admin
+                            </button>
+                          )}
+                          
+                          {/* Delete User Button */}
+                          {userItem.email !== 'eduardocorreia3344@gmail.com' && (
+                            <button
+                              onClick={() => handleDeleteUser(userItem.id, userItem.name)}
+                              className="text-red-400 hover:text-red-300 text-sm px-2 py-1 bg-red-900/20 rounded"
+                            >
+                              ⚠️ Deletar Usuário
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'md:grid-cols-3 gap-6'}`}>
+          <Link
+            to="/admin/orders"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">📋</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Pedidos</h3>
+          </Link>
+          <Link
+            to="/admin/products"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🎁</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Produtos</h3>
+          </Link>
+          <Link
+            to="/admin/coupons"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🎫</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Cupões</h3>
+          </Link>
+          <Link
+            to="/admin/promotions"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🏷️</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Promoções</h3>
+          </Link>
+          <Link
+            to="/admin/categories"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🏷️</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Categorias</h3>
+          </Link>
+          <Link
+            to="/admin/emails"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">📧</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Emails</h3>
+          </Link>
+          <Link
+            to="/admin/chat"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">💬</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Live Chat</h3>
+          </Link>
+        </div>
+      </div>
 
       {/* Password Change Modal */}
       {showPasswordModal && passwordModalUser && (
