@@ -167,39 +167,48 @@ backend:
 
   - task: "Sistema de produtos - Listar produtos"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/products para listar produtos com filtros por categoria e featured"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente após correções de mapeamento de campos e serialização ObjectId"
 
   - task: "Sistema de produtos - Obter detalhes de produto"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/products/{product_id} para obter detalhes de produto específico"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente com 6 produtos na base de dados"
 
   - task: "Sistema de categorias - Listar categorias"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint /api/categories para listar categorias ativas"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente com 4 categorias na base de dados"
 
   - task: "Sistema de carrinho - Obter carrinho"
     implemented: true
