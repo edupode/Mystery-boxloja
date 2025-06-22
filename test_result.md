@@ -570,6 +570,51 @@ backend:
         agent: "testing"
         comment: "Endpoints GET /api/categories e POST /api/admin/categories testados com sucesso"
 
+  - task: "Funcionalidades admin - Gestão de utilizadores"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para listar utilizadores, adicionar e remover admins"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/admin/users, POST /api/admin/users/make-admin e DELETE /api/admin/users/{user_id}/remove-admin testados com sucesso"
+
+  - task: "Funcionalidades admin - Envio de emails"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para envio de emails de desconto e aniversário"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints POST /api/admin/emails/send-discount e POST /api/admin/emails/send-birthday testados com sucesso"
+
+  - task: "Funcionalidades admin - Dashboard"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/admin/dashboard para dashboard com estatísticas"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/admin/dashboard testado com sucesso, retorna estatísticas e pedidos recentes"
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
