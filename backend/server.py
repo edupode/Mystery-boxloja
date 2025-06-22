@@ -1702,6 +1702,146 @@ async def create_category(category_data: CategoryCreate, admin_user: User = Depe
     await db.categories.insert_one(category.dict())
     return category
 
+# Chat System Endpoints
+@api_router.post("/chat/sessions")
+async def create_chat_session(session_data: ChatSessionCreate, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    chat_session = ChatSession(
+        user_id=current_user.id,
+        subject=session_data.subject
+    )
+    await db.chat_sessions.insert_one(chat_session.dict())
+    return chat_session
+
+@api_router.get("/chat/sessions")
+async def get_user_chat_sessions(current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    sessions = await db.chat_sessions.find({"user_id": current_user.id}).sort("updated_at", -1).to_list(1000)
+    # Convert ObjectId to string
+    for session in sessions:
+        if "_id" in session:
+            session["_id"] = str(session["_id"])
+    return sessions
+
+@api_router.get("/chat/sessions/{session_id}/messages")
+async def get_chat_messages(session_id: str, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify user owns this session or is admin
+    session = await db.chat_sessions.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão de chat não encontrada")
+    
+    if session["user_id"] != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    messages = await db.chat_messages.find({"chat_session_id": session_id}).sort("timestamp", 1).to_list(1000)
+    # Convert ObjectId to string
+    for message in messages:
+        if "_id" in message:
+            message["_id"] = str(message["_id"])
+    return messages
+
+@api_router.post("/chat/sessions/{session_id}/messages")
+async def send_chat_message(session_id: str, message_data: ChatMessageCreate, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify user owns this session or is admin
+    session = await db.chat_sessions.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão de chat não encontrada")
+    
+    if session["user_id"] != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    # Determine sender type
+    sender_type = "agent" if current_user.is_admin else "user"
+    
+    chat_message = ChatMessage(
+        chat_session_id=session_id,
+        sender_id=current_user.id,
+        sender_type=sender_type,
+        message=message_data.message
+    )
+    
+    await db.chat_messages.insert_one(chat_message.dict())
+    
+    # Update session updated_at
+    await db.chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"updated_at": datetime.utcnow()}}
+    )
+    
+    # If user is admin, assign themselves as agent
+    if current_user.is_admin and not session.get("agent_id"):
+        await db.chat_sessions.update_one(
+            {"id": session_id},
+            {"$set": {"agent_id": current_user.id}}
+        )
+    
+    return chat_message
+
+@api_router.put("/chat/sessions/{session_id}/close")
+async def close_chat_session(session_id: str, current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify user owns this session or is admin
+    session = await db.chat_sessions.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão de chat não encontrada")
+    
+    if session["user_id"] != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    await db.chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"status": "closed", "updated_at": datetime.utcnow()}}
+    )
+    
+    return {"message": "Sessão de chat encerrada"}
+
+# Admin Chat Endpoints
+@api_router.get("/admin/chat/sessions")
+async def get_all_chat_sessions(admin_user: User = Depends(get_admin_user)):
+    sessions = await db.chat_sessions.find().sort("updated_at", -1).to_list(1000)
+    
+    # Get user info for each session
+    result = []
+    for session in sessions:
+        if "_id" in session:
+            session["_id"] = str(session["_id"])
+        
+        user = await db.users.find_one({"id": session["user_id"]})
+        session["user_name"] = user["name"] if user else "Usuário desconhecido"
+        session["user_email"] = user["email"] if user else ""
+        
+        # Get last message
+        last_message = await db.chat_messages.find_one(
+            {"chat_session_id": session["id"]},
+            sort=[("timestamp", -1)]
+        )
+        session["last_message"] = last_message["message"] if last_message else ""
+        session["last_message_time"] = last_message["timestamp"] if last_message else session["created_at"]
+        
+        result.append(session)
+    
+    return result
+
+@api_router.put("/admin/chat/sessions/{session_id}/assign")
+async def assign_chat_session(session_id: str, admin_user: User = Depends(get_admin_user)):
+    await db.chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"agent_id": admin_user.id, "status": "active", "updated_at": datetime.utcnow()}}
+    )
+    return {"message": "Sessão atribuída"}
+
 # Include router
 app.include_router(api_router)
 
