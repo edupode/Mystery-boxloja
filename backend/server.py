@@ -1888,6 +1888,14 @@ async def assign_chat_session(session_id: str, admin_user: User = Depends(get_ad
     )
     return {"message": "Sessão atribuída"}
 
+@api_router.put("/admin/chat/sessions/{session_id}/reject")
+async def reject_chat_session(session_id: str, admin_user: User = Depends(get_admin_user)):
+    await db.chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"status": "rejected", "updated_at": datetime.utcnow()}}
+    )
+    return {"message": "Sessão rejeitada"}
+
 # OTP and password change endpoints
 @api_router.post("/auth/send-otp")
 async def send_otp(request: dict, current_user: User = Depends(get_current_user)):
