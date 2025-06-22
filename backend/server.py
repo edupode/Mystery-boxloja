@@ -1259,6 +1259,10 @@ async def admin_dashboard(admin_user: User = Depends(get_admin_user)):
 
     # Get recent orders
     recent_orders = await db.orders.find().sort("created_at", -1).limit(10).to_list(10)
+    # Convert ObjectId to string
+    for order in recent_orders:
+        if "_id" in order:
+            order["_id"] = str(order["_id"])
 
     return {
         "stats": {
