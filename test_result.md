@@ -757,6 +757,156 @@ backend:
         agent: "testing"
         comment: "Endpoint GET /api/admin/dashboard testado com sucesso, retorna estatísticas e pedidos recentes"
 
+  - task: "Perfil de usuário - Obter informações do perfil"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/me para obter informações completas do perfil"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/auth/me testado com sucesso, retorna todas as informações do perfil do usuário"
+
+  - task: "Perfil de usuário - Atualizar perfil"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/profile para atualização de perfil"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint PUT /api/auth/profile testado com sucesso, permite atualizar todos os campos do perfil"
+
+  - task: "Perfil de usuário - Histórico de pedidos"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/auth/orders para histórico de pedidos do usuário"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/auth/orders testado com sucesso, retorna lista de pedidos com detalhes"
+
+  - task: "Sistema de chat - Criar sessão"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/chat/sessions para criar nova sessão de chat"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint POST /api/chat/sessions testado com sucesso, cria nova sessão de chat"
+
+  - task: "Sistema de chat - Listar sessões"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/chat/sessions para listar sessões do usuário"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/chat/sessions testado com sucesso, retorna lista de sessões do usuário"
+
+  - task: "Sistema de chat - Enviar mensagem"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/chat/sessions/{session_id}/messages para enviar mensagem"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint POST /api/chat/sessions/{session_id}/messages testado com sucesso, envia mensagem para a sessão"
+
+  - task: "Sistema de chat - Listar mensagens"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/chat/sessions/{session_id}/messages para listar mensagens"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/chat/sessions/{session_id}/messages testado com sucesso, retorna lista de mensagens da sessão"
+
+  - task: "Sistema de chat - Fechar sessão"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/chat/sessions/{session_id}/close para fechar sessão"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint PUT /api/chat/sessions/{session_id}/close testado com sucesso, fecha a sessão de chat"
+
+  - task: "Admin chat - Listar todas as sessões"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/admin/chat/sessions para listar todas as sessões"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint GET /api/admin/chat/sessions testado com sucesso, retorna todas as sessões de chat"
+
+  - task: "Admin chat - Atribuir sessão a admin"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint /api/admin/chat/sessions/{session_id}/assign para atribuir sessão a admin"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint PUT /api/admin/chat/sessions/{session_id}/assign testado com sucesso, atribui a sessão ao admin"
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
