@@ -480,6 +480,51 @@ backend:
         agent: "testing"
         comment: "Função corrigida para aceitar NIFs com ou sem prefixo 'PT', validação funcionando"
 
+  - task: "Funcionalidades admin - Autenticação"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada autenticação de admin com verificação de permissões"
+      - working: true
+        agent: "testing"
+        comment: "Autenticação de admin testada com sucesso usando email: eduardocorreia3344@gmail.com e senha: admin123"
+
+  - task: "Funcionalidades admin - Gestão de pedidos"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para listar e atualizar status de pedidos"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/admin/orders e PUT /api/admin/orders/{order_id}/status testados com sucesso"
+
+  - task: "Funcionalidades admin - Gestão de produtos"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementados endpoints para criar, listar, atualizar e remover produtos"
+      - working: true
+        agent: "testing"
+        comment: "Endpoints GET /api/products, POST /api/admin/products, PUT /api/admin/products/{product_id} e DELETE /api/admin/products/{product_id} testados com sucesso"
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
