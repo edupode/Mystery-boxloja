@@ -309,12 +309,12 @@ def test_checkout():
         
         requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
         
-        # Create checkout
+        # Test with invalid NIF
         checkout_data = {
             "cart_id": SESSION_ID,
             "shipping_address": "Rua de Teste, 123, Lisboa",
             "phone": "+351912345678",
-            "nif": "PT123456789",  # This is not a valid NIF, testing validation
+            "nif": "123456789",  # Invalid NIF
             "payment_method": "card",
             "shipping_method": "standard",
             "origin_url": BACKEND_URL
@@ -328,7 +328,7 @@ def test_checkout():
         else:
             log_test_result("NIF Validation", False, "Failed to validate NIF")
             
-        # Try with valid NIF (without PT prefix)
+        # Try with valid NIF
         checkout_data["nif"] = "501964843"  # Valid Portuguese NIF
         
         response = requests.post(f"{API_URL}/checkout", json=checkout_data)
