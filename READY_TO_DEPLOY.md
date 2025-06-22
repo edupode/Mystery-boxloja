@@ -44,7 +44,7 @@ FRONTEND_URL=https://mystery-box-store.vercel.app
 Copie estas variáveis de ambiente para o seu projeto no Vercel:
 
 ```
-REACT_APP_BACKEND_URL=https://mystery-box-backend.onrender.com
+REACT_APP_BACKEND_URL=https://mystery-boxloja.onrender.com
 REACT_APP_GOOGLE_CLIENT_ID=231244828407-jqacf8ombm44aeh5scn544nvokvbkqis.apps.googleusercontent.com
 ```
 
