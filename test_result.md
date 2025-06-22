@@ -267,6 +267,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint de login com Google OAuth está implementado corretamente. Não foi possível testar completamente devido à necessidade de um token OAuth válido, mas o código está correto."
+      - working: true
+        agent: "testing"
+        comment: "Endpoint /api/auth/google testado novamente. Confirmado que o endpoint está acessível, rejeita tokens inválidos corretamente e o GOOGLE_CLIENT_ID está configurado no backend. Endpoint funcionando conforme esperado."
 
   - task: "Autenticação - Verificar token JWT"
     implemented: true
