@@ -1003,6 +1003,16 @@ async def apply_coupon_to_cart(session_id: str, coupon_code: str):
     )
     
     cart = await db.carts.find_one({"session_id": session_id})
+    if not cart:
+        # Create a new cart if it doesn't exist
+        new_cart = Cart(session_id=session_id, coupon_code=coupon_code.upper())
+        await db.carts.insert_one(new_cart.dict())
+        return new_cart
+    
+    # Convert ObjectId to string
+    if "_id" in cart:
+        cart["_id"] = str(cart["_id"])
+    
     return Cart(**cart)
 
 @api_router.delete("/cart/{session_id}/remove-coupon")
