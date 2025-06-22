@@ -1703,7 +1703,16 @@ async def send_birthday_email_admin(
 
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin_user: User = Depends(get_admin_user)):
-    product = Product(**product_data.dict())
+    # Prioritize base64 image over URL if both are provided
+    image_url = product_data.image_base64 if product_data.image_base64 else product_data.image_url
+    
+    product_dict = product_data.dict()
+    product_dict["image_url"] = image_url
+    # Remove image_base64 from the final product data
+    if "image_base64" in product_dict:
+        del product_dict["image_base64"]
+    
+    product = Product(**product_dict)
     await db.products.insert_one(product.dict())
     return product
 
