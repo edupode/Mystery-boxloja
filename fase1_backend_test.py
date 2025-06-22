@@ -141,17 +141,22 @@ def test_checkout_with_card():
         return log_test_result("Checkout with Card", False, "No product ID available")
     
     try:
-        # Ensure cart has items
+        # Create a new session ID for this test
+        card_session_id = str(uuid.uuid4())
+        
+        # Add product to cart
         cart_item = {
             "product_id": test_results["product_id"],
             "quantity": 1
         }
         
-        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
+        response = requests.post(f"{API_URL}/cart/{card_session_id}/add", json=cart_item)
+        if response.status_code != 200:
+            return log_test_result("Add to Cart for Card Checkout", False, f"Failed: {response.text}")
         
         # Create checkout with card payment
         checkout_data = {
-            "cart_id": SESSION_ID,
+            "cart_id": card_session_id,
             "shipping_address": "Rua de Teste, 123, Lisboa",
             "phone": "+351912345678",
             "nif": "501964843",  # Valid Portuguese NIF
@@ -171,13 +176,15 @@ def test_checkout_with_card():
         test_results["order_id_card"] = checkout_result["order_id"]
         
         # Check if cart was cleared after checkout
-        response = requests.get(f"{API_URL}/cart/{SESSION_ID}")
+        response = requests.get(f"{API_URL}/cart/{card_session_id}")
         if response.status_code != 200:
             return log_test_result("Cart Cleared After Checkout", False, f"Failed to get cart: {response.text}")
         
         cart_after_checkout = response.json()
         if cart_after_checkout.get("items") and len(cart_after_checkout["items"]) > 0:
             return log_test_result("Cart Cleared After Checkout", False, "Cart not cleared after checkout")
+        
+        log_test_result("Cart Cleared After Checkout", True, "Cart was cleared after checkout")
         
         # If we have a Stripe session, test payment status
         if "checkout_url" in checkout_result and "session_id=" in checkout_result["checkout_url"]:
