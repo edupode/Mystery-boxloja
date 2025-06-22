@@ -1666,6 +1666,1255 @@ const AdminDashboard = () => {
   );
 };
 
+// Admin sub-pages
+const AdminOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadOrders();
+    }
+  }, [user]);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/orders`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await axios.put(`${API}/admin/orders/${orderId}/status?status=${newStatus}`);
+      alert('Status atualizado com sucesso!');
+      loadOrders();
+    } catch (error) {
+      alert('Erro ao atualizar status');
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            📋 Gestão de Pedidos
+          </h1>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando pedidos...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">ID do Pedido</th>
+                    <th className="text-left p-4">Cliente</th>
+                    <th className="text-left p-4">Total</th>
+                    <th className="text-left p-4">Status Pagamento</th>
+                    <th className="text-left p-4">Status Pedido</th>
+                    <th className="text-left p-4">Data</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-mono text-sm">#{order.id.slice(0, 8)}</td>
+                      <td className="p-4">{order.user_id || 'Convidado'}</td>
+                      <td className="p-4 font-bold text-green-400">€{order.total_amount?.toFixed(2)}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          order.payment_status === 'paid' ? 'bg-green-900 text-green-300' : 
+                          order.payment_status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                          'bg-red-900 text-red-300'
+                        }`}>
+                          {order.payment_status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <select
+                          value={order.order_status}
+                          onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                          className="bg-gray-700 text-white border border-purple-500/30 rounded px-2 py-1 text-sm"
+                        >
+                          <option value="pending">Pendente</option>
+                          <option value="confirmed">Confirmado</option>
+                          <option value="processing">Processando</option>
+                          <option value="shipped">Enviado</option>
+                          <option value="delivered">Entregue</option>
+                          <option value="cancelled">Cancelado</option>
+                        </select>
+                      </td>
+                      <td className="p-4 text-sm text-gray-400">
+                        {new Date(order.created_at).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <button className="text-purple-400 hover:text-purple-300 text-sm">
+                          📋 Ver Detalhes
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {orders.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">📦</div>
+                <p>Nenhum pedido encontrado</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminProducts = () => {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    price: '',
+    image_url: '',
+    stock_quantity: '100',
+    featured: false
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadProducts();
+      loadCategories();
+    }
+  }, [user]);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/products`);
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await axios.get(`${API}/categories`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock_quantity: parseInt(formData.stock_quantity)
+      };
+
+      if (editingProduct) {
+        await axios.put(`${API}/admin/products/${editingProduct.id}`, productData);
+        alert('Produto atualizado com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/products`, productData);
+        alert('Produto criado com sucesso!');
+      }
+
+      setFormData({
+        name: '',
+        description: '',
+        category: '',
+        price: '',
+        image_url: '',
+        stock_quantity: '100',
+        featured: false
+      });
+      setShowAddForm(false);
+      setEditingProduct(null);
+      loadProducts();
+    } catch (error) {
+      alert('Erro ao salvar produto');
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      category: product.category,
+      price: product.price.toString(),
+      image_url: product.image_url,
+      stock_quantity: product.stock_quantity.toString(),
+      featured: product.featured
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Tem certeza que quer remover este produto?')) {
+      try {
+        await axios.delete(`${API}/admin/products/${productId}`);
+        alert('Produto removido!');
+        loadProducts();
+      } catch (error) {
+        alert('Erro ao remover produto');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🎁 Gestão de Produtos
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingProduct(null);
+              setFormData({
+                name: '',
+                description: '',
+                category: '',
+                price: '',
+                image_url: '',
+                stock_quantity: '100',
+                featured: false
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Novo Produto
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingProduct ? '✏️ Editar Produto' : '➕ Novo Produto'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome do Produto</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Mystery Box Geek..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Categoria</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="">Selecionar categoria</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  rows="4"
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Descrição detalhada do produto..."
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Preço (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="29.99"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Stock</label>
+                  <input
+                    type="number"
+                    value={formData.stock_quantity}
+                    onChange={(e) => setFormData({...formData, stock_quantity: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="100"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.featured}
+                      onChange={(e) => setFormData({...formData, featured: e.target.checked})}
+                      className="mr-3 scale-125"
+                    />
+                    ⭐ Produto em Destaque
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">URL da Imagem</label>
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingProduct ? '💾 Atualizar' : '➕ Criar'} Produto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingProduct(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando produtos...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden hover:border-purple-400 transition-colors duration-300">
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-white">{product.name}</h3>
+                    {product.featured && (
+                      <span className="bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
+                        ⭐ Destaque
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-3">{product.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-bold text-purple-400">€{product.price}</span>
+                    <span className="text-sm text-gray-400">Stock: {product.stock_quantity}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors duration-300 text-sm"
+                    >
+                      🗑️ Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {products.length === 0 && !loading && (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-6xl mb-4">🎁</div>
+            <p>Nenhum produto encontrado</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminCoupons = () => {
+  const [coupons, setCoupons] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
+  const [formData, setFormData] = useState({
+    code: '',
+    description: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    min_order_value: '',
+    max_uses: '',
+    valid_from: '',
+    valid_until: ''
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadCoupons();
+    }
+  }, [user]);
+
+  const loadCoupons = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/coupons`);
+      setCoupons(response.data);
+    } catch (error) {
+      console.error('Error loading coupons:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const couponData = {
+        ...formData,
+        code: formData.code.toUpperCase(),
+        discount_value: parseFloat(formData.discount_value),
+        min_order_value: formData.min_order_value ? parseFloat(formData.min_order_value) : null,
+        max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
+        valid_from: new Date(formData.valid_from).toISOString(),
+        valid_until: new Date(formData.valid_until).toISOString()
+      };
+
+      if (editingCoupon) {
+        await axios.put(`${API}/admin/coupons/${editingCoupon.id}`, couponData);
+        alert('Cupão atualizado com sucesso!');
+      } else {
+        await axios.post(`${API}/admin/coupons`, couponData);
+        alert('Cupão criado com sucesso!');
+      }
+
+      setFormData({
+        code: '',
+        description: '',
+        discount_type: 'percentage',
+        discount_value: '',
+        min_order_value: '',
+        max_uses: '',
+        valid_from: '',
+        valid_until: ''
+      });
+      setShowAddForm(false);
+      setEditingCoupon(null);
+      loadCoupons();
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao salvar cupão');
+    }
+  };
+
+  const handleEdit = (coupon) => {
+    setEditingCoupon(coupon);
+    setFormData({
+      code: coupon.code,
+      description: coupon.description,
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value.toString(),
+      min_order_value: coupon.min_order_value?.toString() || '',
+      max_uses: coupon.max_uses?.toString() || '',
+      valid_from: coupon.valid_from ? new Date(coupon.valid_from).toISOString().split('T')[0] : '',
+      valid_until: coupon.valid_until ? new Date(coupon.valid_until).toISOString().split('T')[0] : ''
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (couponId) => {
+    if (window.confirm('Tem certeza que quer desativar este cupão?')) {
+      try {
+        await axios.delete(`${API}/admin/coupons/${couponId}`);
+        alert('Cupão desativado!');
+        loadCoupons();
+      } catch (error) {
+        alert('Erro ao desativar cupão');
+      }
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🎫 Gestão de Cupões
+            </h1>
+          </div>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              setEditingCoupon(null);
+              setFormData({
+                code: '',
+                description: '',
+                discount_type: 'percentage',
+                discount_value: '',
+                min_order_value: '',
+                max_uses: '',
+                valid_from: '',
+                valid_until: ''
+              });
+            }}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Novo Cupão
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">
+              {editingCoupon ? '✏️ Editar Cupão' : '➕ Novo Cupão'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código do Cupão</label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="DESCONTO10"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Desconto</label>
+                  <select
+                    value={formData.discount_type}
+                    onChange={(e) => setFormData({...formData, discount_type: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem (%)</option>
+                    <option value="fixed">Valor Fixo (€)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Desconto de 10% em todos os produtos"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">
+                    Valor do Desconto {formData.discount_type === 'percentage' ? '(%)' : '(€)'}
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.discount_value}
+                    onChange={(e) => setFormData({...formData, discount_value: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder={formData.discount_type === 'percentage' ? '10' : '5.00'}
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Valor Mínimo (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.min_order_value}
+                    onChange={(e) => setFormData({...formData, min_order_value: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Máximo de Usos</label>
+                  <input
+                    type="number"
+                    value={formData.max_uses}
+                    onChange={(e) => setFormData({...formData, max_uses: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Ilimitado"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido De</label>
+                  <input
+                    type="date"
+                    value={formData.valid_from}
+                    onChange={(e) => setFormData({...formData, valid_from: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Válido Até</label>
+                  <input
+                    type="date"
+                    value={formData.valid_until}
+                    onChange={(e) => setFormData({...formData, valid_until: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  {editingCoupon ? '💾 Atualizar' : '➕ Criar'} Cupão
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingCoupon(null);
+                  }}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando cupões...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">Código</th>
+                    <th className="text-left p-4">Descrição</th>
+                    <th className="text-left p-4">Desconto</th>
+                    <th className="text-left p-4">Usos</th>
+                    <th className="text-left p-4">Validade</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {coupons.map((coupon) => (
+                    <tr key={coupon.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4 font-mono font-bold text-purple-400">{coupon.code}</td>
+                      <td className="p-4">{coupon.description}</td>
+                      <td className="p-4 font-bold text-green-400">
+                        {coupon.discount_type === 'percentage' 
+                          ? `${coupon.discount_value}%` 
+                          : `€${coupon.discount_value}`}
+                      </td>
+                      <td className="p-4">
+                        {coupon.current_uses}/{coupon.max_uses || '∞'}
+                      </td>
+                      <td className="p-4 text-sm">
+                        {new Date(coupon.valid_from).toLocaleDateString('pt-PT')} - {new Date(coupon.valid_until).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          coupon.is_active 
+                            ? 'bg-green-900 text-green-300' 
+                            : 'bg-red-900 text-red-300'
+                        }`}>
+                          {coupon.is_active ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(coupon)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(coupon.id)}
+                            className="text-red-400 hover:text-red-300 text-sm"
+                          >
+                            🗑️ Desativar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {coupons.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">🎫</div>
+                <p>Nenhum cupão encontrado</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminCategories = () => {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    emoji: '',
+    color: '#8B5CF6'
+  });
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadCategories();
+    }
+  }, [user]);
+
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/categories`);
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/admin/categories`, formData);
+      alert('Categoria criada com sucesso!');
+      setFormData({
+        name: '',
+        description: '',
+        emoji: '',
+        color: '#8B5CF6'
+      });
+      setShowAddForm(false);
+      loadCategories();
+    } catch (error) {
+      alert('Erro ao criar categoria');
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+              ← Voltar ao Admin
+            </Link>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+              🏷️ Gestão de Categorias
+            </h1>
+          </div>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
+          >
+            ➕ Nova Categoria
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="bg-gray-800/50 rounded-2xl p-8 mb-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">➕ Nova Categoria</h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome da Categoria</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="Geek, Terror, etc."
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Emoji</label>
+                  <input
+                    type="text"
+                    value={formData.emoji}
+                    onChange={(e) => setFormData({...formData, emoji: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="🤓"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Descrição</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  required
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  placeholder="Produtos relacionados com..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Cor da Categoria</label>
+                <input
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => setFormData({...formData, color: e.target.value})}
+                  className="w-32 h-12 bg-gray-700 border border-purple-500/30 rounded-lg focus:border-purple-400 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                >
+                  ➕ Criar Categoria
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando categorias...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <div key={category.id} className="bg-gray-800/50 rounded-2xl border border-purple-500/30 p-6 text-center hover:border-purple-400 transition-colors duration-300">
+                <div className="text-6xl mb-4">{category.emoji}</div>
+                <h3 className="text-xl font-semibold text-white mb-2">{category.name}</h3>
+                <p className="text-gray-300 text-sm mb-4">{category.description}</p>
+                <div 
+                  className="w-full h-4 rounded-full mb-4"
+                  style={{ backgroundColor: category.color }}
+                ></div>
+                <div className="text-xs text-gray-400">
+                  ID: {category.id}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {categories.length === 0 && !loading && (
+          <div className="text-center py-12 text-gray-400">
+            <div className="text-6xl mb-4">🏷️</div>
+            <p>Nenhuma categoria encontrada</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const AdminEmails = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [emailForm, setEmailForm] = useState({
+    type: 'discount',
+    user_email: '',
+    user_name: '',
+    coupon_code: '',
+    discount_value: '',
+    discount_type: 'percentage',
+    expiry_date: ''
+  });
+  const [sending, setSending] = useState(false);
+  const { user } = useAppContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadUsers();
+    }
+  }, [user]);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/users`);
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    setSending(true);
+
+    try {
+      if (emailForm.type === 'discount') {
+        await axios.post(`${API}/admin/emails/send-discount`, {
+          user_email: emailForm.user_email,
+          user_name: emailForm.user_name,
+          coupon_code: emailForm.coupon_code,
+          discount_value: parseFloat(emailForm.discount_value),
+          discount_type: emailForm.discount_type,
+          expiry_date: emailForm.expiry_date
+        });
+      } else if (emailForm.type === 'birthday') {
+        await axios.post(`${API}/admin/emails/send-birthday`, {
+          user_email: emailForm.user_email,
+          user_name: emailForm.user_name,
+          coupon_code: emailForm.coupon_code,
+          discount_value: parseFloat(emailForm.discount_value)
+        });
+      }
+
+      alert('Email enviado com sucesso!');
+      setEmailForm({
+        type: 'discount',
+        user_email: '',
+        user_name: '',
+        coupon_code: '',
+        discount_value: '',
+        discount_type: 'percentage',
+        expiry_date: ''
+      });
+    } catch (error) {
+      alert('Erro ao enviar email');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleUserSelect = (selectedUser) => {
+    setEmailForm({
+      ...emailForm,
+      user_email: selectedUser.email,
+      user_name: selectedUser.name
+    });
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            📧 Gestão de Emails
+          </h1>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Email Form */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">📧 Enviar Email</h3>
+            
+            <form onSubmit={handleSendEmail} className="space-y-6">
+              <div>
+                <label className="block text-lg font-medium mb-3 text-gray-300">Tipo de Email</label>
+                <select
+                  value={emailForm.type}
+                  onChange={(e) => setEmailForm({...emailForm, type: e.target.value})}
+                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                >
+                  <option value="discount">Email de Desconto</option>
+                  <option value="birthday">Email de Aniversário</option>
+                </select>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Email do Utilizador</label>
+                  <input
+                    type="email"
+                    value={emailForm.user_email}
+                    onChange={(e) => setEmailForm({...emailForm, user_email: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="user@exemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Nome do Utilizador</label>
+                  <input
+                    type="text"
+                    value={emailForm.user_name}
+                    onChange={(e) => setEmailForm({...emailForm, user_name: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="João Silva"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Código do Cupão</label>
+                  <input
+                    type="text"
+                    value={emailForm.coupon_code}
+                    onChange={(e) => setEmailForm({...emailForm, coupon_code: e.target.value.toUpperCase()})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="DESCONTO20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Valor do Desconto</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={emailForm.discount_value}
+                    onChange={(e) => setEmailForm({...emailForm, discount_value: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Tipo</label>
+                  <select
+                    value={emailForm.discount_type}
+                    onChange={(e) => setEmailForm({...emailForm, discount_type: e.target.value})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  >
+                    <option value="percentage">Percentagem</option>
+                    <option value="fixed">Valor Fixo</option>
+                  </select>
+                </div>
+              </div>
+
+              {emailForm.type === 'discount' && (
+                <div>
+                  <label className="block text-lg font-medium mb-3 text-gray-300">Data de Expiração</label>
+                  <input
+                    type="date"
+                    value={emailForm.expiry_date}
+                    onChange={(e) => setEmailForm({...emailForm, expiry_date: e.target.value})}
+                    required
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50"
+              >
+                {sending ? (
+                  <span className="flex items-center justify-center">
+                    <div className="animate-spin mr-2">📧</div>
+                    Enviando...
+                  </span>
+                ) : (
+                  '📧 Enviar Email'
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Users List */}
+          <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+            <h3 className="text-2xl font-bold mb-6 text-white">👥 Selecionar Utilizador</h3>
+            
+            {loading ? (
+              <div className="text-center text-white">
+                <div className="animate-spin text-4xl mb-4">🔮</div>
+                <p>Carregando utilizadores...</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {users.map((userItem) => (
+                  <div
+                    key={userItem.id}
+                    onClick={() => handleUserSelect(userItem)}
+                    className="p-4 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors duration-300 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-white font-semibold">{userItem.name}</h4>
+                        <p className="text-gray-400 text-sm">{userItem.email}</p>
+                      </div>
+                      {userItem.is_admin && (
+                        <span className="text-purple-400 text-xs">⚙️ Admin</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <AppProvider>
