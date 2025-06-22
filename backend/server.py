@@ -1839,9 +1839,20 @@ async def update_product(product_id: str, product_data: ProductCreate, admin_use
     if update_data.get("image_base64"):
         update_data["image_url"] = update_data["image_base64"]
     
-    # Remove image_base64 from the final product data
-    if "image_base64" in update_data:
-        del update_data["image_base64"]
+    # Handle multiple images
+    images = []
+    if product_data.images_base64:
+        images.extend(product_data.images_base64)
+    if product_data.images:
+        images.extend(product_data.images)
+    
+    if images:
+        update_data["images"] = images
+    
+    # Remove temporary fields from the final product data
+    for field in ["image_base64", "images_base64"]:
+        if field in update_data:
+            del update_data[field]
     
     # Add updated timestamp
     update_data["updated_at"] = datetime.utcnow()
