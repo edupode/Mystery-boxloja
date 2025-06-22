@@ -1566,6 +1566,72 @@ const AdminDashboard = () => {
     }
   };
 
+  // New functions for user management
+  const handleChangePassword = (userItem) => {
+    setPasswordModalUser(userItem);
+    setShowPasswordModal(true);
+    setNewPassword('');
+  };
+
+  const handleSavePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/admin/users/${passwordModalUser.id}/password`, {
+        new_password: newPassword
+      });
+      alert('Senha alterada com sucesso!');
+      setShowPasswordModal(false);
+      setPasswordModalUser(null);
+      setNewPassword('');
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao alterar senha');
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (window.confirm(`Tem certeza que quer deletar o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+      try {
+        await axios.delete(`${API}/admin/users/${userId}`);
+        alert('Usuário deletado com sucesso!');
+        loadUsers();
+      } catch (error) {
+        alert(error.response?.data?.detail || 'Erro ao deletar usuário');
+      }
+    }
+  };
+
+  const handleUserSelection = (userId) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleBulkMakeAdmin = async () => {
+    if (selectedUsers.length === 0) {
+      alert('Selecione pelo menos um usuário');
+      return;
+    }
+    
+    if (window.confirm(`Tem certeza que quer tornar ${selectedUsers.length} usuário(s) administrador(es)?`)) {
+      try {
+        await axios.post(`${API}/admin/users/bulk-make-admin`, {
+          user_ids: selectedUsers
+        });
+        alert('Usuários promovidos a admin com sucesso!');
+        setSelectedUsers([]);
+        loadUsers();
+      } catch (error) {
+        alert(error.response?.data?.detail || 'Erro ao promover usuários');
+      }
+    }
+  };
+
   if (!user?.is_admin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
