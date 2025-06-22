@@ -2207,8 +2207,6 @@ const AdminDashboard = () => {
 // Admin sub-pages
 
 // Admin sub-pages
-const AdminOrders = () => {
-  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAppContext();
   const isMobile = useIsMobile();
