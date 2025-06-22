@@ -821,7 +821,7 @@ backend:
         agent: "testing"
         comment: "Endpoints GET /api/categories e POST /api/admin/categories testados com sucesso"
 
-  - task: "Funcionalidades admin - Gestão de utilizadores"
+  - task: "Admin User Management"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -831,10 +831,25 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implementados endpoints para listar utilizadores, adicionar e remover admins"
+        comment: "Implementados endpoints para gestão de usuários: listar, alterar senha, excluir conta e tornar múltiplos usuários admin."
       - working: true
         agent: "testing"
-        comment: "Endpoints GET /api/admin/users, POST /api/admin/users/make-admin e DELETE /api/admin/users/{user_id}/remove-admin testados com sucesso"
+        comment: "Testados com sucesso os endpoints GET /api/admin/users (listar usuários), PUT /api/admin/users/{user_id}/password (alterar senha), DELETE /api/admin/users/{user_id} (excluir conta) e POST /api/admin/users/bulk-make-admin (tornar múltiplos usuários admin)."
+
+  - task: "Admin Order Management"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada lógica de priorização de pedidos no endpoint GET /api/admin/orders."
+      - working: true
+        agent: "testing"
+        comment: "Verificado que o endpoint GET /api/admin/orders implementa corretamente a lógica de priorização - pedidos cancelados/entregues estão ocultos, pedidos enviados estão no final da lista, e pedidos em processamento/pendentes/confirmados estão no topo."
 
   - task: "Funcionalidades admin - Envio de emails"
     implemented: true
