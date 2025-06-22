@@ -1949,11 +1949,24 @@ async def change_password(request: dict, current_user: User = Depends(get_curren
 # Include router
 app.include_router(api_router)
 
+# Configure CORS based on environment
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+CORS_ORIGINS = [
+    "http://localhost:3000",
+    "https://localhost:3000", 
+    FRONTEND_URL
+]
+
+# Add any additional origins from environment variable
+additional_origins = os.environ.get('ADDITIONAL_CORS_ORIGINS', '')
+if additional_origins:
+    CORS_ORIGINS.extend([origin.strip() for origin in additional_origins.split(',')])
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=CORS_ORIGINS,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
