@@ -2930,6 +2930,11 @@ const App = () => {
             <Route path="/success" element={<Success />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/emails" element={<AdminEmails />} />
           </Routes>
         </BrowserRouter>
       </div>
