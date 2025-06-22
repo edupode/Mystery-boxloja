@@ -1549,8 +1549,8 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Admin Management - Only for super admin */}
-        {user?.is_super_admin && (
+        {/* Admin Management - Only for admin */}
+        {user?.is_admin && (
           <div className="bg-gray-800/50 rounded-2xl p-8 mb-12 border border-purple-500/30">
             <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold mb-6 text-white`}>👑 Gestão de Administradores</h2>
 
