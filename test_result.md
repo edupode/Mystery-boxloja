@@ -161,9 +161,9 @@ backend:
 
   - task: "FASE 1 - Correção upload de fotos - Melhorar sistema de upload"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
@@ -176,6 +176,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "Retestado o endpoint POST /api/admin/products com image_base64, mas continua retornando erro 500 (Internal Server Error). O problema na implementação persiste."
+      - working: true
+        agent: "testing"
+        comment: "Identificado e corrigido o problema: o campo subscription_prices é obrigatório no modelo Product. Após incluir este campo nos testes, o upload de imagens com base64 funciona corretamente, tanto na criação quanto na atualização de produtos. O base64 tem prioridade sobre image_url quando ambos estão presentes."
 
 backend:
   - task: "FASE 1 - Correção página de admin - Criar página de gestão de pedidos"
