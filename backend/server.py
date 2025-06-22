@@ -183,7 +183,8 @@ class Product(BaseModel):
         "6_months": 0.0,
         "12_months": 0.0
     }
-    image_url: str
+    image_url: str  # Primary image for backwards compatibility
+    images: List[str] = []  # Additional images for gallery
     is_active: bool = True
     stock_quantity: int = 100
     featured: bool = False
