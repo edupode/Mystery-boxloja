@@ -2126,16 +2126,44 @@ const AdminProducts = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-lg font-medium mb-3 text-gray-300">URL da Imagem</label>
-                <input
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                  required
-                  className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                />
+              <div className="space-y-4">
+                <label className="block text-lg font-medium mb-3 text-gray-300">Imagem do Produto</label>
+                
+                {/* Preview da imagem atual */}
+                {(formData.image_base64 || formData.image_url) && (
+                  <div className="mb-4">
+                    <img 
+                      src={formData.image_base64 || formData.image_url} 
+                      alt="Preview" 
+                      className="w-32 h-32 object-cover rounded-lg border border-purple-500/30"
+                    />
+                  </div>
+                )}
+                
+                {/* Upload de arquivo */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-400">Enviar Imagem (Max: 5MB)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                  />
+                </div>
+                
+                <div className="text-center text-gray-400">OU</div>
+                
+                {/* URL da imagem */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-400">URL da Imagem</label>
+                  <input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({...formData, image_url: e.target.value, image_base64: ''})}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4">
