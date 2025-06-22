@@ -1003,3 +1003,5 @@ agent_communication:
     message: "Testadas as correções da Fase 1. Encontrados problemas em 3 das 4 funcionalidades: 1) O carrinho não é limpo após checkout; 2) O endpoint de rejeição de chat retorna erro 404; 3) O upload de imagens com base64 retorna erro 500. Apenas a atualização de status de pedidos funciona corretamente, embora aceite status inválidos sem validação."
   - agent: "main"
     message: "CONTINUAÇÃO: Usuário solicitou melhorias estéticas no website, correções finais de checkout, adição de FAQ e Termos & Condições, correção de chat admin, e substituição do emoji Stitch. Primeiro vou testar novamente as correções da Fase 1 para verificar o estado atual do backend."
+  - agent: "testing"
+    message: "Retestadas as correções da Fase 1. Três das quatro funcionalidades agora estão funcionando corretamente: 1) O carrinho é limpo após checkout com todos os métodos de pagamento; 2) A atualização de status de pedidos funciona corretamente e valida status inválidos; 3) O sistema de chat admin com aprovação/rejeição funciona corretamente. No entanto, o upload de imagens com base64 ainda retorna erro 500 (Internal Server Error)."
