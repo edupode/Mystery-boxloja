@@ -132,13 +132,20 @@ def test_cors_auth_login():
 def test_cors_auth_google():
     """Test CORS for auth/google endpoint"""
     try:
-        response = requests.options(f"{API_URL}/auth/google")
+        response = requests.options(f"{API_URL}/auth/google", headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "Content-Type, Authorization"
+        })
+        
+        logger.info(f"OPTIONS response status: {response.status_code}")
+        logger.info(f"OPTIONS response headers: {response.headers}")
         
         if response.status_code == 200:
             cors_headers = {
-                'Access-Control-Allow-Origin': True,
-                'Access-Control-Allow-Methods': True,
-                'Access-Control-Allow-Headers': True
+                'access-control-allow-origin': True,
+                'access-control-allow-methods': True,
+                'access-control-allow-headers': True
             }
             
             headers_present = all(
