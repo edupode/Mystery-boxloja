@@ -3995,6 +3995,112 @@ const UserProfile = () => {
   );
 };
 
+// Subscriptions Component
+const Subscriptions = () => {
+  const { isMobile } = useContext(AppContext);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [newSubscription, setNewSubscription] = useState({
+    type: 'monthly',
+    category: '',
+    price: 0
+  });
+
+  const subscriptionTypes = [
+    {
+      id: 'monthly',
+      name: 'Mensal',
+      description: 'Receba uma mystery box todos os meses',
+      price: 29.99,
+      features: ['3-5 produtos exclusivos', 'Envio grátis', 'Surpresas mensais']
+    },
+    {
+      id: 'quarterly',
+      name: 'Trimestral',
+      description: 'Receba uma mystery box a cada 3 meses',
+      price: 79.99,
+      features: ['5-7 produtos exclusivos', 'Envio grátis', 'Itens premium', 'Desconto de 10%']
+    },
+    {
+      id: 'yearly',
+      name: 'Anual',
+      description: 'Receba uma mystery box a cada mês por um ano',
+      price: 299.99,
+      features: ['3-5 produtos exclusivos mensais', 'Envio grátis', 'Itens exclusivos anuais', 'Desconto de 20%']
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold mb-8 text-center text-white`}>
+          🎯 Assinaturas Mystery Box
+        </h1>
+        
+        <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300 text-center mb-12 max-w-2xl mx-auto`}>
+          Escolha o plano perfeito e receba surpresas incríveis regularmente!
+        </p>
+
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-8'} mb-12`}>
+          {subscriptionTypes.map((subscription) => (
+            <div key={subscription.id} className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+              <div className="text-center mb-6">
+                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-2`}>
+                  {subscription.name}
+                </h3>
+                <p className="text-gray-400 mb-4">{subscription.description}</p>
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400 mb-4`}>
+                  €{subscription.price}
+                </div>
+              </div>
+
+              <ul className="mb-8 space-y-2">
+                {subscription.features.map((feature, index) => (
+                  <li key={index} className="text-gray-300 flex items-center">
+                    <span className="text-green-400 mr-2">✓</span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold">
+                Subscrever Agora
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
+          <h2 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold mb-6 text-white text-center`}>
+            💎 Vantagens das Assinaturas
+          </h2>
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'md:grid-cols-2 lg:grid-cols-4 gap-6'}`}>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🎁</div>
+              <h3 className="font-semibold text-white mb-2">Produtos Exclusivos</h3>
+              <p className="text-gray-400 text-sm">Itens únicos apenas para subscritores</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🚚</div>
+              <h3 className="font-semibold text-white mb-2">Envio Grátis</h3>
+              <p className="text-gray-400 text-sm">Entrega gratuita em todos os envios</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">⏰</div>
+              <h3 className="font-semibold text-white mb-2">Flexibilidade</h3>
+              <p className="text-gray-400 text-sm">Pause ou cancele a qualquer momento</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">💰</div>
+              <h3 className="font-semibold text-white mb-2">Melhor Preço</h3>
+              <p className="text-gray-400 text-sm">Economia garantida vs compras individuais</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <AppProvider>
