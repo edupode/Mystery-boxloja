@@ -291,8 +291,13 @@ const Header = () => {
                 📦 Produtos
               </Link>
               {user?.is_admin && (
-                <Link to="/admin" className="hover:text-yellow-300 transition-colors duration-300 flex items-center">
+                <Link to="/admin" className="hover:text-yellow-300 transition-colors duration-300 flex items-center relative">
                   ⚙️ Admin
+                  {pendingChatsCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs animate-pulse">
+                      {pendingChatsCount}
+                    </span>
+                  )}
                 </Link>
               )}
             </nav>
