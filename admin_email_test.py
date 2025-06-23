@@ -59,12 +59,11 @@ def test_send_discount_email(admin_token):
     
     try:
         headers = {
-            "Authorization": f"Bearer {admin_token}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {admin_token}"
         }
         
-        # Using JSON body instead of query parameters
-        discount_data = {
+        # Using query parameters
+        params = {
             "user_email": TEST_EMAIL,
             "user_name": TEST_NAME,
             "coupon_code": TEST_COUPON,
@@ -73,11 +72,10 @@ def test_send_discount_email(admin_token):
             "expiry_date": TEST_EXPIRY_DATE
         }
         
-        # Try with JSON body
-        logger.info(f"Sending discount email to {TEST_EMAIL} with JSON body: {json.dumps(discount_data)}")
+        logger.info(f"Sending discount email to {TEST_EMAIL} with params: {params}")
         response = requests.post(
             f"{API_URL}/admin/emails/send-discount", 
-            json=discount_data,
+            params=params,
             headers=headers
         )
         
