@@ -210,12 +210,20 @@ def test_subscription_webhook():
             }
         }
         
-        # Send the webhook event
+        # Try with local API first
         response = requests.post(
-            f"{API_URL}/subscriptions/webhook", 
+            f"{LOCAL_API_URL}/subscriptions/webhook", 
             data=json.dumps(mock_event),
             headers={"Content-Type": "application/json"}
         )
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.post(
+                f"{API_URL}/subscriptions/webhook", 
+                data=json.dumps(mock_event),
+                headers={"Content-Type": "application/json"}
+            )
         
         # We expect a 200 response even for mock data since we're not verifying the signature
         if response.status_code == 200:
