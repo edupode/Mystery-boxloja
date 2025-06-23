@@ -2230,6 +2230,9 @@ async def create_product(product_data: ProductCreate, admin_user: User = Depends
     product_dict["image_url"] = image_url
     product_dict["images"] = images
     
+    # Calculate subscription prices automatically based on the base price
+    product_dict["subscription_prices"] = calculate_subscription_prices(product_data.price)
+    
     # Remove temporary fields from the final product data
     for field in ["image_base64", "images_base64"]:
         if field in product_dict:
