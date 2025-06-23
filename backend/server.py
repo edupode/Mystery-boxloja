@@ -419,6 +419,20 @@ class Order(BaseModel):
     tracking_number: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
+class DiscountEmailRequest(BaseModel):
+    user_email: str
+    user_name: str
+    coupon_code: str
+    discount_value: float
+    discount_type: str
+    expiry_date: str
+
+class BirthdayEmailRequest(BaseModel):
+    user_email: str
+    user_name: str
+    coupon_code: str
+    discount_value: float
+
 class CheckoutRequest(BaseModel):
     cart_id: str
     shipping_address: str
