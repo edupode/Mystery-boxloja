@@ -1383,7 +1383,7 @@ const Login = () => {
     name: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAppContext();
+  const { login } = useDeviceContext();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
