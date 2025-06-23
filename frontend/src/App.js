@@ -622,7 +622,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [selectedSubscription, setSelectedSubscription] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { addToCart } = useAppContext();
+  const { addToCart } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
