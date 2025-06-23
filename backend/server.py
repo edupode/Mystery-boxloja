@@ -2131,26 +2131,30 @@ async def delete_promotion(promotion_id: str, admin_user: User = Depends(get_adm
 # Email management endpoints
 @api_router.post("/admin/emails/send-discount")
 async def send_discount_email_admin(
-    user_email: str,
-    user_name: str,
-    coupon_code: str,
-    discount_value: float,
-    discount_type: str,
-    expiry_date: str,
+    request: DiscountEmailRequest,
     admin_user: User = Depends(get_admin_user)
 ):
-    result = await send_discount_email(user_email, user_name, coupon_code, discount_value, discount_type, expiry_date)
+    result = await send_discount_email(
+        request.user_email, 
+        request.user_name, 
+        request.coupon_code, 
+        request.discount_value, 
+        request.discount_type, 
+        request.expiry_date
+    )
     return result
 
 @api_router.post("/admin/emails/send-birthday")
 async def send_birthday_email_admin(
-    user_email: str,
-    user_name: str,
-    coupon_code: str,
-    discount_value: float,
+    request: BirthdayEmailRequest,
     admin_user: User = Depends(get_admin_user)
 ):
-    result = await send_birthday_email(user_email, user_name, coupon_code, discount_value)
+    result = await send_birthday_email(
+        request.user_email, 
+        request.user_name, 
+        request.coupon_code, 
+        request.discount_value
+    )
     return result
 
 # Test email endpoint
