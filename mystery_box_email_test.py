@@ -39,10 +39,13 @@ def log_test_result(test_name, success, message=""):
 def test_direct_email_endpoint():
     """Test the direct email endpoint"""
     try:
-        # The endpoint is at /api/test-email (not /test-email)
+        # The endpoint is at /api/test-email
         response = requests.post(f"{API_URL}/test-email", params={"email": TEST_USER['email']})
         if response.status_code != 200:
-            return log_test_result("Direct Email Test", False, f"Failed: {response.text}")
+            # Try alternative URL format
+            response = requests.post(f"{BACKEND_URL}/api/test-email", params={"email": TEST_USER['email']})
+            if response.status_code != 200:
+                return log_test_result("Direct Email Test", False, f"Failed: {response.text}")
         
         result = response.json()
         if not result.get("welcome_email", {}).get("success") or not result.get("basic_email", {}).get("success"):
