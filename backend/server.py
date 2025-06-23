@@ -132,6 +132,12 @@ app = FastAPI(title="Mystery Box Store API", version="2.0.0")
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
+# Health check endpoint
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint to verify API is running"""
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
 # Admin email
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'eduardocorreia3344@gmail.com')
 
