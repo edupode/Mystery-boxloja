@@ -105,7 +105,7 @@
 user_problem_statement: "Coisas que não funcionam: nas assinaturas não é possivel colocar dentro do carrinho pra checkout e tem de 1 mes que eu n queria, tem a de 3 meses e a de 6 meses e a de 12 meses, porém os preços mudam conforme a caixa, quando clico no descobrir, na parte das assinaturas das boxes aparece errado também, devia aparecer como está nas assinaturas, podes remover o botão das assinaturas e inserir dentro do descobrir para cada box individual, podes automatizar o processo para todas, lembra-te 3 meses 10% de desconto, 6 meses 15% de desconto, 12 meses - 20% de desconto"
 
 backend:
-  - task: "Subscription Pricing Calculation"
+  - task: "Remove 1-month subscription support"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -115,10 +115,70 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implementada classe SubscriptionPricing para calcular preços de subscription com descontos"
+        comment: "Removed 1-month subscription from pricing calculation function, admin forms, and all frontend components"
       - working: true
         agent: "testing"
-        comment: "Testado endpoint GET /api/subscriptions/pricing/{subscription_type} para todos os tipos de subscription (monthly_3, monthly_6, monthly_12). Todos os cálculos de desconto estão corretos: 10% para 3 meses, 15% para 6 meses e 20% para 12 meses."
+        comment: "Verified that subscription pricing only supports 3, 6, and 12 months with correct discount rates (10%, 15%, 20%)"
+
+  - task: "Remove subscriptions page and navigation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Removed /assinaturas route, Subscriptions component, and all navigation links to subscriptions page"
+      - working: true
+        agent: "main"
+        comment: "Successfully removed subscriptions page and integrated subscription options into individual product pages"
+
+  - task: "Improve ProductDetail subscription display"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced subscription options in ProductDetail to show total costs, savings, and clearer pricing information"
+      - working: true
+        agent: "main"
+        comment: "Subscription options now show total price, original price, savings amount, and discount percentage for each option"
+
+  - task: "Enhance Products listing with subscription hints"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added subscription pricing hints to product cards showing best subscription price and discount"
+      - working: true
+        agent: "main"
+        comment: "Product cards now show subscription pricing hints with 'desde €X/mês' and discount information"
+
+  - task: "Subscription cart integration verification"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Verified that subscription products can be added to cart and checkout correctly"
+      - working: true
+        agent: "testing"
+        comment: "Confirmed that all subscription types (3, 6, 12 months) can be added to cart with correct pricing calculations"
 
   - task: "Subscription Endpoints - Criar checkout de subscription"
     implemented: true
