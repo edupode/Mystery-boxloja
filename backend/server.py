@@ -113,7 +113,7 @@ class SubscriptionPricing:
             'price_per_box': final_price / months
         }
 
-# Stripe subscription implementation
+# Stripe subscription implementation - Updated for prepaid subscriptions
 class StripeSubscription:
     def __init__(self, api_key: str):
         self.api_key = api_key
@@ -121,27 +121,50 @@ class StripeSubscription:
 
     async def create_subscription_checkout(self, request: SubscriptionRequest) -> SubscriptionResponse:
         try:
+            # Calculate subscription pricing
+            pricing = SubscriptionPricing.calculate_subscription_price(
+                request.box_price, 
+                request.subscription_type
+            )
+            
             # Create or retrieve customer
             if request.customer_id:
                 customer = stripe.Customer.retrieve(request.customer_id)
             else:
                 customer = stripe.Customer.create(
                     email=request.customer_email,
-                    metadata={"source": "mystery_box_subscription"}
+                    metadata={"source": "mystery_box_prepaid_subscription"}
                 )
 
-            # Create subscription checkout session
+            # Create one-time payment checkout session (no subscription)
             session = stripe.checkout.Session.create(
                 customer=customer.id,
-                payment_method_types=["card", "klarna", "multibanco", "sofort", "giropay"],
+                payment_method_types=["card", "multibanco", "klarna"],
                 line_items=[{
-                    "price": request.price_id,
+                    "price_data": {
+                        "currency": "eur",
+                        "product_data": {
+                            "name": f"Mystery Box Subscription - {pricing['months']} meses",
+                            "description": f"Pagamento antecipado de {pricing['months']} meses com {int(pricing['discount_rate']*100)}% desconto",
+                        },
+                        "unit_amount": int(pricing['final_price'] * 100),  # Stripe uses cents
+                    },
                     "quantity": 1,
                 }],
-                mode="subscription",
+                mode="payment",  # One-time payment instead of subscription
                 success_url=request.success_url,
                 cancel_url=request.cancel_url,
-                metadata=request.metadata
+                metadata={
+                    **request.metadata,
+                    "subscription_type": request.subscription_type,
+                    "months": str(pricing['months']),
+                    "box_price": str(request.box_price),
+                    "discount_rate": str(pricing['discount_rate']),
+                    "original_total": str(pricing['original_total']),
+                    "final_price": str(pricing['final_price'])
+                },
+                # Remove automatic tax calculation for subscriptions
+                automatic_tax={'enabled': False}
             )
             
             return SubscriptionResponse(
@@ -157,22 +180,31 @@ class StripeSubscription:
         try:
             session = stripe.checkout.Session.retrieve(session_id)
             
-            if session.subscription:
-                subscription = stripe.Subscription.retrieve(session.subscription)
+            # For one-time payments, we check the payment intent instead of subscription
+            if session.payment_intent:
+                payment_intent = stripe.PaymentIntent.retrieve(session.payment_intent)
+                
+                # Calculate end date based on subscription type from metadata
+                months = int(session.metadata.get('months', 1))
+                current_period_end = int((datetime.utcnow() + timedelta(days=30*months)).timestamp())
+                
                 return SubscriptionStatusResponse(
-                    subscription_id=subscription.id,
-                    status=subscription.status,
-                    current_period_start=subscription.current_period_start,
-                    current_period_end=subscription.current_period_end,
-                    customer_id=subscription.customer
+                    subscription_id=session.payment_intent,
+                    status=payment_intent.status,
+                    current_period_end=current_period_end,
+                    customer_id=session.customer,
+                    customer_email=session.customer_details.email if session.customer_details else None
                 )
             else:
                 return SubscriptionStatusResponse(
-                    status="incomplete" if session.payment_status == "unpaid" else "processing"
+                    subscription_id="",
+                    status="incomplete",
+                    customer_id=session.customer or "",
+                    customer_email=session.customer_details.email if session.customer_details else None
                 )
         except Exception as e:
-            print(f"Error retrieving subscription status: {str(e)}")
-            return SubscriptionStatusResponse(status="error")
+            print(f"Error getting subscription status: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
 
     async def create_customer_portal(self, request: CustomerPortalRequest) -> CustomerPortalResponse:
         try:
