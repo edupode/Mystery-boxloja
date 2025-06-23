@@ -2386,6 +2386,81 @@ const AdminProducts = () => {
                 </div>
               </div>
 
+              {/* Subscription Prices Section */}
+              <div className="bg-gray-700/30 rounded-lg p-6 border border-purple-500/20">
+                <h4 className="text-lg font-semibold mb-4 text-white">📅 Preços de Assinatura (Opcional)</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">1 Mês (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.subscription_prices["1_month"]}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        subscription_prices: {
+                          ...formData.subscription_prices,
+                          "1_month": e.target.value
+                        }
+                      })}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="25.99"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">3 Meses (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.subscription_prices["3_months"]}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        subscription_prices: {
+                          ...formData.subscription_prices,
+                          "3_months": e.target.value
+                        }
+                      })}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="22.99"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">6 Meses (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.subscription_prices["6_months"]}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        subscription_prices: {
+                          ...formData.subscription_prices,
+                          "6_months": e.target.value
+                        }
+                      })}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="19.99"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-gray-300">12 Meses (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.subscription_prices["12_months"]}
+                      onChange={(e) => setFormData({
+                        ...formData, 
+                        subscription_prices: {
+                          ...formData.subscription_prices,
+                          "12_months": e.target.value
+                        }
+                      })}
+                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+                      placeholder="16.99"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <label className="block text-lg font-medium mb-3 text-gray-300">Imagem do Produto</label>
                 
