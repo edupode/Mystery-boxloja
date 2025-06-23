@@ -248,7 +248,12 @@ def test_stripe_live_keys():
             "cancel_url": f"{BACKEND_URL}/cancel"
         }
         
-        response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data)
+        # Try with local API first
+        response = requests.post(f"{LOCAL_API_URL}/subscriptions/create", json=subscription_data)
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data)
         
         # With live keys, we expect a 400 error with "No such price" message
         if response.status_code == 400 and "No such price" in response.text:
