@@ -11,17 +11,17 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv('/app/frontend/.env')
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL')
-API_URL = f"{BACKEND_URL}/api"
+API_URL = f"{BACKEND_URL}"  # No need to add /api since it's already in the router prefix
 
 # For local testing
-LOCAL_API_URL = "http://localhost:8001/api"
+LOCAL_API_URL = "http://localhost:8001"  # No need to add /api since it's already in the router prefix
 
 def test_resend_status():
     """Test the Resend API status endpoint"""
     
     try:
         # Send request to the test endpoint
-        response = requests.get(f"{LOCAL_API_URL}/test/resend-status")
+        response = requests.get(f"{LOCAL_API_URL}/api/test/resend-status")
         
         # Check response
         if response.status_code == 200:
