@@ -686,6 +686,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Função está implementada e operacional com Resend API"
+      - working: true
+        agent: "testing"
+        comment: "Testado novamente com o email edupodeptptpt@gmail.com. Email de boas-vindas enviado com sucesso durante o registro de usuário em 2025-06-23 16:03:34 UTC."
 
   - task: "Sistema de emails - Email de confirmação de pedido"
     implemented: true
