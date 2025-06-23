@@ -2932,6 +2932,18 @@ const AdminCategories = () => {
     }
   };
 
+  const handleDeleteCategory = async (categoryId, categoryName) => {
+    if (window.confirm(`Tem a certeza que deseja remover a categoria "${categoryName}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await axios.delete(`${API}/admin/categories/${categoryId}`);
+        alert('Categoria removida com sucesso!');
+        loadCategories();
+      } catch (error) {
+        alert(error.response?.data?.detail || 'Erro ao remover categoria');
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
