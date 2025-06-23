@@ -72,15 +72,29 @@ def test_cart_setup():
             "quantity": 1
         }
         
+        # First get the cart to ensure it exists
+        response = requests.get(f"{API_URL}/cart/{SESSION_ID}")
+        if response.status_code != 200:
+            return log_test_result("Cart Setup", False, f"Failed to get cart: {response.text}")
+        
+        # Add product to cart
         response = requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
         if response.status_code != 200:
             return log_test_result("Cart Setup", False, f"Failed to add product to cart: {response.text}")
+        
+        # Verify cart has items
+        response = requests.get(f"{API_URL}/cart/{SESSION_ID}")
+        if response.status_code != 200:
+            return log_test_result("Cart Setup", False, f"Failed to get cart after adding product: {response.text}")
         
         cart = response.json()
         if not cart or not cart.get("items"):
             return log_test_result("Cart Setup", False, "Product not added to cart")
         
-        return log_test_result("Cart Setup", True, f"Added product {test_results['product_id']} to cart")
+        # Store cart ID
+        test_results["cart_id"] = cart["id"]
+        
+        return log_test_result("Cart Setup", True, f"Added product {test_results['product_id']} to cart {SESSION_ID}")
     except Exception as e:
         return log_test_result("Cart Setup", False, f"Exception: {str(e)}")
 
