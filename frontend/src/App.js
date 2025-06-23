@@ -211,7 +211,7 @@ const useIsMobile = () => {
 
 // Components
 const Header = () => {
-  const { user, logout, cart } = useAppContext();
+  const { user, logout, cart } = useDeviceContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
 
