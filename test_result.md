@@ -195,6 +195,24 @@ backend:
         agent: "testing"
         comment: "Chaves Stripe live testadas com sucesso. As chaves estão funcionando corretamente, retornando respostas apropriadas da API Stripe."
 
+  - task: "Correção de imagens nos produtos"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Usuário reportou problema com imagens não aparecendo quando clica no botão 'descobrir'."
+      - working: false
+        agent: "testing"
+        comment: "Identificado problema no endpoint GET /api/products/{product_id} que estava procurando imagens no campo 'images' em vez de 'image_url'. Também havia inconsistências nos campos 'category', 'stock_quantity' e 'featured'."
+      - working: true
+        agent: "testing"
+        comment: "Corrigido o endpoint GET /api/products/{product_id} para usar o campo 'image_url' em vez de 'images'. Corrigidos também os campos 'category', 'stock_quantity' e 'featured'. Todos os testes de imagens agora passam com sucesso."
+
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
     implemented: true
