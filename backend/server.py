@@ -2152,22 +2152,18 @@ async def send_discount_email_admin(
 
 @api_router.post("/admin/emails/send-birthday")
 async def send_birthday_email_admin(
-    request: BirthdayEmailRequest,
+    user_email: str,
+    user_name: str,
+    coupon_code: str,
+    discount_value: float,
     admin_user: User = Depends(get_admin_user)
 ):
-    """Send birthday email to a user
-    
-    This endpoint accepts a JSON body with the following fields:
-    - user_email: Email of the recipient
-    - user_name: Name of the recipient
-    - coupon_code: Coupon code to include in the email
-    - discount_value: Value of the discount
-    """
+    """Send birthday email to a user"""
     result = await send_birthday_email(
-        request.user_email, 
-        request.user_name, 
-        request.coupon_code, 
-        request.discount_value
+        user_email, 
+        user_name, 
+        coupon_code, 
+        discount_value
     )
     return result
 
