@@ -2388,7 +2388,7 @@ async def send_otp(request: dict, current_user: User = Depends(get_current_user)
         """
         
         try:
-            resend.emails.send({
+            resend.Emails.send({
                 "from": "noreply@mysteryboxstore.com",
                 "to": [email],
                 "subject": subject,
