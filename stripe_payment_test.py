@@ -106,6 +106,13 @@ def test_checkout_with_stripe():
     try:
         headers = {"Authorization": f"Bearer {test_results['auth_token']}"}
         
+        # Make sure we have a fresh cart with items
+        cart_item = {
+            "product_id": test_results["product_id"],
+            "quantity": 1
+        }
+        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
+        
         checkout_data = {
             "cart_id": SESSION_ID,
             "shipping_address": "Rua Teste 123, 1234-567 Lisboa",
@@ -138,6 +145,13 @@ def test_checkout_with_card():
     try:
         headers = {"Authorization": f"Bearer {test_results['auth_token']}"}
         
+        # Make sure we have a fresh cart with items
+        cart_item = {
+            "product_id": test_results["product_id"],
+            "quantity": 1
+        }
+        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
+        
         checkout_data = {
             "cart_id": SESSION_ID,
             "shipping_address": "Rua Teste 123, 1234-567 Lisboa",
@@ -166,6 +180,13 @@ def test_checkout_with_bank_transfer():
     try:
         headers = {"Authorization": f"Bearer {test_results['auth_token']}"}
         
+        # Make sure we have a fresh cart with items
+        cart_item = {
+            "product_id": test_results["product_id"],
+            "quantity": 1
+        }
+        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
+        
         checkout_data = {
             "cart_id": SESSION_ID,
             "shipping_address": "Rua Teste 123, 1234-567 Lisboa",
@@ -193,6 +214,13 @@ def test_checkout_without_birth_date():
     
     try:
         headers = {"Authorization": f"Bearer {test_results['auth_token']}"}
+        
+        # Make sure we have a fresh cart with items
+        cart_item = {
+            "product_id": test_results["product_id"],
+            "quantity": 1
+        }
+        requests.post(f"{API_URL}/cart/{SESSION_ID}/add", json=cart_item)
         
         # Check the CheckoutRequest model to confirm birth_date is not required
         checkout_data = {
