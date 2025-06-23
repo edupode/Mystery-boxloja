@@ -1391,7 +1391,7 @@ async def get_product(product_id: str):
         "id": product.get("id"),
         "name": product.get("name"),
         "description": product.get("description"),
-        "category": product.get("category_id", ""),  # Use category_id as category
+        "category": product.get("category", ""),
         "price": product.get("price", 0.0),
         "subscription_prices": product.get("subscription_prices", {
             "1_month": 0.0,
