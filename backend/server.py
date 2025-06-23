@@ -241,6 +241,7 @@ db = client[os.environ['DB_NAME']]
 # Stripe setup
 stripe_secret = os.environ['STRIPE_SECRET_KEY']
 stripe_checkout = StripeCheckout(api_key=stripe_secret)
+stripe_subscription = StripeSubscription(api_key=stripe_secret)
 
 # Google OAuth setup
 GOOGLE_CLIENT_ID = os.environ['GOOGLE_CLIENT_ID']
