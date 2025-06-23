@@ -583,16 +583,37 @@ const Products = () => {
               <div className={`${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-b from-gray-800 to-gray-900`}>
                 <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-3 text-white`}>{product.name}</h3>
                 <p className={`text-gray-300 ${isMobile ? 'text-sm' : 'text-sm'} mb-4 line-clamp-3`}>{product.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
-                    €{product.price}
-                  </span>
+                
+                <div className="mb-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
+                      €{product.price}
+                    </span>
+                    <span className="text-xs text-gray-400">avulsa</span>
+                  </div>
+                  
+                  {/* Subscription pricing hint */}
+                  {product.subscription_prices && product.subscription_prices['12_months'] && (
+                    <div className="mt-2 text-xs text-green-400">
+                      Assinatura: desde €{product.subscription_prices['12_months']}/mês
+                      <span className="text-yellow-400 ml-1">(-20% desconto!)</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between space-x-2">
+                  <Link
+                    to={`/produto/${product.id}`}
+                    className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 text-center`}
+                  >
+                    🔮 Descobrir
+                  </Link>
                   <button
                     onClick={() => handleAddToCart(product.id)}
                     data-product-id={product.id}
-                    className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+                    className={`bg-gray-700 hover:bg-gray-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg transition-all duration-300 transform hover:scale-105`}
                   >
-                    🛒 Adicionar
+                    🛒
                   </button>
                 </div>
               </div>
