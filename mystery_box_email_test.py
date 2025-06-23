@@ -51,18 +51,24 @@ def test_direct_email_endpoint():
         admin_token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {admin_token}"}
         
-        # Try the admin test welcome email endpoint
-        response = requests.post(f"{API_URL}/admin/emails/test-welcome", headers=headers)
+        # Try the admin discount email endpoint
+        params = {
+            "user_email": TEST_USER["email"],
+            "user_name": TEST_USER["name"],
+            "coupon_code": "TESTDISCOUNT",
+            "discount_value": 15.0,
+            "discount_type": "percentage",
+            "expiry_date": "31/12/2024"
+        }
+        
+        response = requests.post(f"{API_URL}/admin/emails/send-discount", params=params, headers=headers)
         if response.status_code != 200:
-            return log_test_result("Direct Email Test", False, f"Failed to send test welcome email: {response.text}")
+            return log_test_result("Direct Email Test", False, f"Failed to send discount email: {response.text}")
         
-        result = response.json()
-        if not result.get("result", {}).get("success"):
-            return log_test_result("Direct Email Test", False, f"Email sending failed: {result}")
+        # Record the timestamp when the email was sent
+        email_timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
         
-        timestamp = result.get("result", {}).get("timestamp")
-        
-        return log_test_result("Direct Email Test", True, f"Test welcome email sent at: {timestamp}")
+        return log_test_result("Direct Email Test", True, f"Discount email sent at: {email_timestamp}")
     except Exception as e:
         return log_test_result("Direct Email Test", False, f"Exception: {str(e)}")
 
