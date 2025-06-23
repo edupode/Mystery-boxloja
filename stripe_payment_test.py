@@ -251,6 +251,94 @@ def test_checkout_without_birth_date():
     except Exception as e:
         return log_test_result("Checkout without Birth Date", False, f"Exception: {str(e)}")
 
+def test_subscription_endpoints():
+    """Test subscription endpoints with Stripe live keys"""
+    if "auth_token" not in test_results:
+        test_register()
+        if "auth_token" not in test_results:
+            return log_test_result("Subscription Endpoints", False, "Failed to register test user")
+    
+    try:
+        headers = {"Authorization": f"Bearer {test_results['auth_token']}"}
+        
+        # Test create subscription endpoint
+        subscription_data = {
+            "customer_email": TEST_USER["email"],
+            "price_id": "price_1RdXXXXXXXXXXXXX",  # Invalid price ID to test error handling
+            "success_url": f"{BACKEND_URL}/success",
+            "cancel_url": f"{BACKEND_URL}/cancel",
+            "metadata": {"test": "true"}
+        }
+        
+        response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data, headers=headers)
+        
+        # We expect a 400 error with "No such price" message since we're using an invalid price ID
+        # This confirms the Stripe live keys are working
+        if response.status_code == 400 and "No such price" in response.text:
+            log_test_result("Create Subscription", True, "Stripe live keys are working - correctly rejected invalid price ID")
+        else:
+            log_test_result("Create Subscription", False, f"Expected 400 error with 'No such price' message, got: {response.status_code} - {response.text}")
+        
+        # Test customer portal endpoint with invalid customer ID
+        portal_data = {
+            "customer_id": "cus_invalid",
+            "return_url": f"{BACKEND_URL}/account"
+        }
+        
+        response = requests.post(f"{API_URL}/subscriptions/customer-portal", json=portal_data, headers=headers)
+        
+        # We expect a 400 error with "No such customer" message
+        if response.status_code == 400 and "No such customer" in response.text:
+            log_test_result("Customer Portal", True, "Stripe live keys are working - correctly rejected invalid customer ID")
+        else:
+            log_test_result("Customer Portal", False, f"Expected 400 error with 'No such customer' message, got: {response.status_code} - {response.text}")
+        
+        # Test customer subscriptions endpoint with invalid customer ID
+        response = requests.get(f"{API_URL}/subscriptions/customer/cus_invalid", headers=headers)
+        
+        # We expect a 400 error with "No such customer" message
+        if response.status_code == 400 and "No such customer" in response.text:
+            log_test_result("List Customer Subscriptions", True, "Stripe live keys are working - correctly rejected invalid customer ID")
+        else:
+            log_test_result("List Customer Subscriptions", False, f"Expected 400 error with 'No such customer' message, got: {response.status_code} - {response.text}")
+        
+        # Test subscription status endpoint with invalid session ID
+        response = requests.get(f"{API_URL}/subscriptions/status/cs_invalid", headers=headers)
+        
+        # We expect a 200 response with status "error" for invalid session ID
+        if response.status_code == 200:
+            status_data = response.json()
+            if status_data.get("status") == "error":
+                log_test_result("Subscription Status", True, "Correctly handled invalid session ID")
+            else:
+                log_test_result("Subscription Status", False, f"Expected status 'error', got: {status_data}")
+        else:
+            log_test_result("Subscription Status", False, f"Expected 200 response, got: {response.status_code} - {response.text}")
+        
+        # Test webhook endpoint
+        webhook_data = {
+            "type": "test_event",
+            "data": {"object": {"id": "test_id"}}
+        }
+        
+        response = requests.post(f"{API_URL}/subscriptions/webhook", json=webhook_data)
+        
+        # We expect a 200 response for basic webhook test
+        if response.status_code == 200:
+            log_test_result("Subscription Webhook", True, "Webhook endpoint accepted test event")
+        else:
+            log_test_result("Subscription Webhook", False, f"Expected 200 response, got: {response.status_code} - {response.text}")
+        
+        # Overall subscription endpoints test result
+        success = all(
+            test_results.get(test, {}).get("success", False) 
+            for test in ["Create Subscription", "Customer Portal", "List Customer Subscriptions", "Subscription Status", "Subscription Webhook"]
+        )
+        
+        return log_test_result("Subscription Endpoints", success, "All subscription endpoints are working with Stripe live keys" if success else "Some subscription endpoints failed")
+    except Exception as e:
+        return log_test_result("Subscription Endpoints", False, f"Exception: {str(e)}")
+
 def test_subscription_payment_methods():
     """Test subscription endpoint to verify payment method types"""
     try:
