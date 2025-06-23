@@ -750,33 +750,54 @@ async def send_order_confirmation_email(user_email: str, order: Order, products:
     </html>
     """
     
-    # Prepare order items for template
-    order_items = []
+    # Build products list HTML
+    products_html = ""
     for item in order.items:
+        # Find product in the products list
         product = next((p for p in products if p["id"] == item.product_id), None)
         if product:
-            price = item.subscription_type and product["subscription_prices"].get(item.subscription_type) or product["price"]
-            order_items.append({
-                "name": product["name"],
-                "quantity": item.quantity,
-                "total_price": f"{price * item.quantity:.2f}"
-            })
+            price = item.subscription_type and product.get("subscription_prices", {}).get(item.subscription_type) or product.get("price", 0)
+            total_price = price * item.quantity
+            
+            # Map categories to emojis
+            category_emojis = {
+                "mistery_box": "🎁",
+                "geek": "🎮",
+                "terror": "👻",
+                "pets": "🐕",
+                "lifestyle": "✨",
+                "tech": "📱",
+                "fashion": "👕",
+                "home": "🏠"
+            }
+            emoji = category_emojis.get(product.get("category", ""), "📦")
+            
+            products_html += f"""
+            <div class="product-item">
+                <div class="product-emoji">{emoji}</div>
+                <div class="product-info">
+                    <div class="product-name">{product.get("name", "Produto")}</div>
+                    <div style="color: #666; font-size: 14px;">{product.get("description", "")}</div>
+                    <div style="margin-top: 5px;">
+                        <span style="color: #666;">Quantidade: {item.quantity}</span>
+                        <span class="product-price" style="float: right;">€{total_price:.2f}</span>
+                    </div>
+                </div>
+            </div>
+            """
     
-    template = Template(html_template)
-    html_content = template.render(
-        order_id=order.id,
-        order_date=order.created_at.strftime("%d/%m/%Y %H:%M"),
-        items=order_items,
-        subtotal=f"{order.subtotal:.2f}",
-        discount_amount=f"{order.discount_amount:.2f}",
-        coupon_code=order.coupon_code,
-        vat_amount=f"{order.vat_amount:.2f}",
-        shipping_cost=f"{order.shipping_cost:.2f}",
-        total_amount=f"{order.total_amount:.2f}",
-        shipping_address=order.shipping_address,
-        phone=order.phone,
-        nif=order.nif
-    )
+    # Replace placeholders
+    html_content = html_template.replace("{{ order_id }}", order.id[:8])
+    html_content = html_content.replace("{{ order_status }}", order.order_status.title())
+    html_content = html_content.replace("{{ order_date }}", order.created_at.strftime("%d/%m/%Y às %H:%M"))
+    html_content = html_content.replace("{{ payment_method }}", order.payment_method.title())
+    html_content = html_content.replace("{{ shipping_method }}", order.shipping_method.title())
+    html_content = html_content.replace("{{ products_list }}", products_html)
+    html_content = html_content.replace("{{ total_amount }}", f"{order.total_amount:.2f}")
+    html_content = html_content.replace("{{ customer_name }}", order.customer_name)
+    html_content = html_content.replace("{{ customer_address }}", order.customer_address)
+    html_content = html_content.replace("{{ customer_postal_code }}", order.customer_postal_code)
+    html_content = html_content.replace("{{ customer_city }}", order.customer_city)
     
     return await send_email(
         to_email=user_email,
