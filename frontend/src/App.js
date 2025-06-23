@@ -3093,7 +3093,7 @@ const AdminEmails = () => {
     expiry_date: ''
   });
   const [sending, setSending] = useState(false);
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -3347,7 +3347,7 @@ const AdminPromotions = () => {
     valid_from: '',
     valid_until: ''
   });
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -3653,7 +3653,7 @@ const AdminPromotions = () => {
 const LiveChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNewTicket, setIsNewTicket] = useState(false);
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
 
   if (!user) return null;
 
@@ -3698,7 +3698,7 @@ const NewChatForm = ({ onSubmit, onClose }) => {
     name: '',
     reason: ''
   });
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -3857,7 +3857,7 @@ const AdminChatDashboard = () => {
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(null);
   const [newTicketSound, setNewTicketSound] = useState(null);
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
