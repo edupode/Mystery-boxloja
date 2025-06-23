@@ -195,7 +195,7 @@ backend:
         agent: "testing"
         comment: "Chaves Stripe live testadas com sucesso. As chaves estão funcionando corretamente, retornando respostas apropriadas da API Stripe."
 
-  - task: "Correção de imagens nos produtos"
+  - task: "Validação de Pagamento Stripe"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -205,13 +205,10 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Usuário reportou problema com imagens não aparecendo quando clica no botão 'descobrir'."
-      - working: false
-        agent: "testing"
-        comment: "Identificado problema no endpoint GET /api/products/{product_id} que estava procurando imagens no campo 'images' em vez de 'image_url'. Também havia inconsistências nos campos 'category', 'stock_quantity' e 'featured'."
+        comment: "Implementada validação para aceitar apenas payment_method='stripe' no endpoint POST /api/checkout"
       - working: true
         agent: "testing"
-        comment: "Corrigido o endpoint GET /api/products/{product_id} para usar o campo 'image_url' em vez de 'images'. Corrigidos também os campos 'category', 'stock_quantity' e 'featured'. Todos os testes de imagens agora passam com sucesso."
+        comment: "Validação testada com sucesso. O endpoint POST /api/checkout aceita apenas payment_method='stripe' e rejeita 'card' e 'bank_transfer' com erro 400 e mensagem 'Apenas pagamento via Stripe é suportado'."
 
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
