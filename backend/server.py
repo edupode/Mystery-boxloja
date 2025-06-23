@@ -51,6 +51,135 @@ class CheckoutStatusResponse(BaseModel):
     amount_total: Optional[float] = None
     metadata: Dict[str, Any] = {}
 
+# Stripe subscription models
+class SubscriptionRequest(BaseModel):
+    customer_id: Optional[str] = None
+    customer_email: str
+    price_id: str
+    success_url: str
+    cancel_url: str
+    metadata: Dict[str, str] = {}
+
+class SubscriptionResponse(BaseModel):
+    session_id: str
+    url: str
+    customer_id: str
+
+class SubscriptionStatusResponse(BaseModel):
+    subscription_id: Optional[str] = None
+    status: str
+    current_period_start: Optional[int] = None
+    current_period_end: Optional[int] = None
+    customer_id: Optional[str] = None
+
+class CustomerPortalRequest(BaseModel):
+    customer_id: str
+    return_url: str
+
+class CustomerPortalResponse(BaseModel):
+    url: str
+
+# Stripe subscription implementation
+class StripeSubscription:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        stripe.api_key = api_key
+
+    async def create_subscription_checkout(self, request: SubscriptionRequest) -> SubscriptionResponse:
+        try:
+            # Create or retrieve customer
+            if request.customer_id:
+                customer = stripe.Customer.retrieve(request.customer_id)
+            else:
+                customer = stripe.Customer.create(
+                    email=request.customer_email,
+                    metadata={"source": "mystery_box_subscription"}
+                )
+
+            # Create subscription checkout session
+            session = stripe.checkout.Session.create(
+                customer=customer.id,
+                payment_method_types=["card"],
+                line_items=[{
+                    "price": request.price_id,
+                    "quantity": 1,
+                }],
+                mode="subscription",
+                success_url=request.success_url,
+                cancel_url=request.cancel_url,
+                metadata=request.metadata
+            )
+            
+            return SubscriptionResponse(
+                session_id=session.id,
+                url=session.url,
+                customer_id=customer.id
+            )
+        except Exception as e:
+            print(f"Error creating subscription checkout: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
+
+    async def get_subscription_status(self, session_id: str) -> SubscriptionStatusResponse:
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            
+            if session.subscription:
+                subscription = stripe.Subscription.retrieve(session.subscription)
+                return SubscriptionStatusResponse(
+                    subscription_id=subscription.id,
+                    status=subscription.status,
+                    current_period_start=subscription.current_period_start,
+                    current_period_end=subscription.current_period_end,
+                    customer_id=subscription.customer
+                )
+            else:
+                return SubscriptionStatusResponse(
+                    status="incomplete" if session.payment_status == "unpaid" else "processing"
+                )
+        except Exception as e:
+            print(f"Error retrieving subscription status: {str(e)}")
+            return SubscriptionStatusResponse(status="error")
+
+    async def create_customer_portal(self, request: CustomerPortalRequest) -> CustomerPortalResponse:
+        try:
+            portal_session = stripe.billing_portal.Session.create(
+                customer=request.customer_id,
+                return_url=request.return_url
+            )
+            
+            return CustomerPortalResponse(url=portal_session.url)
+        except Exception as e:
+            print(f"Error creating customer portal: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
+
+    async def list_customer_subscriptions(self, customer_id: str):
+        try:
+            subscriptions = stripe.Subscription.list(
+                customer=customer_id,
+                status="all"
+            )
+            
+            return {
+                "subscriptions": [
+                    {
+                        "id": sub.id,
+                        "status": sub.status,
+                        "current_period_start": sub.current_period_start,
+                        "current_period_end": sub.current_period_end,
+                        "items": [
+                            {
+                                "price_id": item.price.id,
+                                "product_name": stripe.Product.retrieve(item.price.product).name,
+                                "quantity": item.quantity
+                            } for item in sub.items.data
+                        ]
+                    } for sub in subscriptions.data
+                ]
+            }
+        except Exception as e:
+            print(f"Error listing customer subscriptions: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
+
 # Stripe checkout implementation
 class StripeCheckout:
     def __init__(self, api_key: str):
