@@ -2080,7 +2080,7 @@ const AdminProducts = () => {
       "12_months": ''
     }
   });
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
