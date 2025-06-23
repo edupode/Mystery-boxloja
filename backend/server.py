@@ -1399,7 +1399,7 @@ async def get_product(product_id: str):
             "6_months": 0.0,
             "12_months": 0.0
         }),
-        "image_url": product.get("images", [""])[0] if product.get("images") else "",
+        "image_url": product.get("image_url", ""),
         "is_active": product.get("is_active", True),
         "stock_quantity": product.get("stock", 100),
         "featured": product.get("is_featured", False),
