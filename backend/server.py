@@ -1584,6 +1584,7 @@ async def create_checkout(checkout_data: CheckoutRequest, current_user: User = D
 
     # Create order
     order = Order(
+        user_id=current_user.id,  # Set user_id from authenticated user
         session_id=cart.session_id,
         items=cart.items,
         subtotal=subtotal,
