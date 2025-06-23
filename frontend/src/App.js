@@ -2557,7 +2557,7 @@ const AdminCoupons = () => {
     valid_from: '',
     valid_until: ''
   });
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
