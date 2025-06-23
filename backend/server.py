@@ -2549,7 +2549,7 @@ async def test_resend_status():
         # Try to send a test email to a test address
         test_email = "test@example.com"
         params = {
-            "from": "Mystery Box Store <noreply@mysteryboxstore.com>",
+            "from": "Mystery Box Store <noreply@mysteryboxes.pt>",
             "to": [test_email],
             "subject": "Test Email",
             "html": "<p>This is a test email.</p>"
@@ -2735,7 +2735,7 @@ async def test_resend_status():
         # Try to send a test email to a test address
         test_email = "test@example.com"
         params = {
-            "from": "Mystery Box Store <noreply@mysteryboxstore.com>",
+            "from": "Mystery Box Store <noreply@mysteryboxes.pt>",
             "to": [test_email],
             "subject": "Test Email",
             "html": "<p>This is a test email.</p>"
