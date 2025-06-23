@@ -2178,6 +2178,12 @@ const AdminProducts = () => {
         ...formData,
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity),
+        subscription_prices: {
+          "1_month": parseFloat(formData.subscription_prices["1_month"]) || 0,
+          "3_months": parseFloat(formData.subscription_prices["3_months"]) || 0,
+          "6_months": parseFloat(formData.subscription_prices["6_months"]) || 0,
+          "12_months": parseFloat(formData.subscription_prices["12_months"]) || 0
+        },
         // Use base64 image if uploaded, otherwise use URL
         image_url: formData.image_base64 || formData.image_url
       };
