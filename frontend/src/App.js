@@ -1958,6 +1958,8 @@ const AdminDashboard = () => {
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
@@ -1989,6 +1991,17 @@ const AdminOrders = () => {
     } catch (error) {
       console.error('Error updating order status:', error);
       alert('Erro ao atualizar status: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    }
+  };
+
+  const handleViewOrderDetails = async (orderId) => {
+    try {
+      const response = await axios.get(`${API}/admin/orders/${orderId}`);
+      setSelectedOrder(response.data);
+      setShowOrderDetails(true);
+    } catch (error) {
+      console.error('Error loading order details:', error);
+      alert('Erro ao carregar detalhes do pedido');
     }
   };
 
