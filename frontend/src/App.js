@@ -1118,7 +1118,6 @@ const Checkout = () => {
         cart_id: sessionId,
         shipping_address: `${formData.street}, ${formData.postalCode} ${formData.city}`,
         phone: formData.phone,
-        birth_date: formData.birthDate,
         nif: formData.nif || null,
         payment_method: formData.paymentMethod,
         shipping_method: formData.shippingMethod,
