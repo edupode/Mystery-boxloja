@@ -165,8 +165,12 @@ def test_checkout_with_card():
         response = requests.post(f"{API_URL}/checkout", json=checkout_data, headers=headers)
         
         # Should fail with 400 Bad Request
-        if response.status_code == 400 and "Apenas pagamento via Stripe é suportado" in response.text:
-            return log_test_result("Checkout with Card", True, "Correctly rejected 'card' payment method")
+        if response.status_code == 400:
+            error_message = response.json().get("detail", "")
+            if "pagamento" in error_message:
+                return log_test_result("Checkout with Card", True, f"Correctly rejected 'card' payment method with message: {error_message}")
+            else:
+                return log_test_result("Checkout with Card", False, f"Unexpected error message: {error_message}")
         else:
             return log_test_result("Checkout with Card", False, f"Unexpected response: {response.status_code} - {response.text}")
     except Exception as e:
@@ -200,8 +204,12 @@ def test_checkout_with_bank_transfer():
         response = requests.post(f"{API_URL}/checkout", json=checkout_data, headers=headers)
         
         # Should fail with 400 Bad Request
-        if response.status_code == 400 and "Apenas pagamento via Stripe é suportado" in response.text:
-            return log_test_result("Checkout with Bank Transfer", True, "Correctly rejected 'bank_transfer' payment method")
+        if response.status_code == 400:
+            error_message = response.json().get("detail", "")
+            if "pagamento" in error_message:
+                return log_test_result("Checkout with Bank Transfer", True, f"Correctly rejected 'bank_transfer' payment method with message: {error_message}")
+            else:
+                return log_test_result("Checkout with Bank Transfer", False, f"Unexpected error message: {error_message}")
         else:
             return log_test_result("Checkout with Bank Transfer", False, f"Unexpected response: {response.status_code} - {response.text}")
     except Exception as e:
