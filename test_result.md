@@ -774,20 +774,50 @@ backend:
         agent: "testing"
         comment: "Função está implementada e operacional com Resend API"
 
-  - task: "Funcionalidades admin - Envio de emails"
+  - task: "Admin Email Endpoints - Send Discount Email"
     implemented: true
     working: true
     file: "/app/backend/server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implementados endpoints para envio de emails de desconto e aniversário"
+        comment: "Implementado endpoint POST /api/admin/emails/send-discount para enviar email de desconto via admin"
       - working: true
         agent: "testing"
-        comment: "Endpoints funcionam corretamente para envio de emails admin"
+        comment: "Endpoint testado com sucesso usando os dados fornecidos pelo usuário (email: edupodeptptpt@gmail.com, nome: Eduardo Teste, cupão: ADMIN10, desconto: 15%, expiração: 2025-07-01). Email enviado com sucesso em 2025-06-23 18:23:37 UTC."
+
+  - task: "Admin Email Endpoints - Send Birthday Email"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint POST /api/admin/emails/send-birthday para enviar email de aniversário via admin"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint testado com sucesso usando os dados fornecidos pelo usuário (email: edupodeptptpt@gmail.com, nome: Eduardo Teste, cupão: ADMIN10, desconto: 15%). Email enviado com sucesso em 2025-06-23 18:23:37 UTC."
+
+  - task: "Admin Email Endpoints - Test Welcome Email"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint POST /api/admin/emails/test-welcome para testar o envio de email de boas-vindas"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint testado com sucesso. Email de teste enviado com sucesso para eduardocorreia3344@gmail.com em 2025-06-23 18:23:38 UTC."
 
   - task: "Funcionalidades admin - Dashboard"
     implemented: true
