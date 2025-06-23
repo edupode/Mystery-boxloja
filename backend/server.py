@@ -2496,6 +2496,81 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Test email endpoint
+@api_router.post("/test/send-email")
+async def test_send_email(request: dict):
+    """Test endpoint to send emails through Resend"""
+    try:
+        to_email = request.get("to_email")
+        subject = request.get("subject", "Teste de Email - Mystery Box Store")
+        custom_message = request.get("message", "Este é um email de teste do sistema Mystery Box Store.")
+        
+        if not to_email:
+            raise HTTPException(status_code=400, detail="Email de destino é obrigatório")
+        
+        # Create HTML email content
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{subject}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #4f46e5; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+                .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 14px; }}
+                .test-info {{ background-color: #e0e7ff; padding: 15px; border-radius: 6px; margin: 20px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎁 Mystery Box Store</h1>
+                    <p>Teste de Sistema de Emails</p>
+                </div>
+                <div class="content">
+                    <h2>Email de Teste Enviado com Sucesso! ✅</h2>
+                    <p>{custom_message}</p>
+                    
+                    <div class="test-info">
+                        <h3>Informações do Teste:</h3>
+                        <ul>
+                            <li><strong>Serviço:</strong> Resend API</li>
+                            <li><strong>Data/Hora:</strong> {datetime.utcnow().strftime('%d/%m/%Y às %H:%M:%S')} UTC</li>
+                            <li><strong>Email de Destino:</strong> {to_email}</li>
+                            <li><strong>Status:</strong> Enviado com sucesso</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Se você recebeu este email, significa que o sistema de emails da Mystery Box Store está funcionando corretamente através do Resend! 🎉</p>
+                    
+                    <p>Este é um email automatizado de teste. Por favor, não responda a este email.</p>
+                </div>
+                <div class="footer">
+                    <p>© 2024 Mystery Box Store - Sistema de Teste de Emails</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Send email using existing send_email function
+        result = await send_email(to_email, subject, html_content)
+        
+        return {
+            "success": True,
+            "message": f"Email de teste enviado com sucesso para {to_email}",
+            "timestamp": datetime.utcnow().isoformat(),
+            "email_result": result
+        }
+        
+    except Exception as e:
+        logger.error(f"Test email sending error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro ao enviar email de teste: {str(e)}")
+
 # Health check endpoint for Railway
 @app.get("/api/health")
 async def health_check():
