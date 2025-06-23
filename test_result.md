@@ -105,6 +105,21 @@
 user_problem_statement: "FASE 4 - IMPLEMENTAÇÃO SUBSCRIPTIONS RECORRENTES: Implementar sistema completo de subscriptions recorrentes do Stripe com endpoints: POST /api/subscriptions/create, GET /api/subscriptions/status/{session_id}, POST /api/subscriptions/customer-portal, GET /api/subscriptions/customer/{customer_id}, POST /api/subscriptions/webhook. Melhorar sistema de emails com templates bonitos e testar OTP. Remover data de nascimento do checkout e adicionar ao perfil."
 
 backend:
+  - task: "Subscription Pricing Calculation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementada classe SubscriptionPricing para calcular preços de subscription com descontos"
+      - working: true
+        agent: "testing"
+        comment: "Testado endpoint GET /api/subscriptions/pricing/{subscription_type} para todos os tipos de subscription (monthly_3, monthly_6, monthly_12). Todos os cálculos de desconto estão corretos: 10% para 3 meses, 15% para 6 meses e 20% para 12 meses."
+
   - task: "Subscription Endpoints - Criar checkout de subscription"
     implemented: true
     working: true
@@ -119,6 +134,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint testado com sucesso. Retorna erro 400 com mensagem 'No such price' quando testado com price_id inválido, o que é o comportamento esperado com as chaves Stripe live."
+      - working: true
+        agent: "testing"
+        comment: "Endpoint retestado com o novo formato de API (subscription_type e box_price em vez de price_id). Cria sessão de checkout com sucesso e retorna session_id e URL válidos."
 
   - task: "Subscription Endpoints - Status de subscription"
     implemented: true
@@ -134,6 +152,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint testado com sucesso. Retorna status 'error' quando testado com session_id inválido, o que é o comportamento esperado."
+      - working: true
+        agent: "testing"
+        comment: "Endpoint retestado com session_id válido. Retorna corretamente o status da subscription (incomplete para sessões recém-criadas)."
 
   - task: "Subscription Endpoints - Customer Portal"
     implemented: true
