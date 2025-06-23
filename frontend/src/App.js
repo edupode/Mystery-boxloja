@@ -5103,6 +5103,7 @@ const App = () => {
             <Route path="/success" element={<Success />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/coupons" element={<AdminCoupons />} />
