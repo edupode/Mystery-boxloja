@@ -4475,7 +4475,7 @@ const UserProfile = () => {
 
 // Subscriptions Component
 const Subscriptions = () => {
-  const { isMobile } = useContext(AppContext);
+  const { isMobile } = useContext(DeviceContext);
   const { user } = useContext(AuthContext);
   const [subscriptions, setSubscriptions] = useState([]);
   const [pricing, setPricing] = useState({});
