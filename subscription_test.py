@@ -16,6 +16,9 @@ load_dotenv('/app/frontend/.env')
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL')
 API_URL = f"{BACKEND_URL}/api"
 
+# For local testing
+LOCAL_API_URL = "http://localhost:8001/api"
+
 # Test data
 TEST_USER = {
     "email": f"test_user_{uuid.uuid4()}@example.com",
