@@ -4332,6 +4332,34 @@ const AdminChatDashboard = () => {
           </h1>
         </div>
 
+        {/* Chat Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-yellow-900/30 border border-yellow-500/30 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-400">
+              {sessions.filter(s => s.status === 'pending').length}
+            </div>
+            <div className="text-sm text-yellow-300">Pendentes</div>
+          </div>
+          <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-green-400">
+              {sessions.filter(s => s.status === 'active').length}
+            </div>
+            <div className="text-sm text-green-300">Ativos</div>
+          </div>
+          <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-red-400">
+              {sessions.filter(s => s.status === 'rejected').length}
+            </div>
+            <div className="text-sm text-red-300">Rejeitados</div>
+          </div>
+          <div className="bg-gray-900/30 border border-gray-500/30 rounded-lg p-4 text-center">
+            <div className="text-2xl font-bold text-gray-400">
+              {sessions.filter(s => s.status === 'closed' || s.status === 'auto_closed').length}
+            </div>
+            <div className="text-sm text-gray-300">Fechados</div>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Sessions List */}
           <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
