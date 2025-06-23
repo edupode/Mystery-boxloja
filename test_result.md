@@ -1112,12 +1112,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "FASE 1 - Correção checkout - Melhorar processo de finalização"
-    - "FASE 1 - Correção admin - Melhorar atualizações de estado de encomendas"
-    - "FASE 1 - Correção chat admin - Melhorar sistema de chat com aprovação/rejeição"
-    - "FASE 1 - Correção upload de fotos - Melhorar sistema de upload"
-    - "Verificação de cupões corrigidos"
-    - "Sistema de carrinho com cupões"
+    - "Subscription Endpoints - Criar checkout de subscription"
+    - "Subscription Endpoints - Status de subscription"
+    - "Subscription Endpoints - Customer Portal"
+    - "Subscription Endpoints - Listar subscriptions"
+    - "Subscription Endpoints - Webhook handler"
+    - "Stripe Live Keys - Atualização"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
