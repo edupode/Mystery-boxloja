@@ -1280,6 +1280,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint PUT /api/admin/chat/sessions/{session_id}/assign testado com sucesso, atribui a sessão ao admin"
+      - working: true
+        agent: "testing"
+        comment: "Retestado o endpoint PUT /api/admin/chat/sessions/{session_id}/assign. Confirmado que a mensagem automática 'Olá [nome], estou a verificar a mensagem e já darei apoio.' é enviada corretamente e a sessão é atribuída ao admin."
 
 metadata:
   created_by: "main_agent"
