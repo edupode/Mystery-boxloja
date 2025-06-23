@@ -1163,6 +1163,7 @@ test_plan:
     - "Subscription Endpoints - Listar subscriptions"
     - "Subscription Endpoints - Webhook handler"
     - "Stripe Live Keys - Atualização"
+    - "Correção de imagens nos produtos"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
