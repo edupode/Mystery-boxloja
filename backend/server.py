@@ -2557,6 +2557,15 @@ async def reject_chat_session(session_id: str, admin_user: User = Depends(get_ad
     )
     return {"message": "Sessão rejeitada"}
 
+@api_router.put("/admin/chat/sessions/{session_id}/close")
+async def close_chat_session(session_id: str, admin_user: User = Depends(get_admin_user)):
+    """Close an active chat session"""
+    await db.chat_sessions.update_one(
+        {"id": session_id},
+        {"$set": {"status": "closed", "updated_at": datetime.utcnow()}}
+    )
+    return {"message": "Sessão fechada"}
+
 # OTP and password change endpoints
 @api_router.post("/auth/send-otp")
 async def send_otp(request: dict, current_user: User = Depends(get_current_user)):
