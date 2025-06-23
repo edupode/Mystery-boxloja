@@ -1627,9 +1627,9 @@ async def create_checkout(checkout_data: CheckoutRequest, current_user: User = D
         shipping_method=checkout_data.shipping_method
     )
 
-    # Only support Stripe payment (card, Klarna, etc.)
-    if checkout_data.payment_method != "card":
-        raise HTTPException(status_code=400, detail="Apenas pagamento com cartão é suportado")
+    # Only support Stripe payment (card, Klarna, Multibanco, etc.)
+    if checkout_data.payment_method != "stripe":
+        raise HTTPException(status_code=400, detail="Apenas pagamento via Stripe é suportado")
     
     # Create Stripe checkout session
     success_url = f"{checkout_data.origin_url}/success?session_id={{CHECKOUT_SESSION_ID}}"
