@@ -248,9 +248,6 @@ const Header = () => {
               <Link to="/produtos" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
                 📦 Produtos
               </Link>
-              <Link to="/assinaturas" className="hover:text-purple-300 transition-colors duration-300 flex items-center">
-                🎯 Assinaturas
-              </Link>
               {user?.is_admin && (
                 <Link to="/admin" className="hover:text-yellow-300 transition-colors duration-300 flex items-center">
                   ⚙️ Admin
