@@ -48,7 +48,8 @@ def test_create_subscription():
         # Create a subscription checkout session
         subscription_data = {
             "customer_email": TEST_CUSTOMER_EMAIL,
-            "price_id": MOCK_PRICE_ID,
+            "subscription_type": "monthly_3",
+            "box_price": 29.99,
             "success_url": f"{BACKEND_URL}/success",
             "cancel_url": f"{BACKEND_URL}/cancel",
             "metadata": {
