@@ -8,17 +8,17 @@ const API = `${BACKEND_URL}/api`;
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 // Context for cart and user
-const AppContext = createContext();
+const DeviceContext = createContext();
 
-const useAppContext = () => {
-  const context = useContext(AppContext);
+const useDeviceContext = () => {
+  const context = useContext(DeviceContext);
   if (!context) {
-    throw new Error('useAppContext must be used within AppProvider');
+    throw new Error('useDeviceContext must be used within DeviceProvider');
   }
   return context;
 };
 
-const AppProvider = ({ children }) => {
+const DeviceProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState({ items: [] });
   const [sessionId] = useState(() => {
