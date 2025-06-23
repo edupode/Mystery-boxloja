@@ -122,15 +122,18 @@ backend:
 
   - task: "Subscription Endpoints - Status de subscription"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint GET /api/subscriptions/status/{session_id} para verificar status de subscription"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint testado com sucesso. Retorna status 'error' quando testado com session_id inválido, o que é o comportamento esperado."
 
   - task: "Subscription Endpoints - Customer Portal"
     implemented: true
