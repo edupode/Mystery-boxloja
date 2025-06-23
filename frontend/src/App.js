@@ -4423,12 +4423,20 @@ const AdminChatDashboard = () => {
                           </button>
                         </div>
                       ) : session.status === 'active' && session.agent_id ? (
-                        <button
-                          onClick={() => setSelectedSession(session)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm ml-4 transition-colors duration-300"
-                        >
-                          💬 Abrir Chat
-                        </button>
+                        <div className="flex space-x-2 ml-4">
+                          <button
+                            onClick={() => setSelectedSession(session)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                          >
+                            💬 Abrir Chat
+                          </button>
+                          <button
+                            onClick={() => closeSession(session.id)}
+                            className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition-colors duration-300"
+                          >
+                            🔒 Fechar
+                          </button>
+                        </div>
                       ) : null}
                     </div>
                   </div>
