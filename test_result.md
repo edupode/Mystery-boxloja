@@ -722,6 +722,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Função está implementada e operacional com Resend API"
+      - working: true
+        agent: "testing"
+        comment: "Testado novamente com o email edupodeptptpt@gmail.com. Email de desconto enviado com sucesso via endpoint admin em 2025-06-23 16:03:30 UTC."
 
   - task: "Sistema de emails - Email de aniversário"
     implemented: true
