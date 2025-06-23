@@ -1394,7 +1394,6 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
             "category": product.get("category", ""),
             "price": product.get("price", 0.0),
             "subscription_prices": product.get("subscription_prices", {
-                "1_month": 0.0,
                 "3_months": 0.0,
                 "6_months": 0.0,
                 "12_months": 0.0
