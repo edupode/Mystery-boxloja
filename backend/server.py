@@ -1058,12 +1058,7 @@ SAMPLE_PRODUCTS = [
         "description": "Uma caixa recheada de produtos geek: camisetas temáticas, canecas de filmes/séries, gadgets tecnológicos e muito mais! Perfeito para os amantes da cultura pop.",
         "category": "geek",
         "price": 29.99,
-        "subscription_prices": {
-            "1_month": 29.99,
-            "3_months": 26.99,
-            "6_months": 24.99,
-            "12_months": 22.99
-        },
+        "subscription_prices": calculate_subscription_prices(29.99),
         "image_url": "https://images.unsplash.com/photo-1580234811497-9df7fd2f357e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxnYW1pbmd8ZW58MHx8fGJsdWV8MTc1MDU5NzA1OXww&ixlib=rb-4.1.0&q=85",
         "images": [
             "https://images.pexels.com/photos/12304526/pexels-photo-12304526.jpeg",
@@ -1077,12 +1072,7 @@ SAMPLE_PRODUCTS = [
         "description": "Para os amantes do terror: produtos de filmes clássicos, livros de horror, decorações assombradas e muito mais! Prepare-se para ser surpreendido.",
         "category": "terror",
         "price": 34.99,
-        "subscription_prices": {
-            "1_month": 34.99,
-            "3_months": 31.99,
-            "6_months": 29.99,
-            "12_months": 27.99
-        },
+        "subscription_prices": calculate_subscription_prices(34.99),
         "image_url": "https://images.unsplash.com/photo-1633555690973-b736f84f3c1b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxob3Jyb3J8ZW58MHx8fHwxNzUwNTk5MzA0fDA&ixlib=rb-4.1.0&q=85",
         "images": [
             "https://images.pexels.com/photos/6868409/pexels-photo-6868409.jpeg",
@@ -1096,12 +1086,7 @@ SAMPLE_PRODUCTS = [
         "description": "Tudo para o seu melhor amigo: brinquedos, petiscos, acessórios e produtos de cuidado para cães e gatos! Mime o seu pet.",
         "category": "pets",
         "price": 24.99,
-        "subscription_prices": {
-            "1_month": 24.99,
-            "3_months": 22.99,
-            "6_months": 21.99,
-            "12_months": 19.99
-        },
+        "subscription_prices": calculate_subscription_prices(24.99),
         "image_url": "https://images.pexels.com/photos/1739093/pexels-photo-1739093.jpeg",
         "featured": True
     },
@@ -1110,12 +1095,7 @@ SAMPLE_PRODUCTS = [
         "description": "Magia em cada caixa: varinhas, cachecóis das casas, canecas de Hogwarts e produtos oficiais do mundo bruxo! Accio mystery box!",
         "category": "harry_potter",
         "price": 39.99,
-        "subscription_prices": {
-            "1_month": 39.99,
-            "3_months": 36.99,
-            "6_months": 34.99,
-            "12_months": 32.99
-        },
+        "subscription_prices": calculate_subscription_prices(39.99),
         "image_url": "https://images.unsplash.com/photo-1647221597996-54f3d0f73809?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxteXN0ZXJ5JTIwYm94fGVufDB8fHxibHVlfDE3NTA1OTkyNTR8MA&ixlib=rb-4.1.0&q=85"
     },
     {
@@ -1123,12 +1103,7 @@ SAMPLE_PRODUCTS = [
         "description": "Heróis da Marvel: camisetas oficiais, Funko Pops, canecas dos Vingadores e produtos licenciados! Assemble your collection!",
         "category": "marvel",
         "price": 42.99,
-        "subscription_prices": {
-            "1_month": 42.99,
-            "3_months": 39.99,
-            "6_months": 37.99,
-            "12_months": 35.99
-        },
+        "subscription_prices": calculate_subscription_prices(42.99),
         "image_url": "https://images.unsplash.com/photo-1635404617144-8e262a622e41?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwyfHxteXN0ZXJ5JTIwYm94fGVufDB8fHxibHVlfDE3NTA1OTkyNTR8MA&ixlib=rb-4.1.0&q=85"
     },
     {
@@ -1136,12 +1111,7 @@ SAMPLE_PRODUCTS = [
         "description": "Para os amantes da leitura: livros selecionados, marcadores artesanais, cadernos e acessórios literários! Alimente sua mente.",
         "category": "livros",
         "price": 27.99,
-        "subscription_prices": {
-            "1_month": 27.99,
-            "3_months": 25.99,
-            "6_months": 23.99,
-            "12_months": 21.99
-        },
+        "subscription_prices": calculate_subscription_prices(27.99),
         "image_url": "https://images.unsplash.com/photo-1604866830893-c13cafa515d5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxib29rc3xlbnwwfHx8fDE3NTA1OTkzMTZ8MA&ixlib=rb-4.1.0&q=85"
     },
     {
@@ -1149,12 +1119,7 @@ SAMPLE_PRODUCTS = [
         "description": "Produtos de bem-estar e relaxamento: velas aromáticas, óleos essenciais, produtos spa, máscaras faciais e muito mais! Cuide de si mesmo.",
         "category": "auto_cuidado",
         "price": 32.99,
-        "subscription_prices": {
-            "1_month": 32.99,
-            "3_months": 29.99,
-            "6_months": 27.99,
-            "12_months": 25.99
-        },
+        "subscription_prices": calculate_subscription_prices(32.99),
         "image_url": "https://images.pexels.com/photos/289586/pexels-photo-289586.jpeg"
     },
     {
@@ -1162,12 +1127,7 @@ SAMPLE_PRODUCTS = [
         "description": "Produtos do adorável alienígena azul: pelúcias, acessórios, produtos oficiais Disney e muito mais! Ohana significa família.",
         "category": "stitch",
         "price": 36.99,
-        "subscription_prices": {
-            "1_month": 36.99,
-            "3_months": 33.99,
-            "6_months": 31.99,
-            "12_months": 29.99
-        },
+        "subscription_prices": calculate_subscription_prices(36.99),
         "image_url": "https://images.unsplash.com/photo-1504370164829-8c6ef0c41d06?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxnYW1pbmd8ZW58MHx8fGJsdWV8MTc1MDU5NzA1OXww&ixlib=rb-4.1.0&q=85"
     }
 ]
