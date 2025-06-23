@@ -2297,6 +2297,28 @@ async def create_category(category_data: CategoryCreate, admin_user: User = Depe
     await db.categories.insert_one(category.dict())
     return category
 
+@api_router.delete("/admin/categories/{category_id}")
+async def delete_category(category_id: str, admin_user: User = Depends(get_admin_user)):
+    # Check if category exists
+    category = await db.categories.find_one({"id": category_id})
+    if not category:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    
+    # Check if there are products using this category
+    products_using_category = await db.products.find({"category": category_id}).to_list(10)
+    if products_using_category:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Não é possível remover a categoria. Existem {len(products_using_category)} produtos usando esta categoria."
+        )
+    
+    # Delete the category
+    result = await db.categories.delete_one({"id": category_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Categoria não encontrada")
+    
+    return {"message": "Categoria removida com sucesso"}
+
 # Chat System Endpoints
 @api_router.post("/chat/sessions")
 async def create_chat_session(session_data: ChatSessionCreate, current_user: User = Depends(get_current_user)):
