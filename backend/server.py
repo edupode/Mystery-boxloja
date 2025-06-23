@@ -2470,10 +2470,29 @@ async def get_all_chat_sessions(admin_user: User = Depends(get_admin_user)):
 
 @api_router.put("/admin/chat/sessions/{session_id}/assign")
 async def assign_chat_session(session_id: str, admin_user: User = Depends(get_admin_user)):
+    # Get session and user info
+    session = await db.chat_sessions.find_one({"id": session_id})
+    if not session:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    
+    user = await db.users.find_one({"id": session["user_id"]})
+    user_name = user["name"] if user else "usuário"
+    
+    # Update session status
     await db.chat_sessions.update_one(
         {"id": session_id},
         {"$set": {"agent_id": admin_user.id, "status": "active", "updated_at": datetime.utcnow()}}
     )
+    
+    # Send automatic welcome message
+    welcome_message = ChatMessage(
+        chat_session_id=session_id,
+        sender_id=admin_user.id,
+        sender_type="agent",
+        message=f"Olá {user_name}, estou a verificar a mensagem e já darei apoio."
+    )
+    await db.chat_messages.insert_one(welcome_message.dict())
+    
     return {"message": "Sessão atribuída"}
 
 @api_router.put("/admin/chat/sessions/{session_id}/reject")
