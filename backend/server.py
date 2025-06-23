@@ -550,6 +550,11 @@ def validate_nif(nif: str) -> bool:
 async def send_email(to_email: str, subject: str, html_content: str, text_content: Optional[str] = None):
     """Send email using Resend"""
     try:
+        # Log the email sending attempt with timestamp
+        from datetime import datetime
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        logging.info(f"[{timestamp}] Attempting to send email to {to_email} with subject: {subject}")
+        
         params = {
             "from": "Mystery Box Store <noreply@mysteryboxes.pt>",
             "to": [to_email],
@@ -561,10 +566,14 @@ async def send_email(to_email: str, subject: str, html_content: str, text_conten
             params["text"] = text_content
         
         response = resend.Emails.send(params)
-        return {"success": True, "message_id": response.get("id")}
+        success_timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        logging.info(f"[{success_timestamp}] Email sent successfully to {to_email}. Message ID: {response.get('id')}")
+        
+        return {"success": True, "message_id": response.get("id"), "timestamp": success_timestamp}
     except Exception as e:
-        logging.error(f"Error sending email: {e}")
-        return {"success": False, "error": str(e)}
+        error_timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        logging.error(f"[{error_timestamp}] Error sending email to {to_email}: {e}")
+        return {"success": False, "error": str(e), "timestamp": error_timestamp}
 
 async def send_welcome_email(user_email: str, user_name: str):
     """Send welcome email to new users"""
