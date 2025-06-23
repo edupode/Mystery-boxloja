@@ -1524,7 +1524,7 @@ const AdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordModalUser, setPasswordModalUser] = useState(null);
   const [newPassword, setNewPassword] = useState('');
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
