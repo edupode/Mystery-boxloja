@@ -2497,13 +2497,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Test email endpoint
+class TestEmailRequest(BaseModel):
+    to_email: str
+    subject: str = "Teste de Email - Mystery Box Store"
+    message: str = "Este é um email de teste do sistema Mystery Box Store."
+
 @api_router.post("/test/send-email")
-async def test_send_email(request: dict):
+async def test_send_email(request: TestEmailRequest):
     """Test endpoint to send emails through Resend"""
     try:
-        to_email = request.get("to_email")
-        subject = request.get("subject", "Teste de Email - Mystery Box Store")
-        custom_message = request.get("message", "Este é um email de teste do sistema Mystery Box Store.")
+        to_email = request.to_email
+        subject = request.subject
+        custom_message = request.message
         
         if not to_email:
             raise HTTPException(status_code=400, detail="Email de destino é obrigatório")
