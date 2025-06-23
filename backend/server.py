@@ -1710,6 +1710,39 @@ async def get_payment_status(session_id: str):
 
     return status
 
+@api_router.post("/test-email")
+async def test_email_system(email: str = "edupodeptptpt@gmail.com"):
+    """Test email system - TEMPORARY ENDPOINT"""
+    try:
+        # Test welcome email
+        welcome_result = await send_welcome_email(email, "Teste Utilizador")
+        
+        # Test basic email
+        basic_result = await send_email(
+            to_email=email,
+            subject="🧪 Teste do Sistema de Emails - Mystery Box Store",
+            html_content="""
+            <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2 style="color: #667eea;">Teste do Sistema de Emails</h2>
+                <p>Este é um email de teste para verificar se o sistema de emails está funcionando corretamente.</p>
+                <p><strong>Data/Hora:</strong> {}</p>
+                <p><strong>Domínio:</strong> mysteryboxes.pt</p>
+                <p>Se recebeu este email, o sistema Resend está funcionando!</p>
+            </body>
+            </html>
+            """.format(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"))
+        )
+        
+        return {
+            "welcome_email": welcome_result,
+            "basic_email": basic_result,
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        }
+    except Exception as e:
+        logging.error(f"Test email failed: {e}")
+        return {"error": str(e), "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")}
+
 # Subscription endpoints
 @api_router.post("/subscriptions/create")
 async def create_subscription_checkout(request: SubscriptionRequest):
