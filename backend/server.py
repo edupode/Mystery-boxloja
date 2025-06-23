@@ -2181,6 +2181,11 @@ async def root():
 async def api_root():
     return {"message": "Mystery Box Store API", "version": "2.0.0", "status": "running"}
 
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint to verify API is running"""
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
 # Configure CORS based on environment
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 CORS_ORIGINS = [
