@@ -2084,6 +2084,291 @@ const AdminOrders = () => {
   );
 };
 
+// Admin Users Management Component
+const AdminUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordModalUser, setPasswordModalUser] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const { user } = useDeviceContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadUsers();
+    }
+  }, [user, searchTerm]);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const params = searchTerm ? { search: searchTerm } : {};
+      const response = await axios.get(`${API}/admin/users`, { params });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectUser = (userId) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUsers.length === users.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(users.map(u => u.id));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUsers.length === 0) {
+      alert('Selecione pelo menos um usuário');
+      return;
+    }
+
+    if (!window.confirm(`Tem certeza que quer deletar ${selectedUsers.length} usuários? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/admin/users/bulk-delete`, {
+        user_ids: selectedUsers
+      });
+      alert(response.data.message);
+      setSelectedUsers([]);
+      loadUsers();
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao deletar usuários');
+    }
+  };
+
+  const handleChangePassword = (userItem) => {
+    setPasswordModalUser(userItem);
+    setShowPasswordModal(true);
+    setNewPassword('');
+  };
+
+  const handleSavePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/admin/users/${passwordModalUser.id}/password`, {
+        new_password: newPassword
+      });
+      alert('Senha alterada com sucesso!');
+      setShowPasswordModal(false);
+      setPasswordModalUser(null);
+      setNewPassword('');
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao alterar senha');
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Tem certeza que quer deletar o usuário ${userName}? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/admin/users/${userId}`);
+      alert('Usuário deletado com sucesso!');
+      loadUsers();
+    } catch (error) {
+      alert(error.response?.data?.detail || 'Erro ao deletar usuário');
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            👥 Gestão de Utilizadores
+          </h1>
+        </div>
+
+        {/* Search and Actions */}
+        <div className="bg-gray-800/50 rounded-2xl p-6 mb-8 border border-purple-500/30">
+          <div className={`${isMobile ? 'space-y-4' : 'flex items-center justify-between'}`}>
+            <div className={`${isMobile ? 'w-full' : 'flex-1 max-w-md'}`}>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Pesquisar por nome ou email..."
+                className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
+              />
+            </div>
+            <div className={`${isMobile ? 'flex flex-col space-y-2' : 'flex space-x-4'}`}>
+              <button
+                onClick={handleBulkDelete}
+                disabled={selectedUsers.length === 0}
+                className={`${isMobile ? 'w-full' : ''} bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 disabled:cursor-not-allowed`}
+              >
+                🗑️ Deletar Selecionados ({selectedUsers.length})
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p>Carregando utilizadores...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-purple-900/50">
+                  <tr>
+                    <th className="text-left p-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.length === users.length}
+                        onChange={handleSelectAll}
+                        className="scale-125"
+                      />
+                    </th>
+                    <th className="text-left p-4">Nome</th>
+                    <th className="text-left p-4">Email</th>
+                    <th className="text-left p-4">Telefone</th>
+                    <th className="text-left p-4">Cidade</th>
+                    <th className="text-left p-4">Admin</th>
+                    <th className="text-left p-4">Data Registo</th>
+                    <th className="text-left p-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((userItem) => (
+                    <tr key={userItem.id} className="border-b border-gray-700/50 hover:bg-gray-700/30">
+                      <td className="p-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(userItem.id)}
+                          onChange={() => handleSelectUser(userItem.id)}
+                          className="scale-125"
+                        />
+                      </td>
+                      <td className="p-4 font-semibold">{userItem.name}</td>
+                      <td className="p-4">{userItem.email}</td>
+                      <td className="p-4 text-gray-400">{userItem.phone || 'N/A'}</td>
+                      <td className="p-4 text-gray-400">{userItem.city || 'N/A'}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          userItem.is_super_admin ? 'bg-red-900 text-red-300' :
+                          userItem.is_admin ? 'bg-blue-900 text-blue-300' : 
+                          'bg-gray-900 text-gray-300'
+                        }`}>
+                          {userItem.is_super_admin ? 'Super Admin' :
+                           userItem.is_admin ? 'Admin' : 'Utilizador'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm text-gray-400">
+                        {new Date(userItem.created_at).toLocaleDateString('pt-PT')}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleChangePassword(userItem)}
+                            className="text-blue-400 hover:text-blue-300 text-sm"
+                            title="Alterar senha"
+                          >
+                            🔑
+                          </button>
+                          {!userItem.is_super_admin && userItem.email !== user.email && (
+                            <button
+                              onClick={() => handleDeleteUser(userItem.id, userItem.name)}
+                              className="text-red-400 hover:text-red-300 text-sm"
+                              title="Deletar usuário"
+                            >
+                              🗑️
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {users.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <div className="text-6xl mb-4">👥</div>
+                <p>Nenhum utilizador encontrado</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Password Change Modal */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-2xl p-8 border border-purple-500/30 max-w-md w-full mx-4">
+              <h3 className="text-2xl font-bold text-white mb-6">
+                🔑 Alterar Senha
+              </h3>
+              <p className="text-gray-300 mb-4">
+                Usuário: <strong>{passwordModalUser?.name}</strong>
+              </p>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Nova senha (mín. 6 caracteres)"
+                className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 mb-6 focus:border-purple-400 focus:outline-none"
+              />
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleSavePassword}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg transition-colors duration-300"
+                >
+                  ✅ Salvar
+                </button>
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg transition-colors duration-300"
+                >
+                  ❌ Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
