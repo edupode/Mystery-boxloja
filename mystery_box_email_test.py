@@ -39,23 +39,30 @@ def log_test_result(test_name, success, message=""):
 def test_direct_email_endpoint():
     """Test the direct email endpoint"""
     try:
-        # The endpoint is at /api/test-email
-        response = requests.post(f"{API_URL}/test-email", params={"email": TEST_USER['email']})
+        # First, login as admin to get token
+        admin_login_data = {
+            "email": "eduardocorreia3344@gmail.com",
+            "password": "admin123"
+        }
+        login_response = requests.post(f"{API_URL}/auth/login", json=admin_login_data)
+        if login_response.status_code != 200:
+            return log_test_result("Direct Email Test", False, f"Admin login failed: {login_response.text}")
+        
+        admin_token = login_response.json()["access_token"]
+        headers = {"Authorization": f"Bearer {admin_token}"}
+        
+        # Try the admin test welcome email endpoint
+        response = requests.post(f"{API_URL}/admin/emails/test-welcome", headers=headers)
         if response.status_code != 200:
-            # Try alternative URL format
-            response = requests.post(f"{BACKEND_URL}/api/test-email", params={"email": TEST_USER['email']})
-            if response.status_code != 200:
-                return log_test_result("Direct Email Test", False, f"Failed: {response.text}")
+            return log_test_result("Direct Email Test", False, f"Failed to send test welcome email: {response.text}")
         
         result = response.json()
-        if not result.get("welcome_email", {}).get("success") or not result.get("basic_email", {}).get("success"):
+        if not result.get("result", {}).get("success"):
             return log_test_result("Direct Email Test", False, f"Email sending failed: {result}")
         
-        welcome_timestamp = result.get("welcome_email", {}).get("timestamp")
-        basic_timestamp = result.get("basic_email", {}).get("timestamp")
+        timestamp = result.get("result", {}).get("timestamp")
         
-        return log_test_result("Direct Email Test", True, 
-                              f"Welcome email sent at: {welcome_timestamp}, Basic email sent at: {basic_timestamp}")
+        return log_test_result("Direct Email Test", True, f"Test welcome email sent at: {timestamp}")
     except Exception as e:
         return log_test_result("Direct Email Test", False, f"Exception: {str(e)}")
 
