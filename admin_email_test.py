@@ -142,6 +142,45 @@ def test_send_birthday_email(admin_token):
     except Exception as e:
         return log_test_result("Send Birthday Email", False, f"Exception: {str(e)}")
 
+def test_welcome_email(admin_token):
+    """Test sending welcome email via admin test endpoint"""
+    if not admin_token:
+        return log_test_result("Test Welcome Email", False, "No admin token available")
+    
+    try:
+        headers = {
+            "Authorization": f"Bearer {admin_token}",
+            "Content-Type": "application/json"
+        }
+        
+        logger.info("Testing welcome email endpoint")
+        response = requests.post(f"{API_URL}/admin/emails/test-welcome", headers=headers)
+        
+        if response.status_code == 200:
+            result = response.json()
+            email_result = result.get("result", {})
+            timestamp = email_result.get("timestamp", datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"))
+            if email_result.get("success"):
+                return log_test_result(
+                    "Test Welcome Email", 
+                    True, 
+                    f"Welcome email sent successfully at {timestamp}"
+                )
+            else:
+                return log_test_result(
+                    "Test Welcome Email", 
+                    False, 
+                    f"Email API returned error: {email_result.get('error')}"
+                )
+        else:
+            return log_test_result(
+                "Test Welcome Email", 
+                False, 
+                f"Failed with status {response.status_code}: {response.text}"
+            )
+    except Exception as e:
+        return log_test_result("Test Welcome Email", False, f"Exception: {str(e)}")
+
 def run_tests():
     """Run all admin email tests"""
     logger.info("Starting admin email endpoint tests")
