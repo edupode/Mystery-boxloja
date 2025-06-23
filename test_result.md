@@ -1139,6 +1139,13 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  completed_tests:
+    - "Subscription Endpoints - Criar checkout de subscription"
+    - "Subscription Endpoints - Status de subscription"
+    - "Subscription Endpoints - Customer Portal"
+    - "Subscription Endpoints - Listar subscriptions"
+    - "Subscription Endpoints - Webhook handler"
+    - "Stripe Live Keys - Atualização"
 
 agent_communication:
   - agent: "main"
