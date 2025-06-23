@@ -1332,6 +1332,12 @@ backend:
         agent: "testing"
         comment: "Endpoint funciona corretamente. Atribui sessão ao admin e envia mensagem automática com nome do usuário."
 
+metadata:
+  created_by: "main_agent"
+  version: "1.2"
+  test_sequence: 2
+  run_ui: false
+
 test_plan:
   current_focus:
     - "Admin Email Endpoints - Send Discount Email"
