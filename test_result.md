@@ -1187,3 +1187,5 @@ agent_communication:
     message: "NOVA TAREFA INICIADA: Usuário reportou problema com imagens não aparecendo quando clica no botão 'descobrir'. Vou testar backend primeiro, depois frontend, identificar o problema e melhorar a página."
   - agent: "testing"
     message: "TESTE DE IMAGENS COMPLETO: ✅ Identificado e corrigido problema no endpoint GET /api/products/{product_id} que estava procurando imagens no campo 'images' em vez de 'image_url'. ✅ Corrigido também o mapeamento de campos 'category', 'stock_quantity' e 'featured' que estavam com nomes diferentes. ✅ Todos os testes de imagens agora passam com sucesso. ✅ Imagens estão sendo retornadas corretamente em todos os endpoints de produtos."
+  - agent: "testing"
+    message: "TESTE DE VALIDAÇÃO DE PAGAMENTO STRIPE: ✅ Verificado que o endpoint POST /api/checkout aceita apenas payment_method='stripe' ✅ Testado com payment_method='card' e 'bank_transfer' - ambos retornam erro 400 com mensagem 'Apenas pagamento via Stripe é suportado' ✅ Chaves Stripe live estão funcionando corretamente em todos os endpoints de subscription ✅ Todos os testes passaram com sucesso."
