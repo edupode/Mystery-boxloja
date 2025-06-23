@@ -403,12 +403,6 @@ const Home = () => {
             >
               🔍 Explorar Mistérios
             </Link>
-            <Link
-              to="/assinaturas"
-              className={`border-2 border-purple-400 text-purple-300 ${isMobile ? 'px-8 py-3' : 'px-10 py-4'} rounded-xl font-semibold hover:bg-purple-600 hover:text-white transition-all duration-300 transform hover:scale-110 ${isMobile ? 'w-full max-w-xs text-center' : ''}`}
-            >
-              🎯 Assinaturas
-            </Link>
           </div>
         </div>
       </section>
