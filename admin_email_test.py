@@ -103,23 +103,21 @@ def test_send_birthday_email(admin_token):
     
     try:
         headers = {
-            "Authorization": f"Bearer {admin_token}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {admin_token}"
         }
         
-        # Using JSON body instead of query parameters
-        birthday_data = {
+        # Using query parameters
+        params = {
             "user_email": TEST_EMAIL,
             "user_name": TEST_NAME,
             "coupon_code": TEST_COUPON,
             "discount_value": TEST_DISCOUNT
         }
         
-        # Try with JSON body
-        logger.info(f"Sending birthday email to {TEST_EMAIL} with JSON body: {json.dumps(birthday_data)}")
+        logger.info(f"Sending birthday email to {TEST_EMAIL} with params: {params}")
         response = requests.post(
             f"{API_URL}/admin/emails/send-birthday", 
-            json=birthday_data,
+            params=params,
             headers=headers
         )
         
