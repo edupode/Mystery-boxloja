@@ -788,6 +788,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint testado com sucesso usando os dados fornecidos pelo usuário (email: edupodeptptpt@gmail.com, nome: Eduardo Teste, cupão: ADMIN10, desconto: 15%, expiração: 2025-07-01). Email enviado com sucesso em 2025-06-23 18:23:37 UTC."
+      - working: true
+        agent: "testing"
+        comment: "Endpoint retestado com sucesso usando query parameters. Confirmado que o endpoint agora aceita query parameters em vez de JSON body. Email enviado com sucesso em 2025-06-23 18:43:09 UTC."
 
   - task: "Admin Email Endpoints - Send Birthday Email"
     implemented: true
