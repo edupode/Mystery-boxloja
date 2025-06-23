@@ -2347,23 +2347,7 @@ const AdminProducts = () => {
               {/* Subscription Prices Section */}
               <div className="bg-gray-700/30 rounded-lg p-6 border border-purple-500/20">
                 <h4 className="text-lg font-semibold mb-4 text-white">📅 Preços de Assinatura (Opcional)</h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-300">1 Mês (€)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.subscription_prices["1_month"]}
-                      onChange={(e) => setFormData({
-                        ...formData, 
-                        subscription_prices: {
-                          ...formData.subscription_prices
-                        }
-                      })}
-                      className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
-                      placeholder="25.99"
-                    />
-                  </div>
+                <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2 text-gray-300">3 Meses (€)</label>
                     <input
