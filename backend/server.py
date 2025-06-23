@@ -572,52 +572,82 @@ async def send_welcome_email(user_email: str, user_name: str):
     <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="utf-8">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Bem-vindo à Mystery Box Store!</title>
         <style>
-            body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f0f10; color: white; }
-            .container { background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899); padding: 40px; border-radius: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .content { background: rgba(0,0,0,0.3); padding: 30px; border-radius: 15px; }
-            .button { display: inline-block; background: linear-gradient(45deg, #fbbf24, #f59e0b); color: black; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #ccc; }
+            body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 40px 20px; }
+            .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+            .mystery-box { font-size: 60px; margin: 20px 0; animation: bounce 2s infinite; }
+            @keyframes bounce { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+            .content { padding: 40px 20px; text-align: center; }
+            .welcome-text { font-size: 18px; color: #333; margin-bottom: 30px; line-height: 1.6; }
+            .features { display: flex; justify-content: space-around; margin: 30px 0; flex-wrap: wrap; }
+            .feature { flex: 1; min-width: 150px; margin: 10px; text-align: center; }
+            .feature-icon { font-size: 40px; margin-bottom: 10px; }
+            .feature-text { font-size: 14px; color: #666; }
+            .cta-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; margin: 20px 0; transition: transform 0.3s ease; }
+            .cta-button:hover { transform: translateY(-2px); }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
+            .stars { color: #FFD700; font-size: 20px; margin: 10px 0; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>🎁 Bem-vindo à Mystery Box Store!</h1>
-                <div style="font-size: 48px;">🔮 ⚡ 👻</div>
+                <div class="mystery-box">🎁</div>
+                <h1>Bem-vindo à Mystery Box Store!</h1>
+                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Sua aventura misteriosa começa aqui</p>
             </div>
+            
             <div class="content">
-                <h2>Olá {{ user_name }}! 🎉</h2>
-                <p>Bem-vindo ao mundo dos mistérios! Estamos muito felizes por se ter juntado à nossa comunidade de exploradores.</p>
-                <p>Na Mystery Box Store, cada caixa é uma aventura única cheia de surpresas incríveis, desde produtos geek e terror até cuidados para pets e muito mais!</p>
+                <p class="welcome-text">
+                    Olá <strong>{{ user_name }}</strong>! 👋<br>
+                    Seja bem-vindo à nossa loja de mistérios e surpresas!
+                </p>
                 
-                <div style="text-align: center;">
-                    <a href="https://mysteryboxstore.com/produtos" class="button">🔍 Explorar Mistérios</a>
+                <div class="stars">⭐ ⭐ ⭐ ⭐ ⭐</div>
+                
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">Produtos Exclusivos</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🚀</div>
+                        <div class="feature-text">Entregas Rápidas</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">💎</div>
+                        <div class="feature-text">Qualidade Premium</div>
+                    </div>
                 </div>
                 
-                <h3>O que pode esperar:</h3>
-                <ul>
-                    <li>🎭 Caixas temáticas únicas</li>
-                    <li>🎯 Opções de assinatura com desconto</li>
-                    <li>📦 Produtos de alta qualidade</li>
-                    <li>🎉 Surpresas em cada entrega</li>
-                </ul>
+                <p style="color: #666; margin: 20px 0;">
+                    Descubra produtos incríveis com descontos especiais e ofertas exclusivas para membros!
+                </p>
                 
-                <p>Prepare-se para descobrir o inesperado!</p>
+                <a href="https://mystery-box-loja.vercel.app" class="cta-button">
+                    🛍️ Explorar Produtos
+                </a>
+                
+                <p style="color: #888; font-size: 14px; margin-top: 30px;">
+                    Use o código <strong style="color: #667eea;">WELCOME10</strong> e ganhe 10% de desconto na sua primeira compra!
+                </p>
             </div>
+            
             <div class="footer">
-                <p>Mystery Box Store - Descobre o Inesperado! 🚀</p>
+                <p>Mystery Box Store - Sua loja de mistérios e surpresas</p>
+                <p>© 2024 Mystery Box Store. Todos os direitos reservados.</p>
             </div>
         </div>
     </body>
     </html>
     """
     
-    template = Template(html_template)
-    html_content = template.render(user_name=user_name)
+    html_content = html_template.replace("{{ user_name }}", user_name)
     
     return await send_email(
         to_email=user_email,
