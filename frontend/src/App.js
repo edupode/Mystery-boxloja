@@ -2110,7 +2110,13 @@ const AdminProducts = () => {
     image_url: '',
     image_base64: '', // Para armazenar a imagem em base64
     stock_quantity: '100',
-    featured: false
+    featured: false,
+    subscription_prices: {
+      "1_month": '',
+      "3_months": '',
+      "6_months": '',
+      "12_months": ''
+    }
   });
   const { user } = useAppContext();
   const isMobile = useIsMobile();
