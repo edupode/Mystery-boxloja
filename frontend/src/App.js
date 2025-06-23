@@ -1037,7 +1037,7 @@ const Cart = () => {
 };
 
 const Checkout = () => {
-  const { cart, sessionId } = useAppContext();
+  const { cart, sessionId } = useDeviceContext();
   const [formData, setFormData] = useState({
     street: '',
     postalCode: '',
