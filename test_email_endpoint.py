@@ -13,7 +13,10 @@ load_dotenv('/app/frontend/.env')
 BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL')
 API_URL = f"{BACKEND_URL}/api"
 
-def test_send_email():
+# For local testing
+LOCAL_API_URL = "http://localhost:8001/api"
+
+def test_send_email(use_local=True):
     """Test the email test endpoint with both email addresses"""
     
     # Test emails to send to
@@ -23,6 +26,10 @@ def test_send_email():
     ]
     
     results = []
+    
+    # Choose API URL based on whether we're testing locally or remotely
+    url_base = LOCAL_API_URL if use_local else API_URL
+    logger.info(f"Using API URL: {url_base}")
     
     for email in test_emails:
         logger.info(f"Testing email sending to: {email}")
@@ -36,7 +43,7 @@ def test_send_email():
         
         try:
             # Send request to the test endpoint
-            response = requests.post(f"{API_URL}/test/send-email", json=request_data)
+            response = requests.post(f"{url_base}/test/send-email", json=request_data)
             
             # Check response
             if response.status_code == 200:
@@ -80,4 +87,5 @@ def test_send_email():
     return results
 
 if __name__ == "__main__":
-    test_send_email()
+    # Test using local API
+    test_send_email(use_local=True)
