@@ -1971,10 +1971,15 @@ const AdminDashboard = () => {
           </Link>
           <Link
             to="/admin/chat"
-            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white relative"
           >
             <div className="text-5xl mb-4">💬</div>
             <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Live Chat</h3>
+            {pendingChatsCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold animate-pulse">
+                {pendingChatsCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>
