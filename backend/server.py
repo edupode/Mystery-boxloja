@@ -189,7 +189,7 @@ class StripeCheckout:
     async def create_checkout_session(self, request: CheckoutSessionRequest) -> CheckoutSessionResponse:
         try:
             session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
+                payment_method_types=["card", "klarna", "multibanco", "sofort", "giropay"],
                 line_items=[{
                     "price_data": {
                         "currency": request.currency,
