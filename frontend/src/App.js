@@ -1257,36 +1257,12 @@ const Checkout = () => {
                 <input
                   type="radio"
                   name="paymentMethod"
-                  value="card"
-                  checked={formData.paymentMethod === 'card'}
+                  value="stripe"
+                  checked={formData.paymentMethod === 'stripe'}
                   onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
                   className="mr-4 scale-125"
                 />
-                <span className="text-white">💳 Cartão de Crédito/Débito (Stripe)</span>
-              </label>
-
-              <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="bank_transfer"
-                  checked={formData.paymentMethod === 'bank_transfer'}
-                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                  className="mr-4 scale-125"
-                />
-                <span className="text-white">🏦 Transferência Bancária</span>
-              </label>
-
-              <label className="flex items-center p-4 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors duration-300 cursor-pointer">
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="cash_on_delivery"
-                  checked={formData.paymentMethod === 'cash_on_delivery'}
-                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                  className="mr-4 scale-125"
-                />
-                <span className="text-white">💰 Pagamento à Cobrança</span>
+                <span className="text-white">💳 Stripe (Cartão/Klarna/Multibanco/Etc...)</span>
               </label>
             </div>
           </div>
