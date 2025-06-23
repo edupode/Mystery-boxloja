@@ -1601,6 +1601,7 @@ const AdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordModalUser, setPasswordModalUser] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+  const [pendingChatsCount, setPendingChatsCount] = useState(0);
   const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
@@ -1610,8 +1611,22 @@ const AdminDashboard = () => {
       loadUsers();
       loadCoupons();
       loadPromotions();
+      loadPendingChats();
+      // Update pending chats count every 30 seconds
+      const interval = setInterval(loadPendingChats, 30000);
+      return () => clearInterval(interval);
     }
   }, [user]);
+
+  const loadPendingChats = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      const pendingCount = response.data.filter(session => session.status === 'pending').length;
+      setPendingChatsCount(pendingCount);
+    } catch (error) {
+      console.error('Error loading pending chats:', error);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
