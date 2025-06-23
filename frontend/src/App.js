@@ -2081,7 +2081,10 @@ const AdminOrders = () => {
                         {new Date(order.created_at).toLocaleDateString('pt-PT')}
                       </td>
                       <td className="p-4">
-                        <button className="text-purple-400 hover:text-purple-300 text-sm">
+                        <button 
+                          onClick={() => handleViewOrderDetails(order.id)}
+                          className="text-purple-400 hover:text-purple-300 text-sm"
+                        >
                           📋 Ver Detalhes
                         </button>
                       </td>
