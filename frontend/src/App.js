@@ -4293,6 +4293,22 @@ const AdminChatDashboard = () => {
     }
   };
 
+  const closeSession = async (sessionId) => {
+    if (!window.confirm('Tem certeza que quer fechar esta sessão?')) {
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/admin/chat/sessions/${sessionId}/close`);
+      alert('Sessão fechada com sucesso!');
+      setSelectedSession(null);
+      loadSessions();
+    } catch (error) {
+      console.error('Error closing session:', error);
+      alert('Erro ao fechar sessão: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    }
+  };
+
   if (!user?.is_admin) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
