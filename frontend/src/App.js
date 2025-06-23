@@ -4825,8 +4825,8 @@ const App = () => {
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/emails" element={<AdminEmails />} />
             <Route path="/admin/chat" element={<AdminChatDashboard />} />
-            <Route path="/perfil" element={<Profile />} />
-            <Route path="/termos" element={<Terms />} />
+            <Route path="/perfil" element={<UserProfile />} />
+            <Route path="/termos" element={<TermsAndConditions />} />
           </Routes>
           <Footer />
           <LiveChatButton />
