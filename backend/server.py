@@ -840,7 +840,7 @@ async def send_discount_email(user_email: str, user_name: str, coupon_code: str,
                 </div>
                 
                 <div style="text-align: center;">
-                    <a href="https://mysteryboxstore.com/produtos" class="button">🛒 Usar Desconto</a>
+                    <a href="https://mysteryboxes.pt/produtos" class="button">🛒 Usar Desconto</a>
                 </div>
                 
                 <p><strong>Válido até:</strong> {{ expiry_date }}</p>
@@ -905,7 +905,7 @@ async def send_birthday_email(user_email: str, user_name: str, coupon_code: str,
                 </div>
                 
                 <div style="text-align: center;">
-                    <a href="https://mysteryboxstore.com/produtos" class="button">🎁 Celebrar com Compras</a>
+                    <a href="https://mysteryboxes.pt/produtos" class="button">🎁 Celebrar com Compras</a>
                 </div>
                 
                 <p>Este desconto especial é válido por 7 dias. Aproveite o seu aniversário para descobrir mistérios incríveis!</p>
