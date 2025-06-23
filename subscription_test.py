@@ -57,7 +57,12 @@ def test_create_subscription():
             }
         }
         
-        response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data)
+        # Try with local API first
+        response = requests.post(f"{LOCAL_API_URL}/subscriptions/create", json=subscription_data)
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data)
         
         # Since we're using a mock price_id, we expect a 400 error from Stripe
         # But we want to verify the endpoint is working correctly
