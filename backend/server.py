@@ -560,7 +560,7 @@ async def send_email(to_email: str, subject: str, html_content: str, text_conten
         if text_content:
             params["text"] = text_content
         
-        response = resend.emails.send(params)
+        response = resend.Emails.send(params)
         return {"success": True, "message_id": response.get("id")}
     except Exception as e:
         logging.error(f"Error sending email: {e}")
