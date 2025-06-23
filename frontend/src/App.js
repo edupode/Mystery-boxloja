@@ -1926,7 +1926,7 @@ const AdminDashboard = () => {
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
