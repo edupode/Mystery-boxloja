@@ -20,9 +20,13 @@ ADMIN_USER = {
     "password": "admin123"
 }
 
-# Test email recipient
+# Test data as specified by the user
 TEST_EMAIL = "edupodeptptpt@gmail.com"
-TEST_NAME = "Teste Admin"
+TEST_NAME = "Eduardo Teste"
+TEST_COUPON = "ADMIN10"
+TEST_DISCOUNT = 15
+TEST_DISCOUNT_TYPE = "percentage"
+TEST_EXPIRY_DATE = "2025-07-01"
 
 def log_test_result(test_name, success, message=""):
     """Log test result and store in results dictionary"""
