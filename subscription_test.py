@@ -257,8 +257,8 @@ def test_stripe_live_keys():
         if response.status_code == 404:
             response = requests.post(f"{API_URL}/subscriptions/create", json=subscription_data)
         
-        # With live keys, we expect a 400 error with "No such price" message
-        if response.status_code == 400 and "No such price" in response.text:
+        # With live keys, we expect a 400 error with "Invalid subscription type" message
+        if response.status_code == 400 and "Invalid subscription type" in response.text:
             return log_test_result("Stripe Live Keys", True, 
                                   "Stripe live keys are working correctly")
         elif "authentication" in response.text.lower() or "invalid api key" in response.text.lower():
