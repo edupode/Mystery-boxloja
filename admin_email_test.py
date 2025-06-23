@@ -67,10 +67,10 @@ def test_send_discount_email(admin_token):
         discount_data = {
             "user_email": TEST_EMAIL,
             "user_name": TEST_NAME,
-            "coupon_code": "ADMIN10",
-            "discount_value": 10.0,
-            "discount_type": "percentage",
-            "expiry_date": "31/12/2024"
+            "coupon_code": TEST_COUPON,
+            "discount_value": TEST_DISCOUNT,
+            "discount_type": TEST_DISCOUNT_TYPE,
+            "expiry_date": TEST_EXPIRY_DATE
         }
         
         # Try with JSON body
