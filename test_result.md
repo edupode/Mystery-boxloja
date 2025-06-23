@@ -1165,3 +1165,5 @@ agent_communication:
     message: "TESTE DE EMAILS COMPLETO: ✅ Email de boas-vindas testado com sucesso durante registro de usuário (timestamp: 2025-06-23 16:03:34 UTC) ✅ Email de confirmação de pedido testado com sucesso durante checkout (timestamp: 2025-06-23 16:03:37 UTC) ✅ Email de desconto testado com sucesso via endpoint admin (timestamp: 2025-06-23 16:03:30 UTC) ✅ Todos os emails foram enviados para edupodeptptpt@gmail.com conforme solicitado"
   - agent: "main"
     message: "NOVA TAREFA INICIADA: Usuário reportou problema com imagens não aparecendo quando clica no botão 'descobrir'. Vou testar backend primeiro, depois frontend, identificar o problema e melhorar a página."
+  - agent: "testing"
+    message: "TESTE DE IMAGENS COMPLETO: ✅ Identificado e corrigido problema no endpoint GET /api/products/{product_id} que estava procurando imagens no campo 'images' em vez de 'image_url'. ✅ Corrigido também o mapeamento de campos 'category', 'stock_quantity' e 'featured' que estavam com nomes diferentes. ✅ Todos os testes de imagens agora passam com sucesso. ✅ Imagens estão sendo retornadas corretamente em todos os endpoints de produtos."
