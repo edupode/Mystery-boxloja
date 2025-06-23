@@ -1191,6 +1191,7 @@ test_plan:
     - "Subscription Endpoints - Webhook handler"
     - "Stripe Live Keys - Atualização"
     - "Correção de imagens nos produtos"
+    - "Validação de Pagamento Stripe"
 
 agent_communication:
   - agent: "main"
