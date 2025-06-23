@@ -2359,8 +2359,7 @@ const AdminProducts = () => {
                       onChange={(e) => setFormData({
                         ...formData, 
                         subscription_prices: {
-                          ...formData.subscription_prices,
-                          "1_month": e.target.value
+                          ...formData.subscription_prices
                         }
                       })}
                       className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none"
