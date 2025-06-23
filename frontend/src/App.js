@@ -3067,9 +3067,15 @@ const AdminCategories = () => {
                   className="w-full h-4 rounded-full mb-4"
                   style={{ backgroundColor: category.color }}
                 ></div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-400 mb-4">
                   ID: {category.id}
                 </div>
+                <button
+                  onClick={() => handleDeleteCategory(category.id, category.name)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-300 flex items-center justify-center w-full"
+                >
+                  🗑️ Remover Categoria
+                </button>
               </div>
             ))}
           </div>
