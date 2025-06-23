@@ -1234,6 +1234,8 @@ agent_communication:
     message: "FASE 4 TESTADA: Todos os endpoints de subscription testados com sucesso! ✅ Chaves Stripe live estão funcionando corretamente ✅ Todos os 5 endpoints de subscription estão operacionais e retornam respostas apropriadas ✅ Sistema de emails Resend ainda está operacional ✅ Imagens dos produtos estão funcionando corretamente (não são mais imagens de teste)"
   - agent: "testing"
     message: "TESTE DE EMAILS ADMIN COMPLETO: ✅ Endpoint POST /api/admin/emails/send-discount testado com sucesso (email: edupodeptptpt@gmail.com, nome: Eduardo Teste, cupão: ADMIN10, desconto: 15%, expiração: 2025-07-01) ✅ Endpoint POST /api/admin/emails/send-birthday testado com sucesso (email: edupodeptptpt@gmail.com, nome: Eduardo Teste, cupão: ADMIN10, desconto: 15%) ✅ Endpoint POST /api/admin/emails/test-welcome testado com sucesso. Todos os emails foram enviados corretamente e a integração com Resend está funcionando."
+  - agent: "testing"
+    message: "RETESTE DE EMAILS ADMIN COMPLETO: ✅ Confirmado que os endpoints de email agora aceitam query parameters em vez de JSON body ✅ Endpoint POST /api/admin/emails/send-discount testado com sucesso usando query parameters ✅ Endpoint POST /api/admin/emails/send-birthday testado com sucesso usando query parameters ✅ Todos os emails foram enviados corretamente para edupodeptptpt@gmail.com"
   - agent: "main"
     message: "NOVA TAREFA INICIADA: Usuário reportou problema com imagens não aparecendo quando clica no botão 'descobrir'. Vou testar backend primeiro, depois frontend, identificar o problema e melhorar a página."
   - agent: "testing"
