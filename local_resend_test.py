@@ -58,7 +58,7 @@ def test_send_test_email():
         if not message_id:
             return log_test_result("Send Test Email", False, "No message ID returned")
         
-        logger.info(f"Full response: {email_data}")
+        return log_test_result("Send Test Email", True, f"Email sent successfully with ID: {message_id}")
         
         return log_test_result("Send Test Email", True, f"Email sent successfully with ID: {message_id}")
     except Exception as e:
