@@ -808,7 +808,7 @@ const ProductDetail = () => {
 };
 
 const Cart = () => {
-  const { cart, removeFromCart, sessionId, applyCoupon, removeCoupon } = useAppContext();
+  const { cart, removeFromCart, sessionId, applyCoupon, removeCoupon } = useDeviceContext();
   const [products, setProducts] = useState({});
   const [shippingMethods, setShippingMethods] = useState([]);
   const [couponCode, setCouponCode] = useState('');
