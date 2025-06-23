@@ -4476,6 +4476,7 @@ const UserProfile = () => {
 // Subscriptions Component
 const Subscriptions = () => {
   const { isMobile } = useContext(AppContext);
+  const { user } = useContext(AuthContext);
   const [subscriptions, setSubscriptions] = useState([]);
   const [pricing, setPricing] = useState({});
   const [loading, setLoading] = useState(true);
@@ -4507,15 +4508,21 @@ const Subscriptions = () => {
   };
 
   const handleSubscribe = async (subscriptionType) => {
+    if (!user) {
+      alert('Por favor faça login para subscrever.');
+      return;
+    }
+
     try {
       const response = await axios.post(`${API}/subscriptions/create`, {
-        customer_email: "user@example.com", // TODO: Get from user context
+        customer_email: user.email,
         subscription_type: subscriptionType,
         box_price: baseBoxPrice,
         success_url: `${window.location.origin}/success`,
         cancel_url: `${window.location.origin}/assinaturas`,
         metadata: {
-          source: "subscription_page"
+          source: "subscription_page",
+          user_id: user.id
         }
       });
 
