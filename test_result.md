@@ -1179,6 +1179,7 @@ test_plan:
     - "Subscription Endpoints - Webhook handler"
     - "Stripe Live Keys - Atualização"
     - "Correção de imagens nos produtos"
+    - "Validação de Pagamento Stripe"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
