@@ -182,15 +182,18 @@ backend:
 
   - task: "Stripe Live Keys - Atualização"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/.env"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Atualizadas chaves Stripe para live keys fornecidas pelo usuário"
+      - working: true
+        agent: "testing"
+        comment: "Chaves Stripe live testadas com sucesso. As chaves estão funcionando corretamente, retornando respostas apropriadas da API Stripe."
 
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
