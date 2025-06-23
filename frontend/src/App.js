@@ -4690,7 +4690,6 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4 text-purple-300">🔗 Links Rápidos</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/produtos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📦 Produtos</Link></li>
-              <li><Link to="/assinaturas" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🎯 Assinaturas</Link></li>
               <li><Link to="/perfil" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">👤 Meu Perfil</Link></li>
               <li><Link to="/carrinho" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">🛒 Carrinho</Link></li>
             </ul>
