@@ -750,24 +750,40 @@ const ProductDetail = () => {
                   <h4 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-purple-300`}>📅 Assinaturas (com desconto!):</h4>
 
                   {Object.entries(product.subscription_prices).map(([key, price]) => {
-                    const months = key.replace('_', ' ');
+                    const months = parseInt(key.replace('_months', ''));
                     const discount = ((product.price - price) / product.price * 100).toFixed(0);
+                    const totalPrice = price * months;
+                    const originalTotal = product.price * months;
+                    const savings = originalTotal - totalPrice;
+                    
                     return (
-                      <label key={key} className="flex items-center p-3 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 transition-colors duration-300 cursor-pointer">
+                      <label key={key} className="flex items-center p-4 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 transition-colors duration-300 cursor-pointer border-l-4 border-purple-500/30">
                         <input
                           type="radio"
                           name="purchaseType"
                           value={key}
                           checked={selectedSubscription === key}
                           onChange={(e) => setSelectedSubscription(e.target.value)}
-                          className="mr-3 scale-125"
+                          className="mr-4 scale-125"
                         />
-                        <span className="flex-1">
-                          <span className={`${isMobile ? 'text-sm' : 'text-base'}`}>
-                            Assinatura {months} - €{price}/mês
-                          </span>
-                          {discount > 0 && <span className="text-green-400 ml-2">(-{discount}% desconto!)</span>}
-                        </span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-white`}>
+                              Assinatura {months} meses
+                            </span>
+                            <div className="text-right">
+                              <span className="text-gray-400 line-through text-sm">€{originalTotal.toFixed(2)}</span>
+                              <span className="text-purple-400 font-bold ml-2">€{totalPrice.toFixed(2)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-300">€{price}/mês</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400 font-semibold">-{discount}% desconto</span>
+                              <span className="text-green-400">Poupa €{savings.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
                       </label>
                     );
                   })}
