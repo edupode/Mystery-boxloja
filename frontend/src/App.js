@@ -2905,7 +2905,7 @@ const AdminCategories = () => {
     emoji: '',
     color: '#8B5CF6'
   });
-  const { user } = useAppContext();
+  const { user } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
