@@ -582,6 +582,37 @@ class ChatMessageCreate(BaseModel):
 class ChatSessionCreate(BaseModel):
     subject: Optional[str] = None
 
+# Subscription Management Models
+class SubscriptionPlan(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    product_id: str
+    subscription_type: str  # "3_months", "6_months", "12_months"
+    status: str = "active"  # "active", "paused", "cancelled", "completed"
+    current_cycle: int = 1
+    total_cycles: int
+    next_delivery_date: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    stripe_subscription_id: Optional[str] = None
+
+class SubscriptionDelivery(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    subscription_id: str
+    order_id: str
+    cycle_number: int
+    delivery_date: datetime
+    status: str = "pending"  # "pending", "delivered", "failed"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SubscriptionCreate(BaseModel):
+    product_id: str
+    subscription_type: str
+
+class SubscriptionUpdate(BaseModel):
+    status: Optional[str] = None
+    next_delivery_date: Optional[datetime] = None
+
 # Utility functions
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
