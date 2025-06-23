@@ -1963,8 +1963,21 @@ async def update_order_status(order_id: str, status: str, admin_user: User = Dep
     return {"message": "Status atualizado com sucesso", "status": status}
 
 @api_router.get("/admin/users")
-async def get_all_users(admin_user: User = Depends(get_admin_user)):
-    users = await db.users.find().sort("created_at", -1).to_list(1000)
+async def get_all_users(
+    search: Optional[str] = None,
+    admin_user: User = Depends(get_admin_user)
+):
+    # Build search query
+    query = {}
+    if search:
+        query = {
+            "$or": [
+                {"name": {"$regex": search, "$options": "i"}},
+                {"email": {"$regex": search, "$options": "i"}}
+            ]
+        }
+    
+    users = await db.users.find(query).sort("created_at", -1).to_list(1000)
     # Convert ObjectId to string and prepare user data
     user_list = []
     for u in users:
@@ -1974,7 +1987,10 @@ async def get_all_users(admin_user: User = Depends(get_admin_user)):
             "id": u["id"], 
             "name": u["name"], 
             "email": u["email"], 
+            "phone": u.get("phone", ""),
+            "city": u.get("city", ""),
             "is_admin": u.get("is_admin", False), 
+            "is_super_admin": u.get("is_super_admin", False),
             "created_at": u["created_at"]
         })
     return user_list
