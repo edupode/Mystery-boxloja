@@ -626,6 +626,14 @@ def validate_nif(nif: str) -> bool:
     
     return int(nif_numbers[8]) == check_digit
 
+def calculate_subscription_prices(base_price: float) -> Dict[str, float]:
+    """Calculate subscription prices with discounts: 3m=10%, 6m=15%, 12m=20%"""
+    return {
+        "3_months": round(base_price * 0.9, 2),  # 10% discount
+        "6_months": round(base_price * 0.85, 2),  # 15% discount
+        "12_months": round(base_price * 0.8, 2)   # 20% discount
+    }
+
 async def send_email(to_email: str, subject: str, html_content: str, text_content: Optional[str] = None):
     """Send email using Resend"""
     try:
