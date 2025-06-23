@@ -1196,17 +1196,6 @@ const Checkout = () => {
             </div>
 
             <div className="mb-6">
-              <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Data de Nascimento *</label>
-              <input
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-                required
-                className={`w-full border border-purple-500/30 rounded-lg px-4 py-3 bg-gray-700 text-white focus:border-purple-400 focus:outline-none transition-colors duration-300`}
-              />
-            </div>
-
-            <div className="mb-6">
               <label className={`block ${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 text-gray-300`}>Número de Telemóvel *</label>
               <input
                 type="tel"
