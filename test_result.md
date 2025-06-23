@@ -102,7 +102,80 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fase 1 - Correções Críticas de Funcionalidade: 1. Corrigir o processo de checkout para funcionar completamente 2. Corrigir atualizações de estado de encomendas no admin 3. Corrigir sistema de chat do admin (aprovação/negação, mostrar informações, auto-fecho) 4. Corrigir upload de fotos"
+user_problem_statement: "FASE 4 - IMPLEMENTAÇÃO SUBSCRIPTIONS RECORRENTES: Implementar sistema completo de subscriptions recorrentes do Stripe com endpoints: POST /api/subscriptions/create, GET /api/subscriptions/status/{session_id}, POST /api/subscriptions/customer-portal, GET /api/subscriptions/customer/{customer_id}, POST /api/subscriptions/webhook. Melhorar sistema de emails com templates bonitos e testar OTP. Remover data de nascimento do checkout e adicionar ao perfil."
+
+backend:
+  - task: "Subscription Endpoints - Criar checkout de subscription"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint POST /api/subscriptions/create para criar sessões de checkout de subscription recorrente usando Stripe"
+
+  - task: "Subscription Endpoints - Status de subscription"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint GET /api/subscriptions/status/{session_id} para verificar status de subscription"
+
+  - task: "Subscription Endpoints - Customer Portal"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint POST /api/subscriptions/customer-portal para acesso ao portal do cliente"
+
+  - task: "Subscription Endpoints - Listar subscriptions"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint GET /api/subscriptions/customer/{customer_id} para listar subscriptions do cliente"
+
+  - task: "Subscription Endpoints - Webhook handler"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint POST /api/subscriptions/webhook para processar webhooks do Stripe"
+
+  - task: "Stripe Live Keys - Atualização"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Atualizadas chaves Stripe para live keys fornecidas pelo usuário"
 
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
