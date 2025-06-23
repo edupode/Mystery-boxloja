@@ -4477,35 +4477,85 @@ const UserProfile = () => {
 const Subscriptions = () => {
   const { isMobile } = useContext(AppContext);
   const [subscriptions, setSubscriptions] = useState([]);
-  const [newSubscription, setNewSubscription] = useState({
-    type: 'monthly',
-    category: '',
-    price: 0
-  });
+  const [pricing, setPricing] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // Base box price
+  const baseBoxPrice = 29.99;
+
+  useEffect(() => {
+    loadSubscriptionPricing();
+  }, []);
+
+  const loadSubscriptionPricing = async () => {
+    try {
+      setLoading(true);
+      const types = ['monthly_3', 'monthly_6', 'monthly_12'];
+      const pricingData = {};
+      
+      for (const type of types) {
+        const response = await axios.get(`${API}/subscriptions/pricing/${type}?box_price=${baseBoxPrice}`);
+        pricingData[type] = response.data;
+      }
+      
+      setPricing(pricingData);
+    } catch (error) {
+      console.error('Error loading subscription pricing:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (subscriptionType) => {
+    try {
+      const response = await axios.post(`${API}/subscriptions/create`, {
+        customer_email: "user@example.com", // TODO: Get from user context
+        subscription_type: subscriptionType,
+        box_price: baseBoxPrice,
+        success_url: `${window.location.origin}/success`,
+        cancel_url: `${window.location.origin}/assinaturas`,
+        metadata: {
+          source: "subscription_page"
+        }
+      });
+
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      alert('Erro ao processar assinatura. Tente novamente.');
+    }
+  };
 
   const subscriptionTypes = [
     {
-      id: 'monthly',
-      name: 'Mensal',
-      description: 'Receba uma mystery box todos os meses',
-      price: 29.99,
-      features: ['3-5 produtos exclusivos', 'Envio grátis', 'Surpresas mensais']
+      id: 'monthly_3',
+      name: '3 Meses',
+      description: 'Pague 3 meses antecipados',
+      features: ['3 Mystery Boxes', 'Envio grátis', '10% de desconto']
     },
     {
-      id: 'quarterly',
-      name: 'Trimestral',
-      description: 'Receba uma mystery box a cada 3 meses',
-      price: 79.99,
-      features: ['5-7 produtos exclusivos', 'Envio grátis', 'Itens premium', 'Desconto de 10%']
+      id: 'monthly_6',
+      name: '6 Meses', 
+      description: 'Pague 6 meses antecipados',
+      features: ['6 Mystery Boxes', 'Envio grátis', '15% de desconto']
     },
     {
-      id: 'yearly',
-      name: 'Anual',
-      description: 'Receba uma mystery box a cada mês por um ano',
-      price: 299.99,
-      features: ['3-5 produtos exclusivos mensais', 'Envio grátis', 'Itens exclusivos anuais', 'Desconto de 20%']
+      id: 'monthly_12',
+      name: '12 Meses',
+      description: 'Pague 12 meses antecipados',
+      features: ['12 Mystery Boxes', 'Envio grátis', '20% de desconto']
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black flex items-center justify-center">
+        <div className="text-white text-xl">Carregando preços...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
@@ -4515,36 +4565,58 @@ const Subscriptions = () => {
         </h1>
         
         <p className={`${isMobile ? 'text-base' : 'text-lg'} text-gray-300 text-center mb-12 max-w-2xl mx-auto`}>
-          Escolha o plano perfeito e receba surpresas incríveis regularmente!
+          Pague antecipadamente e ganhe desconto! Quanto mais meses, maior o desconto.
         </p>
 
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-8'} mb-12`}>
-          {subscriptionTypes.map((subscription) => (
-            <div key={subscription.id} className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
-              <div className="text-center mb-6">
-                <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-2`}>
-                  {subscription.name}
-                </h3>
-                <p className="text-gray-400 mb-4">{subscription.description}</p>
-                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400 mb-4`}>
-                  €{subscription.price}
+          {subscriptionTypes.map((subscription) => {
+            const pricingData = pricing[subscription.id];
+            return (
+              <div key={subscription.id} className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                <div className="text-center mb-6">
+                  <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-white mb-2`}>
+                    {subscription.name}
+                  </h3>
+                  <p className="text-gray-400 mb-4">{subscription.description}</p>
+                  
+                  {pricingData && (
+                    <>
+                      <div className="mb-2">
+                        <span className="text-gray-400 line-through text-lg">
+                          €{pricingData.original_total.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400 mb-2`}>
+                        €{pricingData.final_price.toFixed(2)}
+                      </div>
+                      <div className="text-green-400 font-semibold mb-4">
+                        Poupa €{pricingData.discount_amount.toFixed(2)} ({Math.round(pricingData.discount_rate * 100)}%)
+                      </div>
+                      <div className="text-sm text-gray-300">
+                        €{pricingData.price_per_box.toFixed(2)} por box
+                      </div>
+                    </>
+                  )}
                 </div>
+
+                <ul className="mb-8 space-y-2">
+                  {subscription.features.map((feature, index) => (
+                    <li key={index} className="text-gray-300 flex items-center">
+                      <span className="text-green-400 mr-2">✓</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={() => handleSubscribe(subscription.id)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold"
+                >
+                  Subscrever Agora
+                </button>
               </div>
-
-              <ul className="mb-8 space-y-2">
-                {subscription.features.map((feature, index) => (
-                  <li key={index} className="text-gray-300 flex items-center">
-                    <span className="text-green-400 mr-2">✓</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <button className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold">
-                Subscrever Agora
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30">
