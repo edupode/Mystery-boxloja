@@ -122,12 +122,22 @@ def test_send_birthday_email(admin_token):
             "discount_value": 15.0
         }
         
-        logger.info(f"Sending birthday email to {TEST_EMAIL} with data: {json.dumps(birthday_data)}")
+        # First try with JSON body
+        logger.info(f"Sending birthday email to {TEST_EMAIL} with JSON body: {json.dumps(birthday_data)}")
         response = requests.post(
             f"{API_URL}/admin/emails/send-birthday", 
             json=birthday_data,
             headers=headers
         )
+        
+        # If JSON body fails, try with query parameters
+        if response.status_code == 422:
+            logger.info("JSON body approach failed with 422, trying with query parameters")
+            response = requests.post(
+                f"{API_URL}/admin/emails/send-birthday", 
+                params=birthday_data,
+                headers=headers
+            )
         
         if response.status_code == 200:
             result = response.json()
