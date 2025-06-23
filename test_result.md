@@ -1202,14 +1202,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Subscription Endpoints - Criar checkout de subscription"
-    - "Subscription Endpoints - Status de subscription"
-    - "Subscription Endpoints - Customer Portal"
-    - "Subscription Endpoints - Listar subscriptions"
-    - "Subscription Endpoints - Webhook handler"
-    - "Stripe Live Keys - Atualização"
-    - "Correção de imagens nos produtos"
-    - "Validação de Pagamento Stripe"
+    - "Admin Email Endpoints - Send Discount Email"
+    - "Admin Email Endpoints - Send Birthday Email"
+    - "Admin Email Endpoints - Test Welcome Email"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
