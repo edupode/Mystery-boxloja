@@ -4826,6 +4826,7 @@ const App = () => {
             <Route path="/admin/emails" element={<AdminEmails />} />
             <Route path="/admin/chat" element={<AdminChatDashboard />} />
             <Route path="/perfil" element={<UserProfile />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/termos" element={<TermsAndConditions />} />
           </Routes>
           <Footer />
