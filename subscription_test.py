@@ -135,7 +135,12 @@ def test_customer_portal():
             "return_url": f"{BACKEND_URL}/account"
         }
         
-        response = requests.post(f"{API_URL}/subscriptions/customer-portal", json=portal_data)
+        # Try with local API first
+        response = requests.post(f"{LOCAL_API_URL}/subscriptions/customer-portal", json=portal_data)
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.post(f"{API_URL}/subscriptions/customer-portal", json=portal_data)
         
         # Since we're likely using a mock customer_id, we expect a 400 error
         if response.status_code == 400 and "No such customer" in response.text:
