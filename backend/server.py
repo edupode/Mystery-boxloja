@@ -1637,6 +1637,86 @@ async def get_payment_status(session_id: str):
 
     return status
 
+# Subscription endpoints
+@api_router.post("/subscriptions/create")
+async def create_subscription_checkout(request: SubscriptionRequest):
+    """Create a subscription checkout session"""
+    try:
+        result = await stripe_subscription.create_subscription_checkout(request)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.get("/subscriptions/status/{session_id}")
+async def get_subscription_status(session_id: str):
+    """Get subscription status from checkout session"""
+    try:
+        status = await stripe_subscription.get_subscription_status(session_id)
+        return status
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/subscriptions/customer-portal")
+async def create_customer_portal(request: CustomerPortalRequest):
+    """Create customer portal session for subscription management"""
+    try:
+        result = await stripe_subscription.create_customer_portal(request)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.get("/subscriptions/customer/{customer_id}")
+async def list_customer_subscriptions(customer_id: str):
+    """List all subscriptions for a customer"""
+    try:
+        result = await stripe_subscription.list_customer_subscriptions(customer_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/subscriptions/webhook")
+async def handle_subscription_webhook(request: Request):
+    """Handle Stripe subscription webhooks"""
+    try:
+        payload = await request.body()
+        sig_header = request.headers.get('stripe-signature')
+        
+        # In production, you should verify the webhook signature
+        # event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        
+        # For now, just parse the payload directly
+        event = json.loads(payload)
+        
+        if event['type'] == 'customer.subscription.created':
+            subscription = event['data']['object']
+            # Handle subscription created
+            print(f"Subscription created: {subscription['id']}")
+            
+        elif event['type'] == 'customer.subscription.updated':
+            subscription = event['data']['object']
+            # Handle subscription updated
+            print(f"Subscription updated: {subscription['id']}")
+            
+        elif event['type'] == 'customer.subscription.deleted':
+            subscription = event['data']['object']
+            # Handle subscription cancelled
+            print(f"Subscription cancelled: {subscription['id']}")
+            
+        elif event['type'] == 'invoice.payment_succeeded':
+            invoice = event['data']['object']
+            # Handle successful payment
+            print(f"Payment succeeded for subscription: {invoice['subscription']}")
+            
+        elif event['type'] == 'invoice.payment_failed':
+            invoice = event['data']['object']
+            # Handle failed payment
+            print(f"Payment failed for subscription: {invoice['subscription']}")
+        
+        return {"status": "success"}
+    except Exception as e:
+        print(f"Webhook error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
 # Admin endpoints
 @api_router.get("/admin/dashboard")
 async def admin_dashboard(admin_user: User = Depends(get_admin_user)):
