@@ -1515,7 +1515,7 @@ async def get_shipping_methods():
 
 # Checkout and payment
 @api_router.post("/checkout")
-async def create_checkout(checkout_data: CheckoutRequest):
+async def create_checkout(checkout_data: CheckoutRequest, current_user: User = Depends(get_current_user)):
     cart = await db.carts.find_one({"session_id": checkout_data.cart_id})
     if not cart or not cart.get("items"):
         raise HTTPException(status_code=400, detail="Carrinho vazio")
