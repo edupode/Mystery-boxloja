@@ -1070,6 +1070,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoints GET /api/categories e POST /api/admin/categories testados com sucesso"
+      - working: true
+        agent: "testing"
+        comment: "Testado o endpoint DELETE /api/admin/categories/{category_id}. O endpoint valida corretamente se a categoria existe (retorna 404 para categorias inexistentes) e impede a remoção de categorias com produtos associados (retorna 400). Há um problema na remoção de produtos associados a categorias que precisa ser investigado."
 
   - task: "Admin User Management"
     implemented: true
