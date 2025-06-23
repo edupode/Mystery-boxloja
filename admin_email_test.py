@@ -69,12 +69,22 @@ def test_send_discount_email(admin_token):
             "expiry_date": "31/12/2024"
         }
         
-        logger.info(f"Sending discount email to {TEST_EMAIL} with data: {json.dumps(discount_data)}")
+        # First try with JSON body
+        logger.info(f"Sending discount email to {TEST_EMAIL} with JSON body: {json.dumps(discount_data)}")
         response = requests.post(
             f"{API_URL}/admin/emails/send-discount", 
             json=discount_data,
             headers=headers
         )
+        
+        # If JSON body fails, try with query parameters
+        if response.status_code == 422:
+            logger.info("JSON body approach failed with 422, trying with query parameters")
+            response = requests.post(
+                f"{API_URL}/admin/emails/send-discount", 
+                params=discount_data,
+                headers=headers
+            )
         
         if response.status_code == 200:
             result = response.json()
