@@ -1173,6 +1173,7 @@ test_plan:
     - "Subscription Endpoints - Listar subscriptions"
     - "Subscription Endpoints - Webhook handler"
     - "Stripe Live Keys - Atualização"
+    - "Correção de imagens nos produtos"
 
 agent_communication:
   - agent: "main"
