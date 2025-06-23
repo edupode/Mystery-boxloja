@@ -661,72 +661,89 @@ async def send_order_confirmation_email(user_email: str, order: Order, products:
     <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="utf-8">
-        <title>Confirmação de Pedido</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirmação do Seu Pedido</title>
         <style>
-            body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0f0f10; color: white; }
-            .container { background: linear-gradient(135deg, #059669, #0d9488); padding: 40px; border-radius: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .content { background: rgba(0,0,0,0.3); padding: 30px; border-radius: 15px; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #374151; }
-            th { background-color: rgba(0,0,0,0.3); }
-            .total-row { font-weight: bold; background-color: rgba(0,0,0,0.2); }
-            .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #ccc; }
+            body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+            .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; text-align: center; padding: 40px 20px; }
+            .header h1 { margin: 0; font-size: 28px; font-weight: bold; }
+            .check-icon { font-size: 60px; margin: 20px 0; animation: pulse 2s infinite; }
+            @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+            .content { padding: 40px 20px; }
+            .order-info { background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0; }
+            .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+            .order-number { font-size: 18px; font-weight: bold; color: #333; }
+            .order-status { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+            .product-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+            .product-item:last-child { border-bottom: none; }
+            .product-info { flex: 1; margin-left: 15px; }
+            .product-name { font-weight: bold; color: #333; }
+            .product-price { color: #28a745; font-weight: bold; }
+            .product-emoji { font-size: 40px; }
+            .total-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin: 20px 0; text-align: center; }
+            .total-amount { font-size: 24px; font-weight: bold; }
+            .shipping-info { background: #e3f2fd; padding: 20px; border-radius: 15px; margin: 20px 0; }
+            .cta-button { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; margin: 20px auto; transition: transform 0.3s ease; text-align: center; }
+            .cta-button:hover { transform: translateY(-2px); }
+            .footer { background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 12px; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
-                <h1>✅ Pedido Confirmado!</h1>
-                <div style="font-size: 48px;">🎉</div>
+                <div class="check-icon">✅</div>
+                <h1>Pedido Confirmado!</h1>
+                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Obrigado pela sua compra</p>
             </div>
+            
             <div class="content">
-                <h2>Obrigado pelo seu pedido!</h2>
-                <p><strong>Número do Pedido:</strong> {{ order_id }}</p>
-                <p><strong>Data:</strong> {{ order_date }}</p>
+                <div class="order-info">
+                    <div class="order-header">
+                        <span class="order-number">Pedido #{{ order_id }}</span>
+                        <span class="order-status">{{ order_status }}</span>
+                    </div>
+                    <p style="color: #666; margin: 0;">
+                        📅 Realizado em: {{ order_date }}<br>
+                        💳 Método de pagamento: {{ payment_method }}<br>
+                        🚚 Método de entrega: {{ shipping_method }}
+                    </p>
+                </div>
                 
-                <h3>📦 Itens do Pedido:</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Quantidade</th>
-                            <th>Preço</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                        <tr>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>€{{ item.total_price }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <h3 style="color: #333; margin: 30px 0 15px 0;">📦 Produtos Comprados:</h3>
                 
-                <table>
-                    <tr><td>Subtotal:</td><td>€{{ subtotal }}</td></tr>
-                    {% if discount_amount > 0 %}
-                    <tr><td>Desconto{% if coupon_code %} ({{ coupon_code }}){% endif %}:</td><td>-€{{ discount_amount }}</td></tr>
-                    {% endif %}
-                    <tr><td>IVA (23%):</td><td>€{{ vat_amount }}</td></tr>
-                    <tr><td>Envio:</td><td>€{{ shipping_cost }}</td></tr>
-                    <tr class="total-row"><td><strong>Total:</strong></td><td><strong>€{{ total_amount }}</strong></td></tr>
-                </table>
+                {{ products_list }}
                 
-                <h3>📍 Informações de Entrega:</h3>
-                <p>{{ shipping_address }}</p>
-                <p><strong>Telemóvel:</strong> {{ phone }}</p>
-                {% if nif %}
-                <p><strong>NIF:</strong> {{ nif }}</p>
-                {% endif %}
+                <div class="total-section">
+                    <p style="margin: 0 0 10px 0; font-size: 16px;">Total do Pedido</p>
+                    <div class="total-amount">€{{ total_amount }}</div>
+                </div>
                 
-                <p>Receberá em breve informações sobre o envio do seu pedido!</p>
+                <div class="shipping-info">
+                    <h4 style="color: #1976d2; margin: 0 0 10px 0;">🚚 Informações de Entrega</h4>
+                    <p style="color: #666; margin: 0;">
+                        <strong>{{ customer_name }}</strong><br>
+                        {{ customer_address }}<br>
+                        {{ customer_postal_code }} {{ customer_city }}
+                    </p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <a href="https://mystery-box-loja.vercel.app/profile" class="cta-button">
+                        📋 Acompanhar Pedido
+                    </a>
+                </div>
+                
+                <p style="color: #888; font-size: 14px; text-align: center; margin-top: 30px;">
+                    Receberá um email com o código de rastreamento assim que o pedido for enviado.
+                </p>
             </div>
+            
             <div class="footer">
-                <p>Mystery Box Store - Os seus mistérios estão a caminho! 🚀</p>
+                <p>Mystery Box Store - Sua loja de mistérios e surpresas</p>
+                <p>© 2024 Mystery Box Store. Todos os direitos reservados.</p>
+                <p>Precisa de ajuda? Contacte-nos através do chat no website.</p>
             </div>
         </div>
     </body>
