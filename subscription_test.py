@@ -95,7 +95,12 @@ def test_subscription_status():
             # Otherwise use a mock session_id
             session_id = "cs_test_mockSessionId"
         
-        response = requests.get(f"{API_URL}/subscriptions/status/{session_id}")
+        # Try with local API first
+        response = requests.get(f"{LOCAL_API_URL}/subscriptions/status/{session_id}")
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.get(f"{API_URL}/subscriptions/status/{session_id}")
         
         # Since we're likely using a mock session_id, we expect an error status
         if response.status_code == 200:
