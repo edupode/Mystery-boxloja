@@ -377,8 +377,9 @@ def run_tests():
     test_checkout_with_bank_transfer()
     test_checkout_without_birth_date()
     
-    # Test subscription payment methods
+    # Test subscription endpoints
     test_subscription_payment_methods()
+    test_subscription_endpoints()
     
     # Print summary
     logger.info("\n=== TEST SUMMARY ===")
