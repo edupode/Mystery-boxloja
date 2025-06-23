@@ -113,8 +113,8 @@ def test_send_birthday_email(admin_token):
         birthday_data = {
             "user_email": TEST_EMAIL,
             "user_name": TEST_NAME,
-            "coupon_code": "BIRTHDAY15",
-            "discount_value": 15.0
+            "coupon_code": TEST_COUPON,
+            "discount_value": TEST_DISCOUNT
         }
         
         # Try with JSON body
