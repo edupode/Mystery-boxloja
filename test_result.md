@@ -167,15 +167,18 @@ backend:
 
   - task: "Subscription Endpoints - Webhook handler"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implementado endpoint POST /api/subscriptions/webhook para processar webhooks do Stripe"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint testado com sucesso. Aceita eventos webhook simulados e retorna status 200, o que é o comportamento esperado para testes básicos sem signature."
 
   - task: "Stripe Live Keys - Atualização"
     implemented: true
