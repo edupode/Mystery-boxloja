@@ -169,7 +169,12 @@ def test_list_customer_subscriptions():
             # Otherwise use a mock customer_id
             customer_id = "cus_mockCustomerId"
         
-        response = requests.get(f"{API_URL}/subscriptions/customer/{customer_id}")
+        # Try with local API first
+        response = requests.get(f"{LOCAL_API_URL}/subscriptions/customer/{customer_id}")
+        
+        # If local API fails, try with remote API
+        if response.status_code == 404:
+            response = requests.get(f"{API_URL}/subscriptions/customer/{customer_id}")
         
         # Since we're likely using a mock customer_id, we expect a 400 error
         if response.status_code == 400 and "No such customer" in response.text:
