@@ -1042,10 +1042,9 @@ const Checkout = () => {
     street: '',
     postalCode: '',
     city: '',
-    birthDate: '',
     phone: '',
     nif: '',
-    paymentMethod: 'card',
+    paymentMethod: 'stripe',
     shippingMethod: 'standard'
   });
   const [shippingMethods, setShippingMethods] = useState([]);
