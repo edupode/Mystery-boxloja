@@ -1600,72 +1600,57 @@ async def create_checkout(checkout_data: CheckoutRequest, current_user: User = D
         shipping_method=checkout_data.shipping_method
     )
 
-    if checkout_data.payment_method == "card":
-        # Create Stripe checkout session
-        success_url = f"{checkout_data.origin_url}/success?session_id={{CHECKOUT_SESSION_ID}}"
-        cancel_url = f"{checkout_data.origin_url}/cart"
+    # Only support Stripe payment (card, Klarna, etc.)
+    if checkout_data.payment_method != "card":
+        raise HTTPException(status_code=400, detail="Apenas pagamento com cartão é suportado")
+    
+    # Create Stripe checkout session
+    success_url = f"{checkout_data.origin_url}/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{checkout_data.origin_url}/cart"
 
-        checkout_request = CheckoutSessionRequest(
-            amount=total_amount,
-            currency="eur",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata={
-                "order_id": order.id,
-                "session_id": cart.session_id
-            }
+    checkout_request = CheckoutSessionRequest(
+        amount=total_amount,
+        currency="eur",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "order_id": order.id,
+            "session_id": cart.session_id,
+            "user_id": current_user.id,
+            "user_email": current_user.email
+        }
+    )
+
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    order.stripe_session_id = session.session_id
+
+    # Create payment transaction
+    payment_transaction = PaymentTransaction(
+        session_id=session.session_id,
+        payment_id=order.id,
+        amount=total_amount,
+        currency="eur",
+        metadata={"order_id": order.id, "user_id": current_user.id},
+        order_id=order.id
+    )
+    await db.payment_transactions.insert_one(payment_transaction.dict())
+
+    await db.orders.insert_one(order.dict())
+    
+    # Update coupon usage if applicable
+    if cart.coupon_code:
+        await db.coupons.update_one(
+            {"code": cart.coupon_code},
+            {"$inc": {"current_uses": 1}}
         )
-
-        session = await stripe_checkout.create_checkout_session(checkout_request)
-        order.stripe_session_id = session.session_id
-
-        # Create payment transaction
-        payment_transaction = PaymentTransaction(
-            session_id=session.session_id,
-            payment_id=order.id,
-            amount=total_amount,
-            currency="eur",
-            metadata={"order_id": order.id},
-            order_id=order.id
-        )
-        await db.payment_transactions.insert_one(payment_transaction.dict())
-
-        await db.orders.insert_one(order.dict())
-        
-        # Update coupon usage if applicable
-        if cart.coupon_code:
-            await db.coupons.update_one(
-                {"code": cart.coupon_code},
-                {"$inc": {"current_uses": 1}}
-            )
-        
-        # Clear the cart after successful order creation
-        await db.carts.update_one(
-            {"session_id": cart.session_id},
-            {"$set": {"items": [], "coupon_code": None, "updated_at": datetime.utcnow()}}
-        )
-        
-        return {"checkout_url": session.url, "order_id": order.id}
-
-    else:
-        # For other payment methods
-        order.payment_status = "pending"
-        await db.orders.insert_one(order.dict())
-        
-        # Update coupon usage if applicable
-        if cart.coupon_code:
-            await db.coupons.update_one(
-                {"code": cart.coupon_code},
-                {"$inc": {"current_uses": 1}}
-            )
-        
-        # Clear the cart after successful order creation
-        await db.carts.update_one(
-            {"session_id": cart.session_id},
-            {"$set": {"items": [], "coupon_code": None, "updated_at": datetime.utcnow()}}
-        )
-        
-        return {"order_id": order.id, "message": "Pedido criado com sucesso"}
+    
+    # Clear the cart after successful order creation
+    await db.carts.update_one(
+        {"session_id": cart.session_id},
+        {"$set": {"items": [], "coupon_code": None, "updated_at": datetime.utcnow()}}
+    )
+    
+    return {"checkout_url": session.url, "order_id": order.id}
 
 @api_router.get("/payments/checkout/status/{session_id}")
 async def get_payment_status(session_id: str):
