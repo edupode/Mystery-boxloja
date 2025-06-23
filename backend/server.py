@@ -2131,26 +2131,22 @@ async def delete_promotion(promotion_id: str, admin_user: User = Depends(get_adm
 # Email management endpoints
 @api_router.post("/admin/emails/send-discount")
 async def send_discount_email_admin(
-    request: DiscountEmailRequest,
+    user_email: str,
+    user_name: str,
+    coupon_code: str,
+    discount_value: float,
+    discount_type: str,
+    expiry_date: str,
     admin_user: User = Depends(get_admin_user)
 ):
-    """Send discount email to a user
-    
-    This endpoint accepts a JSON body with the following fields:
-    - user_email: Email of the recipient
-    - user_name: Name of the recipient
-    - coupon_code: Coupon code to include in the email
-    - discount_value: Value of the discount
-    - discount_type: Type of discount (percentage or fixed)
-    - expiry_date: Expiry date of the coupon
-    """
+    """Send discount email to a user"""
     result = await send_discount_email(
-        request.user_email, 
-        request.user_name, 
-        request.coupon_code, 
-        request.discount_value, 
-        request.discount_type, 
-        request.expiry_date
+        user_email, 
+        user_name, 
+        coupon_code, 
+        discount_value, 
+        discount_type, 
+        expiry_date
     )
     return result
 
