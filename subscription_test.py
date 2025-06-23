@@ -241,10 +241,11 @@ def test_stripe_live_keys():
     """Test if Stripe live keys are working"""
     try:
         # We'll use the create subscription endpoint to test if the keys are working
-        # We'll use a real-looking but invalid price_id to see if we get the expected error
+        # We'll use a real-looking but invalid subscription_type to see if we get the expected error
         subscription_data = {
             "customer_email": TEST_CUSTOMER_EMAIL,
-            "price_id": "price_1RdXXXXXXXXXXXXXXXXXXXXX",  # Invalid but real-looking price_id
+            "subscription_type": "monthly_invalid",
+            "box_price": 29.99,
             "success_url": f"{BACKEND_URL}/success",
             "cancel_url": f"{BACKEND_URL}/cancel"
         }
