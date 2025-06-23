@@ -2286,8 +2286,15 @@ const AdminProducts = () => {
                 category: '',
                 price: '',
                 image_url: '',
+                image_base64: '',
                 stock_quantity: '100',
-                featured: false
+                featured: false,
+                subscription_prices: {
+                  "1_month": '',
+                  "3_months": '',
+                  "6_months": '',
+                  "12_months": ''
+                }
               });
             }}
             className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300"
