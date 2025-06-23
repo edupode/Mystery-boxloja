@@ -1962,6 +1962,63 @@ async def update_order_status(order_id: str, status: str, admin_user: User = Dep
     
     return {"message": "Status atualizado com sucesso", "status": status}
 
+@api_router.get("/admin/orders/{order_id}")
+async def get_order_details(order_id: str, admin_user: User = Depends(get_admin_user)):
+    """Get detailed order information including products"""
+    # Get order
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido não encontrado")
+    
+    # Convert ObjectId to string
+    if "_id" in order:
+        order["_id"] = str(order["_id"])
+    
+    # Get product details for each item
+    detailed_items = []
+    for item in order.get("items", []):
+        product = await db.products.find_one({"id": item.product_id})
+        if product:
+            if "_id" in product:
+                product["_id"] = str(product["_id"])
+            
+            detailed_item = {
+                "product_id": item.product_id,
+                "quantity": item.quantity,
+                "subscription_type": item.get("subscription_type"),
+                "product": {
+                    "id": product["id"],
+                    "name": product["name"],
+                    "description": product.get("description", ""),
+                    "category": product.get("category", ""),
+                    "price": product["price"],
+                    "image_url": product.get("image_url", ""),
+                    "subscription_prices": product.get("subscription_prices", {})
+                }
+            }
+            detailed_items.append(detailed_item)
+    
+    # Get user details if exists
+    user_details = None
+    if order.get("user_id"):
+        user = await db.users.find_one({"id": order["user_id"]})
+        if user:
+            user_details = {
+                "id": user["id"],
+                "name": user["name"],
+                "email": user["email"],
+                "phone": user.get("phone", ""),
+            }
+    
+    # Build detailed order response
+    detailed_order = {
+        **order,
+        "detailed_items": detailed_items,
+        "user_details": user_details
+    }
+    
+    return detailed_order
+
 @api_router.get("/admin/users")
 async def get_all_users(
     search: Optional[str] = None,
