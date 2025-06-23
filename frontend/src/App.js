@@ -40,6 +40,27 @@ const DeviceProvider = ({ children }) => {
     }
   }, []);
 
+  // Keep-alive system to prevent backend from sleeping
+  useEffect(() => {
+    const keepAlive = async () => {
+      try {
+        await axios.get(`${API}/health`);
+        console.log('Backend keep-alive ping sent');
+      } catch (error) {
+        console.warn('Keep-alive ping failed:', error);
+      }
+    };
+
+    // Send first ping immediately
+    keepAlive();
+
+    // Set up interval to ping every 10 minutes (600,000 ms)
+    const intervalId = setInterval(keepAlive, 10 * 60 * 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
   const fetchUserInfo = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`);
