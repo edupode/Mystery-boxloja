@@ -1824,6 +1824,15 @@ async def test_email_system(email: str = "edupodeptptpt@gmail.com"):
         return {"error": str(e), "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")}
 
 # Subscription endpoints
+@api_router.get("/subscriptions/pricing/{subscription_type}")
+async def get_subscription_pricing(subscription_type: str, box_price: float = 29.99):
+    """Get subscription pricing with discounts"""
+    try:
+        pricing = SubscriptionPricing.calculate_subscription_price(box_price, subscription_type)
+        return pricing
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @api_router.post("/subscriptions/create")
 async def create_subscription_checkout(request: SubscriptionRequest):
     """Create a subscription checkout session"""
