@@ -4738,8 +4738,8 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to="/faq" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">❓ FAQ</Link></li>
               <li><Link to="/termos" className="text-gray-400 hover:text-purple-300 transition-colors duration-300">📋 Termos e Condições</Link></li>
-              <li><span className="text-gray-400">📧 suporte@mysteryboxstore.pt</span></li>
-              <li><span className="text-gray-400">📞 +351 123 456 789</span></li>
+              <li><span className="text-gray-400">📧 edupodept@gmail.com</span></li>
+              <li><span className="text-gray-400">📞 +351 913090641</span></li>
             </ul>
           </div>
 
