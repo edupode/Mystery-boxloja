@@ -2576,6 +2576,70 @@ async def test_send_email(request: TestEmailRequest):
         logger.error(f"Test email sending error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao enviar email de teste: {str(e)}")
 
+@api_router.get("/test/resend-status")
+async def test_resend_status():
+    """Test endpoint to check Resend API status"""
+    try:
+        # Check if Resend API key is set
+        api_key = os.environ.get('RESEND_API_KEY')
+        if not api_key:
+            return {"status": "error", "message": "Resend API key not set"}
+        
+        # Check Resend module
+        resend_version = getattr(resend, "__version__", "unknown")
+        
+        # Try to send a test email to a test address
+        test_email = "test@example.com"
+        params = {
+            "from": "Mystery Box Store <noreply@mysteryboxstore.com>",
+            "to": [test_email],
+            "subject": "Test Email",
+            "html": "<p>This is a test email.</p>"
+        }
+        
+        try:
+            # Try to access the Emails class
+            emails_class = getattr(resend, "Emails", None)
+            if emails_class is None:
+                return {
+                    "status": "error", 
+                    "message": "Resend.Emails class not found",
+                    "resend_version": resend_version,
+                    "api_key_set": bool(api_key),
+                    "api_key_prefix": api_key[:5] + "..." if api_key else None
+                }
+            
+            # Try to access the send method
+            send_method = getattr(emails_class, "send", None)
+            if send_method is None:
+                return {
+                    "status": "error", 
+                    "message": "Resend.Emails.send method not found",
+                    "resend_version": resend_version,
+                    "api_key_set": bool(api_key),
+                    "api_key_prefix": api_key[:5] + "..." if api_key else None
+                }
+            
+            # Don't actually send the email to avoid unnecessary API calls
+            return {
+                "status": "ok",
+                "message": "Resend API is properly configured",
+                "resend_version": resend_version,
+                "api_key_set": bool(api_key),
+                "api_key_prefix": api_key[:5] + "..." if api_key else None
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error accessing Resend API: {str(e)}",
+                "resend_version": resend_version,
+                "api_key_set": bool(api_key),
+                "api_key_prefix": api_key[:5] + "..." if api_key else None
+            }
+    except Exception as e:
+        logger.error(f"Resend status check error: {str(e)}")
+        return {"status": "error", "message": f"Error checking Resend status: {str(e)}"}
+
 # Health check endpoint for Railway
 @app.get("/api/health")
 async def health_check():
