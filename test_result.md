@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "FASE 4 - IMPLEMENTAÇÃO SUBSCRIPTIONS RECORRENTES: Implementar sistema completo de subscriptions recorrentes do Stripe com endpoints: POST /api/subscriptions/create, GET /api/subscriptions/status/{session_id}, POST /api/subscriptions/customer-portal, GET /api/subscriptions/customer/{customer_id}, POST /api/subscriptions/webhook. Melhorar sistema de emails com templates bonitos e testar OTP. Remover data de nascimento do checkout e adicionar ao perfil."
+user_problem_statement: "Coisas que não funcionam: nas assinaturas não é possivel colocar dentro do carrinho pra checkout e tem de 1 mes que eu n queria, tem a de 3 meses e a de 6 meses e a de 12 meses, porém os preços mudam conforme a caixa, quando clico no descobrir, na parte das assinaturas das boxes aparece errado também, devia aparecer como está nas assinaturas, podes remover o botão das assinaturas e inserir dentro do descobrir para cada box individual, podes automatizar o processo para todas, lembra-te 3 meses 10% de desconto, 6 meses 15% de desconto, 12 meses - 20% de desconto"
 
 backend:
   - task: "Subscription Pricing Calculation"
