@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv('/app/frontend/.env')
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL')
+# For local testing, use localhost
+BACKEND_URL = "http://localhost:8001"
 API_URL = f"{BACKEND_URL}/api"
 
 # Admin credentials
