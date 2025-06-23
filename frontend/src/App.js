@@ -3123,7 +3123,7 @@ const AdminEmails = () => {
 
     try {
       if (emailForm.type === 'discount') {
-        await axios.post(`${API}/admin/emails/send-discount`, {
+        const params = new URLSearchParams({
           user_email: emailForm.user_email,
           user_name: emailForm.user_name,
           coupon_code: emailForm.coupon_code,
@@ -3131,13 +3131,15 @@ const AdminEmails = () => {
           discount_type: emailForm.discount_type,
           expiry_date: emailForm.expiry_date
         });
+        await axios.post(`${API}/admin/emails/send-discount?${params}`);
       } else if (emailForm.type === 'birthday') {
-        await axios.post(`${API}/admin/emails/send-birthday`, {
+        const params = new URLSearchParams({
           user_email: emailForm.user_email,
           user_name: emailForm.user_name,
           coupon_code: emailForm.coupon_code,
           discount_value: parseFloat(emailForm.discount_value)
         });
+        await axios.post(`${API}/admin/emails/send-birthday?${params}`);
       }
 
       alert('Email enviado com sucesso!');
