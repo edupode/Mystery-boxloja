@@ -4805,7 +4805,7 @@ const Footer = () => {
 
 const App = () => {
   return (
-    <AppProvider>
+    <DeviceProvider>
       <div className="App min-h-screen bg-gray-900">
         <BrowserRouter>
           <Header />
@@ -4832,7 +4832,7 @@ const App = () => {
           <LiveChatButton />
         </BrowserRouter>
       </div>
-    </AppProvider>
+    </DeviceProvider>
   );
 };
 
