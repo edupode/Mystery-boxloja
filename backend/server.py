@@ -99,7 +99,7 @@ class StripeSubscription:
             # Create subscription checkout session
             session = stripe.checkout.Session.create(
                 customer=customer.id,
-                payment_method_types=["card"],
+                payment_method_types=["card", "klarna", "multibanco", "sofort", "giropay"],
                 line_items=[{
                     "price": request.price_id,
                     "quantity": 1,
