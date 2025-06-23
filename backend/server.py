@@ -1401,8 +1401,8 @@ async def get_product(product_id: str):
         }),
         "image_url": product.get("image_url", ""),
         "is_active": product.get("is_active", True),
-        "stock_quantity": product.get("stock", 100),
-        "featured": product.get("is_featured", False),
+        "stock_quantity": product.get("stock_quantity", 100),
+        "featured": product.get("featured", False),
         "created_at": product.get("created_at", datetime.utcnow())
     }
     
