@@ -1426,7 +1426,6 @@ async def get_product(product_id: str):
         "category": product.get("category", ""),
         "price": product.get("price", 0.0),
         "subscription_prices": product.get("subscription_prices", {
-            "1_month": 0.0,
             "3_months": 0.0,
             "6_months": 0.0,
             "12_months": 0.0
