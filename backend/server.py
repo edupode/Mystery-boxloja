@@ -51,11 +51,12 @@ class CheckoutStatusResponse(BaseModel):
     amount_total: Optional[float] = None
     metadata: Dict[str, Any] = {}
 
-# Stripe subscription models
+# Stripe subscription models - Updated for prepaid subscriptions
 class SubscriptionRequest(BaseModel):
     customer_id: Optional[str] = None
     customer_email: str
-    price_id: str
+    subscription_type: str  # 'monthly_3', 'monthly_6', 'monthly_12'
+    box_price: float  # Individual box price
     success_url: str
     cancel_url: str
     metadata: Dict[str, str] = {}
@@ -63,14 +64,14 @@ class SubscriptionRequest(BaseModel):
 class SubscriptionResponse(BaseModel):
     session_id: str
     url: str
-    customer_id: str
+    customer_id: str = None
 
 class SubscriptionStatusResponse(BaseModel):
-    subscription_id: Optional[str] = None
+    subscription_id: str
     status: str
-    current_period_start: Optional[int] = None
     current_period_end: Optional[int] = None
-    customer_id: Optional[str] = None
+    customer_id: str
+    customer_email: Optional[str] = None
 
 class CustomerPortalRequest(BaseModel):
     customer_id: str
@@ -78,6 +79,39 @@ class CustomerPortalRequest(BaseModel):
 
 class CustomerPortalResponse(BaseModel):
     url: str
+
+# Subscription pricing calculation
+class SubscriptionPricing:
+    @staticmethod
+    def calculate_subscription_price(box_price: float, subscription_type: str) -> dict:
+        """Calculate subscription price with discounts"""
+        discounts = {
+            'monthly_3': {'months': 3, 'discount': 0.10},
+            'monthly_6': {'months': 6, 'discount': 0.15}, 
+            'monthly_12': {'months': 12, 'discount': 0.20}
+        }
+        
+        if subscription_type not in discounts:
+            raise ValueError(f"Invalid subscription type: {subscription_type}")
+        
+        config = discounts[subscription_type]
+        months = config['months']
+        discount_rate = config['discount']
+        
+        # Calculate prices
+        original_total = box_price * months
+        discount_amount = original_total * discount_rate
+        final_price = original_total - discount_amount
+        
+        return {
+            'months': months,
+            'box_price': box_price,
+            'original_total': original_total,
+            'discount_rate': discount_rate,
+            'discount_amount': discount_amount,
+            'final_price': final_price,
+            'price_per_box': final_price / months
+        }
 
 # Stripe subscription implementation
 class StripeSubscription:
