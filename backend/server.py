@@ -551,7 +551,7 @@ async def send_email(to_email: str, subject: str, html_content: str, text_conten
     """Send email using Resend"""
     try:
         params = {
-            "from": "Mystery Box Store <noreply@mysteryboxstore.com>",
+            "from": "Mystery Box Store <onboarding@resend.dev>",
             "to": [to_email],
             "subject": subject,
             "html": html_content
