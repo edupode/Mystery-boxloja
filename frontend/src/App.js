@@ -1854,6 +1854,13 @@ const AdminDashboard = () => {
         {/* Quick Actions */}
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'md:grid-cols-3 gap-6'}`}>
           <Link
+            to="/admin/users"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">👥</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Gerir Utilizadores</h3>
+          </Link>
+          <Link
             to="/admin/orders"
             className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
           >
