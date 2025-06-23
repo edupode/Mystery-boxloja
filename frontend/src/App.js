@@ -521,7 +521,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const { addToCart } = useAppContext();
+  const { addToCart } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
