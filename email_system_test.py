@@ -60,7 +60,7 @@ def test_send_test_email():
         response = requests.post(f"{API_URL}/test/send-email", json={
             "to_email": test_email,
             "subject": "Test Email",
-            "html_content": "<h1>Test Email</h1><p>This is a test email from Mystery Box Store.</p>"
+            "message": "This is a test email from Mystery Box Store."
         })
         
         if response.status_code != 200:
@@ -70,7 +70,7 @@ def test_send_test_email():
         if not email_data.get("success"):
             return log_test_result("Send Test Email", False, f"Email not sent: {email_data.get('error', 'No error message')}")
         
-        message_id = email_data.get("message_id")
+        message_id = email_data.get("email_result", {}).get("message_id")
         if not message_id:
             return log_test_result("Send Test Email", False, "No message ID returned")
         
