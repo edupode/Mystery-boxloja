@@ -1139,7 +1139,11 @@ async def register(user_data: UserCreate):
     await db.users.insert_one(user.dict())
     
     # Send welcome email
-    await send_welcome_email(user.email, user.name)
+    try:
+        email_result = await send_welcome_email(user.email, user.name)
+        logging.info(f"Welcome email sent to {user.email}: {email_result}")
+    except Exception as e:
+        logging.error(f"Failed to send welcome email to {user.email}: {e}")
 
     access_token = create_access_token(data={"sub": user.email})
     return Token(
