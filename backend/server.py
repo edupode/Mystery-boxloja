@@ -1687,7 +1687,13 @@ async def get_payment_status(session_id: str):
                         if product:
                             products.append(product)
                     
-                    await send_order_confirmation_email(user["email"], Order(**order), products)
+                    try:
+                        email_result = await send_order_confirmation_email(user["email"], Order(**order), products)
+                        logging.info(f"Order confirmation email sent to {user['email']}: {email_result}")
+                    except Exception as e:
+                        logging.error(f"Failed to send order confirmation email to {user['email']}: {e}")
+                else:
+                    logging.error(f"User not found for order {order.get('id')} with user_id {order.get('user_id')}")
 
     return status
 
