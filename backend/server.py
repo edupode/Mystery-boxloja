@@ -2259,6 +2259,9 @@ async def update_product(product_id: str, product_data: ProductCreate, admin_use
     if images:
         update_data["images"] = images
     
+    # Calculate subscription prices automatically based on the base price
+    update_data["subscription_prices"] = calculate_subscription_prices(product_data.price)
+    
     # Remove temporary fields from the final product data
     for field in ["image_base64", "images_base64"]:
         if field in update_data:
