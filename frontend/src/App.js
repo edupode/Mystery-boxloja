@@ -2230,7 +2230,13 @@ const AdminProducts = () => {
       image_url: product.image_url,
       image_base64: '',
       stock_quantity: product.stock_quantity.toString(),
-      featured: product.featured
+      featured: product.featured,
+      subscription_prices: {
+        "1_month": product.subscription_prices?.["1_month"]?.toString() || '',
+        "3_months": product.subscription_prices?.["3_months"]?.toString() || '',
+        "6_months": product.subscription_prices?.["6_months"]?.toString() || '',
+        "12_months": product.subscription_prices?.["12_months"]?.toString() || ''
+      }
     });
     setShowAddForm(true);
   };
