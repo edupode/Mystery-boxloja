@@ -4154,7 +4154,7 @@ const UserProfile = () => {
   });
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { user, setUser } = useAppContext();
+  const { user, setUser } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
