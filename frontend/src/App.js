@@ -3969,7 +3969,29 @@ const AdminPromotions = () => {
 const LiveChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNewTicket, setIsNewTicket] = useState(false);
+  const [pendingChats, setPendingChats] = useState(0);
   const { user } = useDeviceContext();
+
+  // Check for pending chats if user is admin
+  useEffect(() => {
+    if (user?.is_admin) {
+      checkPendingChats();
+      const interval = setInterval(checkPendingChats, 5000); // Check every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const checkPendingChats = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/chat/sessions`);
+      const pendingCount = response.data.filter(session => 
+        session.status === 'pending' && !session.agent_id
+      ).length;
+      setPendingChats(pendingCount);
+    } catch (error) {
+      console.error('Error checking pending chats:', error);
+    }
+  };
 
   if (!user) return null;
 
@@ -3978,9 +4000,14 @@ const LiveChatButton = () => {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 z-50"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white p-4 rounded-full shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 z-50 relative"
       >
         💬
+        {user.is_admin && pendingChats > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center font-bold animate-pulse">
+            {pendingChats}
+          </span>
+        )}
       </button>
 
       {/* Chat Modal */}
@@ -3988,7 +4015,14 @@ const LiveChatButton = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-2xl w-full max-w-md border border-purple-500/30">
             <div className="flex items-center justify-between p-4 border-b border-purple-500/30">
-              <h3 className="text-lg font-semibold text-white">💬 Live Chat</h3>
+              <h3 className="text-lg font-semibold text-white">
+                💬 Live Chat
+                {user.is_admin && pendingChats > 0 && (
+                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {pendingChats} pendentes
+                  </span>
+                )}
+              </h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 hover:text-white"
@@ -3997,7 +4031,17 @@ const LiveChatButton = () => {
               </button>
             </div>
             
-            {!isNewTicket ? (
+            {user.is_admin ? (
+              <div className="p-6">
+                <Link
+                  to="/admin/chat"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center block"
+                >
+                  🎫 Gerir Chats ({pendingChats} pendentes)
+                </Link>
+              </div>
+            ) : !isNewTicket ? (
               <NewChatForm onSubmit={() => setIsNewTicket(true)} onClose={() => setIsOpen(false)} />
             ) : (
               <ChatInterface onClose={() => setIsOpen(false)} />
