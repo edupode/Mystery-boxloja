@@ -2167,7 +2167,6 @@ const AdminProducts = () => {
         stock_quantity: '100',
         featured: false,
         subscription_prices: {
-          "1_month": '',
           "3_months": '',
           "6_months": '',
           "12_months": ''
