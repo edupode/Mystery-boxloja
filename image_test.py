@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv('/app/frontend/.env')
 # Use local backend URL for testing
-BACKEND_URL = "http://localhost:8001"
+BACKEND_URL = "http://0.0.0.0:8001"
 API_URL = f"{BACKEND_URL}/api"
 
 # Test results
