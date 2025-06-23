@@ -2101,6 +2101,13 @@ async def send_birthday_email_admin(
     result = await send_birthday_email(user_email, user_name, coupon_code, discount_value)
     return result
 
+# Test email endpoint
+@api_router.post("/admin/emails/test-welcome")
+async def test_welcome_email(admin_user: User = Depends(get_admin_user)):
+    """Send a test welcome email to demonstrate new template"""
+    result = await send_welcome_email("eduardocorreia3344@gmail.com", "Eduardo")
+    return {"message": "Test welcome email sent", "result": result}
+
 @api_router.post("/admin/products", response_model=Product)
 async def create_product(product_data: ProductCreate, admin_user: User = Depends(get_admin_user)):
     # Prioritize base64 image over URL if both are provided
