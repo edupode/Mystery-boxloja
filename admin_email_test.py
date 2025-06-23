@@ -197,6 +197,9 @@ def run_tests():
     # Test birthday email endpoint
     test_send_birthday_email(admin_token)
     
+    # Test welcome email endpoint
+    test_welcome_email(admin_token)
+    
     logger.info("Admin email endpoint tests completed")
 
 if __name__ == "__main__":
