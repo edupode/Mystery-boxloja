@@ -380,7 +380,6 @@ class Product(BaseModel):
     category: str
     price: float
     subscription_prices: Dict[str, float] = {
-        "1_month": 0.0,
         "3_months": 0.0,
         "6_months": 0.0,
         "12_months": 0.0
