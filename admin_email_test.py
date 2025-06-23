@@ -145,8 +145,7 @@ def test_welcome_email(admin_token):
     
     try:
         headers = {
-            "Authorization": f"Bearer {admin_token}",
-            "Content-Type": "application/json"
+            "Authorization": f"Bearer {admin_token}"
         }
         
         logger.info("Testing welcome email endpoint")
