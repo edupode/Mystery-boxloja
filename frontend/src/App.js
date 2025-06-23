@@ -123,7 +123,7 @@ const DeviceProvider = ({ children }) => {
   }, []);
 
   return (
-    <AppContext.Provider value={{
+    <DeviceContext.Provider value={{
       user,
       setUser,
       cart,
@@ -138,7 +138,7 @@ const DeviceProvider = ({ children }) => {
       logout
     }}>
       {children}
-    </AppContext.Provider>
+    </DeviceContext.Provider>
   );
 };
 
