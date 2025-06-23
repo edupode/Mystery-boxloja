@@ -1287,11 +1287,50 @@ backend:
         agent: "testing"
         comment: "Retestado o endpoint PUT /api/admin/chat/sessions/{session_id}/assign. Confirmado que a mensagem automática 'Olá [nome], estou a verificar a mensagem e já darei apoio.' é enviada corretamente e a sessão é atribuída ao admin."
 
-metadata:
-  created_by: "main_agent"
-  version: "1.1"
-  test_sequence: 1
-  run_ui: false
+  - task: "Correção Footer - Atualizar contactos"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Atualizados contactos no footer para +351 913090641 e edupodept@gmail.com"
+      - working: true
+        agent: "main"
+        comment: "Footer atualizado com sucesso nos novos contactos"
+
+  - task: "Correção Admin - Adicionar remoção de categorias"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implementado endpoint DELETE /api/admin/categories/{category_id} no backend e função handleDeleteCategory no frontend"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint DELETE funciona corretamente, valida categoria existente, impede remoção de categoria com produtos associados e permite remoção de categoria vazia"
+
+  - task: "Correção Chat Admin - Mensagem automática ao aceitar"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Modificado endpoint PUT /api/admin/chat/sessions/{session_id}/assign para enviar mensagem automática 'Olá [nome], estou a verificar a mensagem e já darei apoio.'"
+      - working: true
+        agent: "testing"
+        comment: "Endpoint funciona corretamente. Atribui sessão ao admin e envia mensagem automática com nome do usuário."
 
 test_plan:
   current_focus:
