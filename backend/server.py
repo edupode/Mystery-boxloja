@@ -2200,6 +2200,22 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Health check endpoint for Railway
+@app.get("/api/health")
+async def health_check():
+    try:
+        # Test database connection
+        await db.command("ping")
+        return {
+            "status": "healthy", 
+            "timestamp": datetime.utcnow().isoformat(),
+            "service": "Mystery Box Store API",
+            "version": "2.0.0",
+            "database": "connected"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
