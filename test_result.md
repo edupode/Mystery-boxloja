@@ -1217,6 +1217,9 @@ test_plan:
     - "Stripe Live Keys - Atualização"
     - "Correção de imagens nos produtos"
     - "Validação de Pagamento Stripe"
+    - "Admin Email Endpoints - Send Discount Email"
+    - "Admin Email Endpoints - Send Birthday Email"
+    - "Admin Email Endpoints - Test Welcome Email"
 
 agent_communication:
   - agent: "main"
