@@ -234,9 +234,30 @@ const useIsMobile = () => {
 const Header = () => {
   const { user, logout, cart } = useDeviceContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [pendingChatsCount, setPendingChatsCount] = useState(0);
   const isMobile = useIsMobile();
 
   const cartItemsCount = cart.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
+  // Load pending chats count for admins
+  useEffect(() => {
+    if (user?.is_admin) {
+      const loadPendingChats = async () => {
+        try {
+          const response = await axios.get(`${API}/admin/chat/sessions`);
+          const pendingCount = response.data.filter(session => session.status === 'pending').length;
+          setPendingChatsCount(pendingCount);
+        } catch (error) {
+          console.error('Error loading pending chats:', error);
+        }
+      };
+
+      loadPendingChats();
+      // Update count every 30 seconds
+      const interval = setInterval(loadPendingChats, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   return (
     <header className="bg-gradient-to-r from-purple-900 via-black to-purple-900 text-white shadow-2xl border-b-2 border-purple-500 sticky top-0 z-50">
