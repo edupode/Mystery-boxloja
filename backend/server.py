@@ -2108,6 +2108,44 @@ async def bulk_make_admin(request: dict, admin_user: User = Depends(get_admin_us
     
     return {"message": f"{result.modified_count} usuários promovidos a admin com sucesso"}
 
+@api_router.post("/admin/users/bulk-delete")
+async def bulk_delete_users(request: dict, admin_user: User = Depends(get_admin_user)):
+    """Admin endpoint to delete multiple users at once"""
+    if not admin_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user_ids = request.get("user_ids", [])
+    if not user_ids or not isinstance(user_ids, list):
+        raise HTTPException(status_code=400, detail="Lista de IDs de usuários é obrigatória")
+    
+    # Find users to check restrictions
+    users_to_delete = await db.users.find({"id": {"$in": user_ids}}).to_list(1000)
+    
+    valid_ids = []
+    skipped_users = []
+    
+    for user in users_to_delete:
+        # Cannot delete super admin
+        if user.get("is_super_admin"):
+            skipped_users.append(f"{user['name']} (super admin)")
+            continue
+        
+        # Cannot delete yourself
+        if user["email"] == admin_user.email:
+            skipped_users.append(f"{user['name']} (própria conta)")
+            continue
+            
+        valid_ids.append(user["id"])
+    
+    # Delete valid users
+    result = await db.users.delete_many({"id": {"$in": valid_ids}})
+    
+    message = f"{result.deleted_count} usuários deletados com sucesso"
+    if skipped_users:
+        message += f". Ignorados: {', '.join(skipped_users)}"
+    
+    return {"message": message, "deleted_count": result.deleted_count, "skipped": skipped_users}
+
 # Coupon management endpoints
 @api_router.get("/admin/coupons")
 async def get_all_coupons(admin_user: User = Depends(get_admin_user)):
