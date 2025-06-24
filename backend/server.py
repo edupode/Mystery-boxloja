@@ -1240,9 +1240,10 @@ async def startup_event():
             await db.categories.insert_one(category.dict())
         print("Created sample categories")
 
-# Auth endpoints
+# Auth endpoints with rate limiting
 @api_router.post("/auth/register", response_model=Token)
-async def register(user_data: UserCreate):
+@limiter.limit("10/minute")
+async def register(request: Request, user_data: UserCreate):
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email já está registrado")
