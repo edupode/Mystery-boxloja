@@ -664,27 +664,20 @@ const Products = memo(() => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { addToCart } = useDeviceContext();
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
+        setError(null);
         console.log('Products - Loading data - API URL:', API);
         console.log('Products - Selected category:', selectedCategory);
         
-        // Try cache first
-        const cacheKey = `products_${selectedCategory || 'all'}`;
-        const cachedProducts = cacheUtils.get(cacheKey);
-        const cachedCategories = cacheUtils.get('categories');
-        
-        if (cachedProducts && cachedCategories) {
-          console.log('Products - Using cached data');
-          setProducts(cachedProducts);
-          setCategories(cachedCategories);
-          return;
-        }
-
+        // Skip cache for now to ensure fresh data
         console.log('Products - Fetching from API');
         const [productsRes, categoriesRes] = await Promise.all([
           axios.get(`${API}/products${selectedCategory ? `?category=${selectedCategory}` : ''}`),
@@ -692,16 +685,25 @@ const Products = memo(() => {
         ]);
         
         console.log('Products - API response:', productsRes.data);
+        console.log('Products - Number of products:', productsRes.data?.length || 0);
         console.log('Categories - API response:', categoriesRes.data);
+        console.log('Categories - Number of categories:', categoriesRes.data?.length || 0);
         
-        setProducts(productsRes.data);
-        setCategories(categoriesRes.data);
+        // Ensure we have arrays
+        const productsData = Array.isArray(productsRes.data) ? productsRes.data : [];
+        const categoriesData = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
         
-        // Cache the results
-        cacheUtils.set(cacheKey, productsRes.data);
-        cacheUtils.set('categories', categoriesRes.data);
+        setProducts(productsData);
+        setCategories(categoriesData);
+        
+        console.log('Products - State updated with', productsData.length, 'products');
       } catch (error) {
         console.error('Error loading products:', error);
+        setError(error.message);
+        setProducts([]);
+        setCategories([]);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
