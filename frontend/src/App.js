@@ -277,12 +277,18 @@ const GoogleLoginButton = ({ onSuccess, onError }) => {
 
     const handleCredentialResponse = async (response) => {
       try {
+        console.log('Google credential response received');
+        console.log('API URL for Google auth:', API);
+        
         const result = await axios.post(`${API}/auth/google`, {
           token: response.credential
         });
+        
+        console.log('Google auth result:', result.data);
         onSuccess(result.data);
       } catch (error) {
         console.error('Google auth error:', error);
+        console.error('Google auth error response:', error.response?.data);
         onError(error);
       }
     };
