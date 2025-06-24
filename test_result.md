@@ -1534,6 +1534,21 @@ test_plan:
     - "Performance Testing - TTL Cache"
     - "Performance Testing - Connection Pooling"
 
+  - task: "MongoDB Index Duplicate Key Error - RESOLVIDO"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Erro de chave duplicada no índice session_id da coleção carts impedia criação correta dos índices MongoDB"
+      - working: true
+        agent: "main"
+        comment: "RESOLVIDO: Implementadas funções fix_cart_indexes() e cleanup_duplicate_carts() que removem índices problemáticos, limpam carrinhos duplicados e recriam índices corretamente. Sistema testado e funcionando sem erros."
+
 agent_communication:
   - agent: "main"
     message: "CORREÇÃO SISTEMA DE SUBSCRIPTIONS INICIADA: ✅ Removida subscription de 1 mês ✅ Removida página dedicada de assinaturas e navegação ✅ Integradas opções de subscription nas páginas individuais de produtos ✅ Melhorado display de preços com descontos (3m=10%, 6m=15%, 12m=20%) ✅ Adicionadas dicas de preços de subscription nas listagens de produtos ✅ Subscriptions agora funcionam corretamente através do carrinho"
