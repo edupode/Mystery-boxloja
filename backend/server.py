@@ -2900,9 +2900,202 @@ async def test_resend_status():
             }
     except Exception as e:
         logger.error(f"Resend status check error: {str(e)}")
-        return {"status": "error", "message": f"Error checking Resend status: {str(e)}"}
+# Subscription Management Endpoints
+@api_router.get("/admin/subscriptions")
+async def get_all_subscriptions(admin_user: User = Depends(get_admin_user)):
+    """Get all active subscriptions"""
+    subscriptions = await db.subscriptions.find().sort("created_at", -1).to_list(1000)
+    
+    # Enrich with user and product information
+    enriched_subscriptions = []
+    for subscription in subscriptions:
+        # Get user info
+        user = await db.users.find_one({"id": subscription["user_id"]})
+        # Get product info
+        product = await db.products.find_one({"id": subscription["product_id"]})
+        
+        # Calculate progress
+        progress_text = f"{subscription['current_cycle']}/{subscription['total_cycles']}"
+        
+        # Calculate next delivery date if not set
+        if not subscription.get('next_delivery_date'):
+            # Calculate based on subscription type
+            months_interval = {
+                "3_months": 1,  # Monthly delivery for 3 months
+                "6_months": 1,  # Monthly delivery for 6 months  
+                "12_months": 1  # Monthly delivery for 12 months
+            }.get(subscription['subscription_type'], 1)
+            
+            next_date = subscription['created_at'] + timedelta(days=30 * subscription['current_cycle'])
+        else:
+            next_date = subscription['next_delivery_date']
+        
+        enriched_subscription = {
+            **subscription,
+            "user_name": user.get("name", "Utilizador Desconhecido") if user else "Utilizador Desconhecido",
+            "user_email": user.get("email", "") if user else "",
+            "product_name": product.get("name", "Produto Desconhecido") if product else "Produto Desconhecido",
+            "progress_text": progress_text,
+            "next_delivery_date": next_date.isoformat() if isinstance(next_date, datetime) else next_date,
+            "_id": str(subscription["_id"]) if "_id" in subscription else subscription.get("id", "")
+        }
+        enriched_subscriptions.append(enriched_subscription)
+    
+    return enriched_subscriptions
 
-# Include router
+@api_router.put("/admin/subscriptions/{subscription_id}/status")
+async def update_subscription_status(
+    subscription_id: str, 
+    status: str,
+    admin_user: User = Depends(get_admin_user)
+):
+    """Update subscription status"""
+    valid_statuses = ["active", "paused", "cancelled", "completed"]
+    if status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    result = await db.subscriptions.update_one(
+        {"id": subscription_id},
+        {"$set": {"status": status, "updated_at": datetime.utcnow()}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+    
+    return {"message": f"Subscription status updated to {status}"}
+
+@api_router.post("/admin/subscriptions/process-deliveries")
+async def process_subscription_deliveries(admin_user: User = Depends(get_admin_user)):
+    """Manually trigger subscription delivery processing"""
+    try:
+        processed_count = await process_monthly_subscriptions()
+        return {"message": f"Processed {processed_count} subscription deliveries"}
+    except Exception as e:
+        logger.error(f"Error processing deliveries: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing deliveries: {str(e)}")
+
+@api_router.get("/admin/subscription-deliveries")
+async def get_subscription_deliveries(admin_user: User = Depends(get_admin_user)):
+    """Get all subscription deliveries"""
+    deliveries = await db.subscription_deliveries.find().sort("created_at", -1).to_list(1000)
+    
+    # Enrich with subscription and order information
+    enriched_deliveries = []
+    for delivery in deliveries:
+        subscription = await db.subscriptions.find_one({"id": delivery["subscription_id"]})
+        order = await db.orders.find_one({"id": delivery["order_id"]})
+        
+        enriched_delivery = {
+            **delivery,
+            "subscription_info": subscription,
+            "order_info": order,
+            "_id": str(delivery["_id"]) if "_id" in delivery else delivery.get("id", "")
+        }
+        enriched_deliveries.append(enriched_delivery)
+    
+    return enriched_deliveries
+
+# Function to process monthly subscription deliveries
+async def process_monthly_subscriptions():
+    """Process monthly subscription deliveries"""
+    today = datetime.utcnow().date()
+    processed_count = 0
+    
+    # Find subscriptions that need delivery
+    subscriptions = await db.subscriptions.find({
+        "status": "active",
+        "next_delivery_date": {"$lte": datetime.combine(today, datetime.min.time())}
+    }).to_list(1000)
+    
+    for subscription in subscriptions:
+        try:
+            # Check if we've already reached the total cycles
+            if subscription["current_cycle"] >= subscription["total_cycles"]:
+                # Mark subscription as completed
+                await db.subscriptions.update_one(
+                    {"id": subscription["id"]},
+                    {"$set": {"status": "completed", "updated_at": datetime.utcnow()}}
+                )
+                continue
+            
+            # Get product information
+            product = await db.products.find_one({"id": subscription["product_id"]})
+            if not product:
+                logger.error(f"Product not found for subscription {subscription['id']}")
+                continue
+            
+            # Get user information
+            user = await db.users.find_one({"id": subscription["user_id"]})
+            if not user:
+                logger.error(f"User not found for subscription {subscription['id']}")
+                continue
+            
+            # Create a new order for this delivery
+            order_id = str(uuid.uuid4())
+            order = {
+                "id": order_id,
+                "user_id": subscription["user_id"],
+                "session_id": f"subscription_{subscription['id']}_{subscription['current_cycle']}",
+                "items": [{
+                    "product_id": subscription["product_id"],
+                    "quantity": 1,
+                    "subscription_type": subscription["subscription_type"]
+                }],
+                "subtotal": product.get("price", 0),
+                "discount_amount": 0,
+                "shipping_cost": 0,
+                "vat_amount": 0,
+                "total_amount": product.get("price", 0),
+                "payment_status": "paid",  # Subscription is already paid
+                "order_status": "confirmed",
+                "payment_method": "subscription",
+                "name": user.get("name", ""),
+                "email": user.get("email", ""),
+                "phone": user.get("phone", ""),
+                "shipping_address": user.get("address", ""),
+                "nif": user.get("nif", ""),
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+                "is_subscription_delivery": True,
+                "subscription_id": subscription["id"],
+                "subscription_cycle": subscription["current_cycle"]
+            }
+            
+            # Insert the order
+            await db.orders.insert_one(order)
+            
+            # Create delivery record
+            delivery = SubscriptionDelivery(
+                subscription_id=subscription["id"],
+                order_id=order_id,
+                cycle_number=subscription["current_cycle"],
+                delivery_date=datetime.utcnow()
+            )
+            await db.subscription_deliveries.insert_one(delivery.dict())
+            
+            # Update subscription - increment cycle and set next delivery date
+            next_cycle = subscription["current_cycle"] + 1
+            next_delivery_date = datetime.utcnow() + timedelta(days=30)  # Next month
+            
+            await db.subscriptions.update_one(
+                {"id": subscription["id"]},
+                {
+                    "$set": {
+                        "current_cycle": next_cycle,
+                        "next_delivery_date": next_delivery_date,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            
+            processed_count += 1
+            logger.info(f"Processed subscription delivery for {subscription['id']}, cycle {subscription['current_cycle']}")
+            
+        except Exception as e:
+            logger.error(f"Error processing subscription {subscription['id']}: {str(e)}")
+            continue
+    
+    return processed_count
 app.include_router(api_router)
 
 # Add root route to avoid 404
