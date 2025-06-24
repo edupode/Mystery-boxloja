@@ -112,7 +112,33 @@
 user_problem_statement: "Então, apos pedir para que seja permitido colocar varias imagens para um produto, o website quebrou, o backend esta a funcionar a 100%, não ouse fazer qualquer teste ao backend. Problema com AdminProducts - múltiplas imagens não funcionando na interface de admin. Campo 'images' não estava sendo retornado corretamente pelos endpoints e a função handleSubmit tinha problemas de compatibilidade com o modelo backend ProductCreate."
 
 backend:
-  - task: "Remove 1-month subscription support"
+  - task: "Verificação dos endpoints de produtos - Campo images"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Verificado que os endpoints GET /api/products e GET /api/products/{product_id} já retornam corretamente o campo 'images' nas linhas 1618 e 1659. Os endpoints POST e PUT /api/admin/products também suportam múltiplas imagens através dos campos images e images_base64."
+
+frontend:
+  - task: "Correção função handleSubmit AdminProducts"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Usuário reportou que após implementar múltiplas imagens para produtos, o website quebrou"
+      - working: true
+        agent: "main"
+        comment: "Corrigida a função handleSubmit no AdminProducts para enviar dados no formato correto do modelo ProductCreate backend. Adicionados logs de depuração e melhor tratamento de erros. Removido spread operator que enviava campos desnecessários. Campos agora mapeados explicitamente: image_url, image_base64, images, images_base64."
     implemented: true
     working: true
     file: "/app/backend/server.py"
