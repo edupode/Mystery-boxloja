@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, memo, createContext, 
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import LazyLoad from 'react-lazyload';
-import { useIntersectionObserver } from 'react-intersection-observer';
+import { useInView } from 'react-intersection-observer';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
