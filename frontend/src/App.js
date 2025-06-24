@@ -842,8 +842,27 @@ const ProductDetail = () => {
     ? product.subscription_prices[selectedSubscription]
     : product.price;
 
-  // Create array of all images (primary + gallery)
-  const allImages = [product.image_url, ...(product.images || [])].filter(Boolean);
+  // Create array of all images (primary + gallery) with robust handling
+  const allImages = (() => {
+    const images = [];
+    
+    // Add primary image if exists
+    if (product.image_url) {
+      images.push(product.image_url);
+    }
+    
+    // Add gallery images if exists and is an array
+    if (product.images) {
+      if (Array.isArray(product.images)) {
+        images.push(...product.images.filter(Boolean));
+      } else if (typeof product.images === 'string' && product.images.trim()) {
+        // Handle case where images might be a single string
+        images.push(product.images);
+      }
+    }
+    
+    return images.filter(Boolean);
+  })();
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
