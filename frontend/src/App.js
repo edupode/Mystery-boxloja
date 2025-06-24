@@ -2727,30 +2727,41 @@ const AdminProducts = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Prepare the product data according to the backend ProductCreate model
       const productData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
         price: parseFloat(formData.price),
         stock_quantity: parseInt(formData.stock_quantity),
+        featured: formData.featured,
         subscription_prices: {
           "3_months": parseFloat(formData.subscription_prices["3_months"]) || 0,
           "6_months": parseFloat(formData.subscription_prices["6_months"]) || 0,
           "12_months": parseFloat(formData.subscription_prices["12_months"]) || 0
         },
-        // Use base64 image if uploaded, otherwise use URL
-        image_url: formData.image_base64 || formData.image_url,
-        // Include multiple images
-        images: formData.images,
-        images_base64: formData.images_base64
+        // Primary image handling (backwards compatibility)
+        image_url: formData.image_base64 || formData.image_url || "",
+        image_base64: formData.image_base64 || null,
+        // Multiple images handling 
+        images: formData.images || [],
+        images_base64: formData.images_base64 || []
       };
 
+      // Log the data being sent for debugging
+      console.log('Sending product data:', productData);
+
       if (editingProduct) {
-        await axios.put(`${API}/admin/products/${editingProduct.id}`, productData);
+        const response = await axios.put(`${API}/admin/products/${editingProduct.id}`, productData);
+        console.log('Update response:', response.data);
         alert('Produto atualizado com sucesso!');
       } else {
-        await axios.post(`${API}/admin/products`, productData);
+        const response = await axios.post(`${API}/admin/products`, productData);
+        console.log('Create response:', response.data);
         alert('Produto criado com sucesso!');
       }
 
+      // Reset form after successful submission
       setFormData({
         name: '',
         description: '',
@@ -2772,7 +2783,9 @@ const AdminProducts = () => {
       setEditingProduct(null);
       loadProducts();
     } catch (error) {
-      alert('Erro ao salvar produto');
+      console.error('Error saving product:', error);
+      console.error('Error response:', error.response?.data);
+      alert(`Erro ao salvar produto: ${error.response?.data?.detail || error.message}`);
     }
   };
 
