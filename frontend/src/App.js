@@ -2785,6 +2785,8 @@ const AdminProducts = () => {
       price: product.price.toString(),
       image_url: product.image_url,
       image_base64: '',
+      images: product.images || [], // Load existing images
+      images_base64: [], // Reset base64 images (will be populated if user uploads new ones)
       stock_quantity: product.stock_quantity.toString(),
       featured: product.featured,
       subscription_prices: {
