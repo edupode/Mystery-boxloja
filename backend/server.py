@@ -1545,6 +1545,7 @@ async def get_products(request: Request, category: Optional[str] = None, feature
                 "12_months": 0.0
             }),
             "image_url": product.get("image_url", ""),
+            "images": product.get("images", []),  # Add gallery images
             "is_active": product.get("is_active", True),
             "stock_quantity": product.get("stock_quantity", 100),
             "featured": product.get("featured", False),
