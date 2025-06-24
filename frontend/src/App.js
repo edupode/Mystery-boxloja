@@ -721,6 +721,39 @@ const Products = memo(() => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">🔮</div>
+            <p className="text-xl">Carregando produtos...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+        <div className="container mx-auto px-4 py-12">
+          <div className="text-center text-white">
+            <div className="text-6xl mb-4">⚠️</div>
+            <p className="text-xl mb-4">Erro ao carregar produtos</p>
+            <p className="text-gray-300">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg transition-colors"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
       <div className="container mx-auto px-4 py-12">
