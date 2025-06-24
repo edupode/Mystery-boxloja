@@ -42,3 +42,4 @@ slowapi>=0.1.9
 limits>=5.4.0
 aiohttp>=3.12.0
 fastapi-cache2>=0.2.1
+deprecated>=1.2.0
