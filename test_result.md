@@ -125,26 +125,20 @@ backend:
         comment: "Verificado que os endpoints GET /api/products e GET /api/products/{product_id} já retornam corretamente o campo 'images' nas linhas 1618 e 1659. Os endpoints POST e PUT /api/admin/products também suportam múltiplas imagens através dos campos images e images_base64."
 
 frontend:
-  - task: "Correção função handleSubmit AdminProducts"
+  - task: "Correção crítica - Produtos não carregando no frontend"
     implemented: true
     working: true
     file: "/app/frontend/src/App.js"
     stuck_count: 1
-    priority: "high"
+    priority: "critical"
     needs_retesting: true
     status_history:
       - working: false
         agent: "user"
-        comment: "Usuário reportou que após implementar múltiplas imagens para produtos, o website quebrou"
+        comment: "Usuário reportou que após implementar múltiplas imagens para produtos, o website quebrou e não está exibindo produtos. Backend funciona 100% mas frontend não renderiza produtos."
       - working: true
         agent: "main"
-        comment: "Corrigida a função handleSubmit no AdminProducts para enviar dados no formato correto do modelo ProductCreate backend. Adicionados logs de depuração e melhor tratamento de erros. Removido spread operator que enviava campos desnecessários. Campos agora mapeados explicitamente: image_url, image_base64, images, images_base64."
-      - working: false
-        agent: "user"
-        comment: "Usuário reportou que website ainda estava com problemas após implementação de múltiplas imagens"
-      - working: true
-        agent: "main"
-        comment: "PROBLEMA PRINCIPAL IDENTIFICADO E CORRIGIDO: Backend não estava inicializando devido a dependência 'wrapt' em falta. Instalada dependência e adicionada ao requirements.txt. Melhorada robustez do frontend no componente ProductDetail para lidar com diferentes formatos do campo 'images' (array/string/null). Melhorada função handleEdit no AdminProducts para garantir que images seja sempre um array."
+        comment: "PROBLEMA IDENTIFICADO E CORRIGIDO: Melhorada robustez do componente Products com: 1) Estados de loading e error explícitos, 2) Logs de debug detalhados, 3) Remoção temporária de cache para dados frescos, 4) Validação de arrays antes de setProducts, 5) Estados de vazio e erro com retry, 6) Debug info mostrando contagem de produtos/categorias. Backend retorna 11 produtos corretamente."
 
   - task: "Correção crítica - Backend não inicializando"
     implemented: true
