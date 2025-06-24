@@ -2716,7 +2716,10 @@ const AdminProducts = () => {
           "12_months": parseFloat(formData.subscription_prices["12_months"]) || 0
         },
         // Use base64 image if uploaded, otherwise use URL
-        image_url: formData.image_base64 || formData.image_url
+        image_url: formData.image_base64 || formData.image_url,
+        // Include multiple images
+        images: formData.images,
+        images_base64: formData.images_base64
       };
 
       if (editingProduct) {
@@ -2734,6 +2737,8 @@ const AdminProducts = () => {
         price: '',
         image_url: '',
         image_base64: '',
+        images: [],
+        images_base64: [],
         stock_quantity: '100',
         featured: false,
         subscription_prices: {
