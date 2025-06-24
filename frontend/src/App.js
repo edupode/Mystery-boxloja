@@ -761,6 +761,11 @@ const Products = memo(() => {
           🔮 Nossos Mistérios 🔮
         </h1>
 
+        {/* Debug info */}
+        <div className="mb-4 text-center text-white text-sm">
+          <p>Produtos carregados: {products.length} | Categorias: {categories.length}</p>
+        </div>
+
         {/* Category Filter */}
         <div className="mb-12 text-center">
           <select
@@ -778,62 +783,70 @@ const Products = memo(() => {
         </div>
 
         {/* Products Grid */}
-        <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 lg:grid-cols-4 gap-8'}`}>
-          {products.map((product, index) => (
-            <div key={product.id} className="mystery-box-card hover:shadow-purple-500/50 transition-all duration-500 animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
-              <div className="relative overflow-hidden">
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className={`w-full ${isMobile ? 'h-40' : 'h-48'} object-cover transition-transform duration-500 hover:scale-110`}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
-                {product.featured && (
-                  <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold animate-pulse">
-                    ⭐ Destaque
-                  </div>
-                )}
-              </div>
-              <div className={`${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-b from-gray-800 to-gray-900`}>
-                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-3 text-white`}>{product.name}</h3>
-                <p className={`text-gray-300 ${isMobile ? 'text-sm' : 'text-sm'} mb-4 line-clamp-3`}>{product.description}</p>
-                
-                <div className="mb-3">
-                  <div className="flex items-center justify-between">
-                    <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
-                      €{product.price}
-                    </span>
-                    <span className="text-xs text-gray-400">avulsa</span>
-                  </div>
-                  
-                  {/* Subscription pricing hint */}
-                  {product.subscription_prices && product.subscription_prices['12_months'] && (
-                    <div className="mt-2 text-xs text-green-400">
-                      Assinatura: desde €{product.subscription_prices['12_months']}/mês
-                      <span className="text-yellow-400 ml-1">(-20% desconto!)</span>
+        {products.length === 0 ? (
+          <div className="text-center text-white">
+            <div className="text-6xl mb-4">📦</div>
+            <p className="text-xl">Nenhum produto encontrado</p>
+            <p className="text-gray-400 mt-2">Tente selecionar uma categoria diferente</p>
+          </div>
+        ) : (
+          <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 lg:grid-cols-4 gap-8'}`}>
+            {products.map((product, index) => (
+              <div key={product.id} className="mystery-box-card hover:shadow-purple-500/50 transition-all duration-500 animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+                <div className="relative overflow-hidden">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className={`w-full ${isMobile ? 'h-40' : 'h-48'} object-cover transition-transform duration-500 hover:scale-110`}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+                  {product.featured && (
+                    <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                      ⭐ Destaque
                     </div>
                   )}
                 </div>
-                
-                <div className="flex items-center justify-between space-x-2">
-                  <Link
-                    to={`/produto/${product.id}`}
-                    className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 text-center`}
-                  >
-                    🔮 Descobrir
-                  </Link>
-                  <button
-                    onClick={() => handleAddToCart(product.id)}
-                    data-product-id={product.id}
-                    className={`bg-gray-700 hover:bg-gray-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg transition-all duration-300 transform hover:scale-105`}
-                  >
-                    🛒
-                  </button>
+                <div className={`${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-b from-gray-800 to-gray-900`}>
+                  <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-3 text-white`}>{product.name}</h3>
+                  <p className={`text-gray-300 ${isMobile ? 'text-sm' : 'text-sm'} mb-4 line-clamp-3`}>{product.description}</p>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between">
+                      <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
+                        €{product.price}
+                      </span>
+                      <span className="text-xs text-gray-400">avulsa</span>
+                    </div>
+                    
+                    {/* Subscription pricing hint */}
+                    {product.subscription_prices && product.subscription_prices['12_months'] && (
+                      <div className="mt-2 text-xs text-green-400">
+                        Assinatura: desde €{product.subscription_prices['12_months']}/mês
+                        <span className="text-yellow-400 ml-1">(-20% desconto!)</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-between space-x-2">
+                    <Link
+                      to={`/produto/${product.id}`}
+                      className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 text-center`}
+                    >
+                      🔮 Descobrir
+                    </Link>
+                    <button
+                      onClick={() => handleAddToCart(product.id)}
+                      data-product-id={product.id}
+                      className={`bg-gray-700 hover:bg-gray-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg transition-all duration-300 transform hover:scale-105`}
+                    >
+                      🛒
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
