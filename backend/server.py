@@ -2485,6 +2485,10 @@ async def update_product(product_id: str, product_data: ProductCreate, admin_use
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
+    # Invalidate products cache
+    invalidate_cache_pattern("products_")
+    cache.pop(f"product_{product_id}", None)  # Invalidate specific product cache
+    
     return {"message": "Produto atualizado com sucesso"}
 
 @api_router.delete("/admin/products/{product_id}")
