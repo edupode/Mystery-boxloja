@@ -3236,31 +3236,34 @@ async def root():
 async def api_root():
     return {"message": "Mystery Box Store API", "version": "2.0.0", "status": "running"}
 
+# Health check endpoint for Railway  
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint to verify API is running"""
-    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+    try:
+        # Test database connection
+        await db.command("ping")
+        return {
+            "status": "healthy", 
+            "timestamp": datetime.utcnow().isoformat(),
+            "service": "Mystery Box Store API",
+            "version": "2.0.0",
+            "database": "connected"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Health check failed: {str(e)}")
 
-# Configure CORS based on environment
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "https://localhost:3000", 
-    FRONTEND_URL,
-    "*"  # Allow all origins for testing
-]
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
 
-# Add any additional origins from environment variable
-additional_origins = os.environ.get('ADDITIONAL_CORS_ORIGINS', '')
-if additional_origins:
-    CORS_ORIGINS.extend([origin.strip() for origin in additional_origins.split(',')])
-
+# Configure CORS with performance optimizations
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["https://mystery-box-loja.vercel.app", "http://localhost:3000"],
     allow_credentials=True,
-    allow_origins=["*"],  # Allow all origins for testing
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific methods for better security
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],  # Specific headers
+    max_age=3600  # Cache preflight requests for 1 hour
 )
 
 logging.basicConfig(level=logging.INFO)
