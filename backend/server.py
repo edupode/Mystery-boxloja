@@ -336,6 +336,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # In-memory cache for frequently accessed data
 cache = TTLCache(maxsize=1000, ttl=300)  # 5 minutes TTL
 
+# Cache invalidation helper
+def invalidate_cache_pattern(pattern: str):
+    """Invalidate cache entries matching a pattern"""
+    keys_to_remove = [key for key in cache.keys() if pattern in str(key)]
+    for key in keys_to_remove:
+        cache.pop(key, None)
+
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
