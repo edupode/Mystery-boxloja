@@ -2583,7 +2583,9 @@ const AdminProducts = () => {
     category: '',
     price: '',
     image_url: '',
-    image_base64: '', // Para armazenar a imagem em base64
+    image_base64: '', // Para armazenar a imagem principal em base64
+    images: [], // URLs de imagens adicionais
+    images_base64: [], // Imagens adicionais em base64
     stock_quantity: '100',
     featured: false,
     subscription_prices: {
