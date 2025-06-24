@@ -5495,4 +5495,320 @@ const App = () => {
   );
 };
 
+// Admin Subscriptions Management Component
+const AdminSubscriptions = () => {
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [deliveries, setDeliveries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('subscriptions');
+  const [processing, setProcessing] = useState(false);
+  const { user } = useDeviceContext();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (user?.is_admin) {
+      loadSubscriptions();
+      loadDeliveries();
+    }
+  }, [user]);
+
+  const loadSubscriptions = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/admin/subscriptions`);
+      setSubscriptions(response.data);
+    } catch (error) {
+      console.error('Error loading subscriptions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDeliveries = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/subscription-deliveries`);
+      setDeliveries(response.data);
+    } catch (error) {
+      console.error('Error loading deliveries:', error);
+    }
+  };
+
+  const handleUpdateStatus = async (subscriptionId, status) => {
+    try {
+      await axios.put(`${API}/admin/subscriptions/${subscriptionId}/status?status=${status}`);
+      alert('Status da assinatura atualizado com sucesso!');
+      loadSubscriptions();
+    } catch (error) {
+      console.error('Error updating subscription status:', error);
+      alert('Erro ao atualizar status: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    }
+  };
+
+  const handleProcessDeliveries = async () => {
+    if (!window.confirm('Processar entregas de assinaturas agendadas para hoje?')) {
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      const response = await axios.post(`${API}/admin/subscriptions/process-deliveries`);
+      alert(response.data.message);
+      loadSubscriptions();
+      loadDeliveries();
+    } catch (error) {
+      console.error('Error processing deliveries:', error);
+      alert('Erro ao processar entregas: ' + (error.response?.data?.detail || 'Erro desconhecido'));
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active': return 'text-green-400';
+      case 'paused': return 'text-yellow-400';
+      case 'cancelled': return 'text-red-400';
+      case 'completed': return 'text-blue-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  if (!user?.is_admin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-8xl mb-4">🚫</div>
+          <h1 className="text-4xl font-bold mb-4">Acesso Negado</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center mb-8">
+          <Link to="/admin" className="text-purple-400 hover:text-purple-300 mr-4">
+            ← Voltar ao Admin
+          </Link>
+          <h1 className={`${isMobile ? 'text-2xl' : 'text-4xl'} font-bold text-white`}>
+            📅 Gestão de Assinaturas
+          </h1>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mb-8 flex gap-4">
+          <button
+            onClick={handleProcessDeliveries}
+            disabled={processing}
+            className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 disabled:opacity-50"
+          >
+            {processing ? (
+              <span className="flex items-center">
+                <div className="animate-spin mr-2">🔮</div>
+                Processando...
+              </span>
+            ) : (
+              '🚀 Processar Entregas Pendentes'
+            )}
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-8">
+          <div className="flex space-x-1 bg-gray-800/50 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('subscriptions')}
+              className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 ${
+                activeTab === 'subscriptions'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              📅 Assinaturas Ativas
+            </button>
+            <button
+              onClick={() => setActiveTab('deliveries')}
+              className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 ${
+                activeTab === 'deliveries'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              📦 Histórico de Entregas
+            </button>
+          </div>
+        </div>
+
+        {/* Subscriptions Tab */}
+        {activeTab === 'subscriptions' && (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="p-6 border-b border-purple-500/30">
+              <h3 className="text-xl font-bold text-white">📋 Assinaturas Ativas</h3>
+            </div>
+            
+            {loading ? (
+              <div className="text-center text-white p-12">
+                <div className="animate-spin text-6xl mb-4">🔮</div>
+                <p>Carregando assinaturas...</p>
+              </div>
+            ) : subscriptions.length === 0 ? (
+              <div className="text-center text-gray-400 p-12">
+                <div className="text-6xl mb-4">📅</div>
+                <p>Nenhuma assinatura encontrada</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-white">
+                  <thead className="bg-purple-900/50">
+                    <tr>
+                      <th className="text-left p-4">Cliente</th>
+                      <th className="text-left p-4">Produto</th>
+                      <th className="text-left p-4">Tipo</th>
+                      <th className="text-left p-4">Progresso</th>
+                      <th className="text-left p-4">Próxima Entrega</th>
+                      <th className="text-left p-4">Status</th>
+                      <th className="text-left p-4">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subscriptions.map((subscription) => (
+                      <tr key={subscription.id} className="border-b border-gray-700 hover:bg-gray-700/30">
+                        <td className="p-4">
+                          <div>
+                            <div className="font-semibold">{subscription.user_name}</div>
+                            <div className="text-sm text-gray-400">{subscription.user_email}</div>
+                          </div>
+                        </td>
+                        <td className="p-4">{subscription.product_name}</td>
+                        <td className="p-4">
+                          <span className="px-2 py-1 bg-purple-900/50 rounded-full text-sm">
+                            {subscription.subscription_type.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-purple-400">{subscription.progress_text}</span>
+                            <div className="w-20 bg-gray-600 rounded-full h-2">
+                              <div 
+                                className="bg-purple-500 h-2 rounded-full" 
+                                style={{
+                                  width: `${(subscription.current_cycle / subscription.total_cycles) * 100}%`
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm">
+                            {new Date(subscription.next_delivery_date).toLocaleDateString('pt-PT')}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`font-semibold ${getStatusColor(subscription.status)}`}>
+                            {subscription.status}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex space-x-2">
+                            {subscription.status === 'active' && (
+                              <button
+                                onClick={() => handleUpdateStatus(subscription.id, 'paused')}
+                                className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                              >
+                                ⏸️ Pausar
+                              </button>
+                            )}
+                            {subscription.status === 'paused' && (
+                              <button
+                                onClick={() => handleUpdateStatus(subscription.id, 'active')}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                              >
+                                ▶️ Retomar
+                              </button>
+                            )}
+                            {['active', 'paused'].includes(subscription.status) && (
+                              <button
+                                onClick={() => handleUpdateStatus(subscription.id, 'cancelled')}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                              >
+                                ❌ Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Deliveries Tab */}
+        {activeTab === 'deliveries' && (
+          <div className="bg-gray-800/50 rounded-2xl border border-purple-500/30 overflow-hidden">
+            <div className="p-6 border-b border-purple-500/30">
+              <h3 className="text-xl font-bold text-white">📦 Histórico de Entregas</h3>
+            </div>
+            
+            {deliveries.length === 0 ? (
+              <div className="text-center text-gray-400 p-12">
+                <div className="text-6xl mb-4">📦</div>
+                <p>Nenhuma entrega encontrada</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-white">
+                  <thead className="bg-purple-900/50">
+                    <tr>
+                      <th className="text-left p-4">Data de Entrega</th>
+                      <th className="text-left p-4">Cliente</th>
+                      <th className="text-left p-4">Produto</th>
+                      <th className="text-left p-4">Ciclo</th>
+                      <th className="text-left p-4">Status</th>
+                      <th className="text-left p-4">Pedido</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {deliveries.map((delivery) => (
+                      <tr key={delivery.id} className="border-b border-gray-700 hover:bg-gray-700/30">
+                        <td className="p-4">
+                          {new Date(delivery.delivery_date).toLocaleDateString('pt-PT')}
+                        </td>
+                        <td className="p-4">
+                          {delivery.subscription_info?.user_name || 'Cliente Desconhecido'}
+                        </td>
+                        <td className="p-4">
+                          {delivery.subscription_info?.product_name || 'Produto Desconhecido'}
+                        </td>
+                        <td className="p-4">
+                          <span className="px-2 py-1 bg-blue-900/50 rounded-full text-sm">
+                            Ciclo {delivery.cycle_number}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`font-semibold ${getStatusColor(delivery.status)}`}>
+                            {delivery.status}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm text-gray-400">
+                            #{delivery.order_id?.slice(0, 8)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default App;
