@@ -2511,6 +2511,10 @@ async def create_category(category_data: CategoryCreate, admin_user: User = Depe
         **category_data.dict()
     )
     await db.categories.insert_one(category.dict())
+    
+    # Invalidate categories cache
+    cache.pop("categories_active", None)
+    
     return category
 
 @api_router.delete("/admin/categories/{category_id}")
