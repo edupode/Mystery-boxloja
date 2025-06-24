@@ -641,7 +641,7 @@ const Home = () => {
   );
 };
 
-const Products = () => {
+const Products = memo(() => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -651,12 +651,28 @@ const Products = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Try cache first
+        const cacheKey = `products_${selectedCategory || 'all'}`;
+        const cachedProducts = cacheUtils.get(cacheKey);
+        const cachedCategories = cacheUtils.get('categories');
+        
+        if (cachedProducts && cachedCategories) {
+          setProducts(cachedProducts);
+          setCategories(cachedCategories);
+          return;
+        }
+
         const [productsRes, categoriesRes] = await Promise.all([
           axios.get(`${API}/products${selectedCategory ? `?category=${selectedCategory}` : ''}`),
           axios.get(`${API}/categories`)
         ]);
+        
         setProducts(productsRes.data);
         setCategories(categoriesRes.data);
+        
+        // Cache the results
+        cacheUtils.set(cacheKey, productsRes.data);
+        cacheUtils.set('categories', categoriesRes.data);
       } catch (error) {
         console.error('Error loading products:', error);
       }
