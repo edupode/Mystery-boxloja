@@ -3433,19 +3433,6 @@ async def health_check():
 async def shutdown_db_client():
     client.close()
 
-# Configure CORS and add routes
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://mystery-box-loja.vercel.app", "http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    max_age=3600  # Cache preflight requests for 1 hour
-)
-
-# Include API routes
-app.include_router(api_router)
-
 # Run the application with optimized settings
 if __name__ == "__main__":
     import uvicorn
