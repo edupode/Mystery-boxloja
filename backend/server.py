@@ -2428,20 +2428,25 @@ async def create_product(product_data: ProductCreate, admin_user: User = Depends
     if product_data.images:
         images.extend(product_data.images)
     
-    product_dict = product_data.dict()
-    product_dict["image_url"] = image_url
-    product_dict["images"] = images
+    # Set subscription prices with defaults
+    subscription_prices = product_data.subscription_prices or calculate_subscription_prices(product_data.price)
     
-    # Calculate subscription prices automatically based on the base price
-    product_dict["subscription_prices"] = calculate_subscription_prices(product_data.price)
-    
-    # Remove temporary fields from the final product data
-    for field in ["image_base64", "images_base64"]:
-        if field in product_dict:
-            del product_dict[field]
-    
-    product = Product(**product_dict)
+    product = Product(
+        name=product_data.name,
+        description=product_data.description,
+        category=product_data.category,
+        price=product_data.price,
+        subscription_prices=subscription_prices,
+        image_url=image_url,
+        images=images,
+        stock_quantity=product_data.stock_quantity,
+        featured=product_data.featured
+    )
     await db.products.insert_one(product.dict())
+    
+    # Invalidate products cache
+    invalidate_cache_pattern("products_")
+    
     return product
 
 @api_router.put("/admin/products/{product_id}")
