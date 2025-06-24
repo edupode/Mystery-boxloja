@@ -129,7 +129,7 @@ frontend:
     implemented: true
     working: true
     file: "/app/frontend/src/App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
@@ -139,6 +139,42 @@ frontend:
       - working: true
         agent: "main"
         comment: "Corrigida a função handleSubmit no AdminProducts para enviar dados no formato correto do modelo ProductCreate backend. Adicionados logs de depuração e melhor tratamento de erros. Removido spread operator que enviava campos desnecessários. Campos agora mapeados explicitamente: image_url, image_base64, images, images_base64."
+      - working: false
+        agent: "user"
+        comment: "Usuário reportou que website ainda estava com problemas após implementação de múltiplas imagens"
+      - working: true
+        agent: "main"
+        comment: "PROBLEMA PRINCIPAL IDENTIFICADO E CORRIGIDO: Backend não estava inicializando devido a dependência 'wrapt' em falta. Instalada dependência e adicionada ao requirements.txt. Melhorada robustez do frontend no componente ProductDetail para lidar com diferentes formatos do campo 'images' (array/string/null). Melhorada função handleEdit no AdminProducts para garantir que images seja sempre um array."
+
+  - task: "Correção crítica - Backend não inicializando"
+    implemented: true
+    working: true
+    file: "/app/backend/requirements.txt"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Descoberto que backend não estava inicializando devido ao erro: ModuleNotFoundError: No module named 'wrapt'. Este era o problema principal que impedia o website de funcionar."
+      - working: true
+        agent: "main"
+        comment: "Instalada dependência 'wrapt>=1.17.0' e adicionada ao requirements.txt. Backend agora está funcionando corretamente e todos os endpoints estão acessíveis."
+
+  - task: "Melhoria robustez - Manipulação de imagens no frontend"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Melhorado o componente ProductDetail para lidar de forma mais robusta com o campo 'images', suportando diferentes formatos (array, string, null/undefined). Implementada função mais robusta para criar o array allImages."
+      - working: true
+        agent: "main"
+        comment: "Implementada lógica robusta que verifica se product.images é um array antes de usar spread operator, e também lida com casos onde é uma string ou null/undefined. Melhorada também a função handleEdit para garantir que images seja sempre tratado como array."
     implemented: true
     working: true
     file: "/app/backend/server.py"
