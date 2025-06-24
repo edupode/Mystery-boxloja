@@ -1981,6 +1981,13 @@ const AdminDashboard = () => {
               </span>
             )}
           </Link>
+          <Link
+            to="/admin/subscriptions"
+            className="bg-gray-800/50 rounded-2xl p-8 border border-purple-500/30 hover:border-purple-400 transition-colors duration-300 text-center text-white"
+          >
+            <div className="text-5xl mb-4">🔄</div>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold`}>Assinaturas</h3>
+          </Link>
         </div>
       </div>
 
