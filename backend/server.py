@@ -1227,6 +1227,31 @@ SAMPLE_CATEGORIES = [
 
 # Initialize sample data and database indexes
 @api_router.on_event("startup")
+async def fix_cart_indexes():
+    """Fix problematic cart indexes by dropping and recreating them"""
+    try:
+        # Drop all existing indexes on carts collection (except _id)
+        indexes = await db.carts.list_indexes().to_list(None)
+        for index in indexes:
+            if index['name'] != '_id_':
+                try:
+                    await db.carts.drop_index(index['name'])
+                    print(f"Dropped cart index: {index['name']}")
+                except Exception as e:
+                    print(f"Could not drop cart index {index['name']}: {e}")
+        
+        # Clean up duplicates
+        await cleanup_duplicate_carts()
+        
+        # Recreate necessary indexes
+        await db.carts.create_index([("session_id", 1)], unique=True)
+        await db.carts.create_index([("user_id", 1)])
+        await db.carts.create_index([("updated_at", -1)])
+        print("Cart indexes recreated successfully")
+        
+    except Exception as e:
+        print(f"Error fixing cart indexes: {e}")
+
 async def cleanup_duplicate_carts():
     """Remove duplicate carts with the same session_id, keeping the most recent one"""
     try:
