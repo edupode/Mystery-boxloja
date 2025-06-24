@@ -5304,6 +5304,7 @@ const App = () => {
             <Route path="/admin/promotions" element={<AdminPromotions />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
             <Route path="/admin/emails" element={<AdminEmails />} />
+            <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
             <Route path="/admin/chat" element={<AdminChatDashboard />} />
             <Route path="/perfil" element={<UserProfile />} />
             <Route path="/faq" element={<FAQ />} />
