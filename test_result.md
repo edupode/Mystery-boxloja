@@ -109,7 +109,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Coisas que não funcionam: nas assinaturas não é possivel colocar dentro do carrinho pra checkout e tem de 1 mes que eu n queria, tem a de 3 meses e a de 6 meses e a de 12 meses, porém os preços mudam conforme a caixa, quando clico no descobrir, na parte das assinaturas das boxes aparece errado também, devia aparecer como está nas assinaturas, podes remover o botão das assinaturas e inserir dentro do descobrir para cada box individual, podes automatizar o processo para todas, lembra-te 3 meses 10% de desconto, 6 meses 15% de desconto, 12 meses - 20% de desconto"
+user_problem_statement: "Então, apos pedir para que seja permitido colocar varias imagens para um produto, o website quebrou, o backend esta a funcionar a 100%, não ouse fazer qualquer teste ao backend. Problema com AdminProducts - múltiplas imagens não funcionando na interface de admin. Campo 'images' não estava sendo retornado corretamente pelos endpoints e a função handleSubmit tinha problemas de compatibilidade com o modelo backend ProductCreate."
 
 backend:
   - task: "Remove 1-month subscription support"
