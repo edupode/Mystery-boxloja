@@ -5597,7 +5597,7 @@ const App = () => {
               </div>
             </div>
           )}
-        </BrowserRouter>
+        </Router>
       </div>
     </DeviceProvider>
   );
