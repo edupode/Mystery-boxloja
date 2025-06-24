@@ -5416,28 +5416,37 @@ const App = () => {
       <div className="App min-h-screen bg-gray-900">
         <Router>
           <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/produtos" element={<Products />} />
-            <Route path="/produto/:id" element={<ProductDetail />} />
-            <Route path="/carrinho" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/success" element={<Success />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/products" element={<AdminProducts />} />
-            <Route path="/admin/coupons" element={<AdminCoupons />} />
-            <Route path="/admin/promotions" element={<AdminPromotions />} />
-            <Route path="/admin/categories" element={<AdminCategories />} />
-            <Route path="/admin/emails" element={<AdminEmails />} />
-            <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
-            <Route path="/admin/chat" element={<AdminChatDashboard />} />
-            <Route path="/perfil" element={<UserProfile />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/termos" element={<TermsAndConditions />} />
-          </Routes>
+          <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen bg-gray-900">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                <p className="text-white text-lg">Carregando...</p>
+              </div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<LazyHome />} />
+              <Route path="/produtos" element={<LazyProducts />} />
+              <Route path="/produto/:id" element={<LazyProductDetail />} />
+              <Route path="/carrinho" element={<LazyCart />} />
+              <Route path="/checkout" element={<LazyCheckout />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/login" element={<LazyLogin />} />
+              <Route path="/admin" element={<LazyAdminDashboard />} />
+              <Route path="/admin/users" element={<LazyAdminUsers />} />
+              <Route path="/admin/orders" element={<LazyAdminOrders />} />
+              <Route path="/admin/products" element={<LazyAdminProducts />} />
+              <Route path="/admin/coupons" element={<LazyAdminCoupons />} />
+              <Route path="/admin/promotions" element={<LazyAdminPromotions />} />
+              <Route path="/admin/categories" element={<LazyAdminCategories />} />
+              <Route path="/admin/emails" element={<LazyAdminEmails />} />
+              <Route path="/admin/subscriptions" element={<LazyAdminSubscriptions />} />
+              <Route path="/admin/chat" element={<LazyAdminChatDashboard />} />
+              <Route path="/perfil" element={<LazyUserProfile />} />
+              <Route path="/faq" element={<LazyFAQ />} />
+              <Route path="/termos" element={<LazyTermsAndConditions />} />
+            </Routes>
+          </Suspense>
           <Footer />
           <LiveChatButton />
 
