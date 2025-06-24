@@ -1,0 +1,19 @@
+{
+  "mongodb_config": {
+    "maxPoolSize": 100,
+    "minPoolSize": 10,
+    "maxIdleTimeMS": 30000,
+    "waitQueueTimeoutMS": 5000,
+    "serverSelectionTimeoutMS": 5000,
+    "connectTimeoutMS": 10000,
+    "socketTimeoutMS": 10000
+  },
+  "fastapi_config": {
+    "workers": 4,
+    "keep_alive": 65,
+    "timeout_keep_alive": 65,
+    "timeout_notify": 60,
+    "limit_concurrency": 1000,
+    "limit_max_requests": 10000
+  }
+}
