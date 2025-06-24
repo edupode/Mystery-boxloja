@@ -1509,6 +1509,17 @@ async def get_user_orders(current_user: User = Depends(get_current_user)):
     return result
 
 # Product endpoints with caching
+# Health endpoint for keep-alive
+@api_router.get("/health")
+async def health_check():
+    """Health check endpoint for keep-alive pings"""
+    try:
+        # Quick database ping
+        await db.command("ping")
+        return {"status": "healthy", "timestamp": datetime.utcnow()}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e), "timestamp": datetime.utcnow()}
+
 @api_router.get("/products")
 @limiter.limit("120/minute")
 async def get_products(request: Request, category: Optional[str] = None, featured: Optional[bool] = None):
