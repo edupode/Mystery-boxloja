@@ -5393,7 +5393,7 @@ const App = () => {
   return (
     <DeviceProvider>
       <div className="App min-h-screen bg-gray-900">
-        <BrowserRouter>
+        <Router>
           <Header />
           <Routes>
             <Route path="/" element={<Home />} />
