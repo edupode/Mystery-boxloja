@@ -1475,9 +1475,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Email Endpoints - Send Discount Email"
-    - "Admin Email Endpoints - Send Birthday Email"
-    - "Admin Email Endpoints - Test Welcome Email"
+    - "Performance Testing - GET /api/products"
+    - "Performance Testing - GET /api/categories"
+    - "Performance Testing - GET /api/auth/me"
+    - "Performance Testing - GET /api/cart/{session_id}"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -1493,6 +1494,15 @@ test_plan:
     - "Admin Email Endpoints - Send Discount Email"
     - "Admin Email Endpoints - Send Birthday Email"
     - "Admin Email Endpoints - Test Welcome Email"
+    - "Performance Testing - GET /api/products"
+    - "Performance Testing - GET /api/categories"
+    - "Performance Testing - GET /api/auth/me"
+    - "Performance Testing - GET /api/cart/{session_id}"
+    - "Performance Testing - Rate Limiting"
+    - "Performance Testing - Error Handling"
+    - "Performance Testing - Database Indexes"
+    - "Performance Testing - TTL Cache"
+    - "Performance Testing - Connection Pooling"
 
 agent_communication:
   - agent: "main"
