@@ -1425,9 +1425,17 @@ async def get_user_orders(current_user: User = Depends(get_current_user)):
     
     return result
 
-# Product endpoints
+# Product endpoints with caching
 @api_router.get("/products")
-async def get_products(category: Optional[str] = None, featured: Optional[bool] = None):
+@limiter.limit("120/minute")
+async def get_products(request: Request, category: Optional[str] = None, featured: Optional[bool] = None):
+    # Create cache key
+    cache_key = f"products_{category or 'all'}_{featured or 'all'}"
+    
+    # Try to get from cache first
+    if cache_key in cache:
+        return cache[cache_key]
+    
     query = {"is_active": True}
     if category:
         query["category"] = category
@@ -1461,6 +1469,8 @@ async def get_products(category: Optional[str] = None, featured: Optional[bool] 
         }
         result.append(product_data)
     
+    # Cache the result
+    cache[cache_key] = result
     return result
 
 @api_router.get("/products/{product_id}")
