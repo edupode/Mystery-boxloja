@@ -1,99 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, memo, createContext, useContext, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import LazyLoad from 'react-lazyload';
-import { useInView } from 'react-intersection-observer';
 import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-
-console.log('App.js - Environment loaded:');
-console.log('REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
-console.log('BACKEND_URL:', BACKEND_URL);
-console.log('API:', API);
-
-// Performance utilities
-const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
-
-// Local storage cache utilities
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-const cacheUtils = {
-  set: (key, data) => {
-    const cacheItem = {
-      data,
-      timestamp: Date.now()
-    };
-    localStorage.setItem(`cache_${key}`, JSON.stringify(cacheItem));
-  },
-  
-  get: (key) => {
-    try {
-      const cacheItem = JSON.parse(localStorage.getItem(`cache_${key}`));
-      if (!cacheItem) return null;
-      
-      const isExpired = Date.now() - cacheItem.timestamp > CACHE_DURATION;
-      if (isExpired) {
-        localStorage.removeItem(`cache_${key}`);
-        return null;
-      }
-      
-      return cacheItem.data;
-    } catch {
-      return null;
-    }
-  },
-  
-  clear: (pattern) => {
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith(`cache_${pattern}`)) {
-        localStorage.removeItem(key);
-      }
-    });
-  }
-};
-
-// Image optimization component
-const OptimizedImage = memo(({ src, alt, className, loading = "lazy", placeholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+aW1hZ2VtPC90ZXh0Pjwvc3ZnPg==" }) => {
-  const [imageSrc, setImageSrc] = useState(placeholder);
-  const [imageRef, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1
-  });
-
-  useEffect(() => {
-    if (inView && src) {
-      setImageSrc(src);
-    }
-  }, [inView, src]);
-
-  return (
-    <img
-      ref={imageRef}
-      src={imageSrc}
-      alt={alt}
-      className={className}
-      loading={loading}
-      style={{ transition: 'opacity 0.3s ease' }}
-    />
-  );
-});
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 // Context for cart and user
