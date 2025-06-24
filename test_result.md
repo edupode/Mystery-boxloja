@@ -1533,6 +1533,7 @@ test_plan:
     - "Performance Testing - GET /api/categories"
     - "Performance Testing - GET /api/auth/me"
     - "Performance Testing - GET /api/cart/{session_id}"
+    - "CORS and API Communication Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -1557,6 +1558,7 @@ test_plan:
     - "Performance Testing - Database Indexes"
     - "Performance Testing - TTL Cache"
     - "Performance Testing - Connection Pooling"
+    - "CORS and API Communication Testing"
 
   - task: "MongoDB Index Duplicate Key Error - RESOLVIDO"
     implemented: true
