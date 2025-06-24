@@ -332,8 +332,22 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Performance optimizations
+# In-memory cache for frequently accessed data
+cache = TTLCache(maxsize=1000, ttl=300)  # 5 minutes TTL
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
 # Create the main app
 app = FastAPI(title="Mystery Box Store API", version="2.0.0")
+
+# Add performance middlewares
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(SlowAPIMiddleware)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
