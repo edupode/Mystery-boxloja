@@ -1227,6 +1227,42 @@ SAMPLE_CATEGORIES = [
 
 # Initialize sample data and database indexes
 @api_router.on_event("startup")
+async def cleanup_duplicate_carts():
+    """Remove duplicate carts with the same session_id, keeping the most recent one"""
+    try:
+        # Find all duplicate session_ids
+        pipeline = [
+            {"$group": {
+                "_id": "$session_id",
+                "count": {"$sum": 1},
+                "docs": {"$push": {"id": "$id", "updated_at": "$updated_at"}}
+            }},
+            {"$match": {"count": {"$gt": 1}}}
+        ]
+        
+        duplicates = await db.carts.aggregate(pipeline).to_list(None)
+        
+        removed_count = 0
+        for duplicate in duplicates:
+            session_id = duplicate["_id"]
+            docs = duplicate["docs"]
+            
+            # Sort by updated_at to keep the most recent
+            docs.sort(key=lambda x: x.get("updated_at", datetime.min), reverse=True)
+            
+            # Remove all but the most recent
+            for doc in docs[1:]:  # Keep the first (most recent), remove the rest
+                await db.carts.delete_one({"id": doc["id"]})
+                removed_count += 1
+        
+        if removed_count > 0:
+            print(f"Cleaned up {removed_count} duplicate cart entries")
+        else:
+            print("No duplicate carts found")
+            
+    except Exception as e:
+        print(f"Error cleaning up duplicate carts: {e}")
+
 async def startup_event():
     # Start background tasks (keep-alive)
     await start_background_tasks()
