@@ -1269,6 +1269,9 @@ async def startup_event():
     
     # Create database indexes for performance
     try:
+        # Clean up duplicate carts before creating unique index
+        await cleanup_duplicate_carts()
+        
         # Products indexes
         await db.products.create_index([("id", 1)], unique=True)
         await db.products.create_index([("category", 1)])
