@@ -1228,6 +1228,9 @@ SAMPLE_CATEGORIES = [
 # Initialize sample data and database indexes
 @api_router.on_event("startup")
 async def startup_event():
+    # Start background tasks (keep-alive)
+    await start_background_tasks()
+    
     # Create database indexes for performance
     try:
         # Products indexes
