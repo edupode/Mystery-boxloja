@@ -1551,7 +1551,7 @@ test_plan:
 
 agent_communication:
   - agent: "main"
-    message: "CORREÇÃO SISTEMA DE SUBSCRIPTIONS INICIADA: ✅ Removida subscription de 1 mês ✅ Removida página dedicada de assinaturas e navegação ✅ Integradas opções de subscription nas páginas individuais de produtos ✅ Melhorado display de preços com descontos (3m=10%, 6m=15%, 12m=20%) ✅ Adicionadas dicas de preços de subscription nas listagens de produtos ✅ Subscriptions agora funcionam corretamente através do carrinho"
+    message: "🔧 PROBLEMA MONGODB RESOLVIDO: ✅ Erro de índice duplicado na coleção carts corrigido ✅ Função fix_cart_indexes() implementada para remover índices problemáticos ✅ Função cleanup_duplicate_carts() remove carrinhos duplicados ✅ Índices únicos recriados com sucesso ✅ Sistema testado e funcionando sem erros ✅ Backend totalmente operacional"
   - agent: "testing"
     message: "SISTEMA DE SUBSCRIPTIONS TESTADO: ✅ Confirmado que apenas existem subscriptions de 3, 6 e 12 meses ✅ Verificado que os cálculos de desconto estão corretos ✅ Testado que subscription products podem ser adicionados ao carrinho ✅ Testadas todas as variações de preços de caixas ✅ Confirmado que checkout de subscriptions funciona corretamente"
   - agent: "testing"
