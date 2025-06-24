@@ -2844,6 +2844,8 @@ const AdminProducts = () => {
                 price: '',
                 image_url: '',
                 image_base64: '',
+                images: [],
+                images_base64: [],
                 stock_quantity: '100',
                 featured: false,
                 subscription_prices: {
