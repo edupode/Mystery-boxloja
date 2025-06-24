@@ -1513,12 +1513,21 @@ async def get_product(request: Request, product_id: str):
     return product_data
 
 @api_router.get("/categories")
-async def get_categories():
+@limiter.limit("120/minute")
+async def get_categories(request: Request):
+    # Try cache first
+    cache_key = "categories_active"
+    if cache_key in cache:
+        return cache[cache_key]
+    
     categories = await db.categories.find({"is_active": True}).to_list(1000)
     # Convert ObjectId to string
     for category in categories:
         if "_id" in category:
             category["_id"] = str(category["_id"])
+    
+    # Cache the result
+    cache[cache_key] = categories
     return categories
 
 # Coupon endpoints
