@@ -1292,8 +1292,23 @@ async def startup_event():
         await db.orders.create_index([("order_status", 1)])
         await db.orders.create_index([("payment_status", 1)])
         
-        # Cart indexes
-        await db.carts.create_index([("session_id", 1)], unique=True)
+        # Cart indexes - with error handling for existing problematic indexes
+        try:
+            await db.carts.create_index([("session_id", 1)], unique=True)
+        except Exception as cart_index_error:
+            print(f"Cart index creation error: {cart_index_error}")
+            # Try to drop existing problematic index and recreate
+            try:
+                await db.carts.drop_index("session_id_1")
+                print("Dropped existing session_id index")
+            except:
+                pass  # Index might not exist
+            
+            # Try again after cleanup
+            await cleanup_duplicate_carts()
+            await db.carts.create_index([("session_id", 1)], unique=True)
+            print("Recreated session_id unique index successfully")
+            
         await db.carts.create_index([("user_id", 1)])
         await db.carts.create_index([("updated_at", -1)])
         
