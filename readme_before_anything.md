@@ -165,7 +165,7 @@ Aplicação Mystery Box Store com:
 ## **NOTAS TÉCNICAS**
 
 ### Backend URLs
-- Atual: `https://caaa3d9b-e18b-47a9-b0f9-4157276de2e7.preview.emergentagent.com`
+- Atual: `https://7552ab69-b682-4388-94a1-ed2caca318f4.preview.emergentagent.com`
 - Produção: Será definido após deploy no Render.com
 
 ### Database
