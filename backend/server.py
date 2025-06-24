@@ -2,11 +2,20 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.gzip import GZipMiddleware
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import json
+
+# Performance imports
+import asyncio
+from cachetools import TTLCache
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 # Custom JSON encoder to handle ObjectId
 class JSONEncoder(json.JSONEncoder):
