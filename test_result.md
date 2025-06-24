@@ -161,20 +161,20 @@ frontend:
         agent: "main"
         comment: "Instalada dependência 'wrapt>=1.17.0' e adicionada ao requirements.txt. Backend agora está funcionando corretamente e todos os endpoints estão acessíveis."
 
-  - task: "Melhoria robustez - Manipulação de imagens no frontend"
+  - task: "Correção crítica - Login quebrado no frontend"
     implemented: true
     working: true
-    file: "/app/frontend/src/App.js"
+    file: "/app/frontend/.env, /app/frontend/src/App.js"
     stuck_count: 0
-    priority: "medium"
+    priority: "critical"
     needs_retesting: true
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Melhorado o componente ProductDetail para lidar de forma mais robusta com o campo 'images', suportando diferentes formatos (array, string, null/undefined). Implementada função mais robusta para criar o array allImages."
+      - working: false
+        agent: "user"
+        comment: "Usuário reportou que o login não está funcionando nem pelo método normal (email/password) nem pelo Google OAuth. Website completamente quebrado para autenticação."
       - working: true
         agent: "main"
-        comment: "Implementada lógica robusta que verifica se product.images é um array antes de usar spread operator, e também lida com casos onde é uma string ou null/undefined. Melhorada também a função handleEdit para garantir que images seja sempre tratado como array."
+        comment: "PROBLEMA IDENTIFICADO E CORRIGIDO: 1) Faltava REACT_APP_GOOGLE_CLIENT_ID no .env do frontend, causando falha no Google OAuth. 2) Adicionados logs de debug no código de login para facilitar diagnóstico futuro. 3) Backend está funcionando 100% (testado via curl). 4) CORS configurado corretamente. O problema era principalmente a configuração em falta do Google Client ID no frontend."
     implemented: true
     working: true
     file: "/app/backend/server.py"
