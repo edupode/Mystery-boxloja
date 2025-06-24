@@ -1272,7 +1272,8 @@ async def register(request: Request, user_data: UserCreate):
     )
 
 @api_router.post("/auth/login", response_model=Token)
-async def login(credentials: UserLogin):
+@limiter.limit("15/minute")
+async def login(request: Request, credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email})
     if not user or not verify_password(credentials.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
