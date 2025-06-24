@@ -351,9 +351,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 api_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
 
-# Health check endpoint
+# Health check endpoint with rate limiting
 @api_router.get("/health")
-async def health_check():
+@limiter.limit("60/minute")
+async def health_check(request: Request):
     """Health check endpoint to verify API is running"""
     return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
 
