@@ -75,6 +75,7 @@ def test_create_product_with_single_image():
                 "6_months": 16.99,
                 "12_months": 15.99
             },
+            "image_url": "https://example.com/placeholder.jpg",  # Required field
             "image_base64": generate_sample_base64_image(),  # Primary image
             "stock_quantity": 50,
             "featured": False
