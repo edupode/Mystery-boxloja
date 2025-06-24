@@ -8,6 +8,11 @@ import './App.css';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+console.log('App.js - Environment loaded:');
+console.log('REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+console.log('BACKEND_URL:', BACKEND_URL);
+console.log('API:', API);
+
 // Performance utilities
 const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
