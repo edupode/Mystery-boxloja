@@ -67,7 +67,7 @@ const cacheUtils = {
 // Image optimization component
 const OptimizedImage = memo(({ src, alt, className, loading = "lazy", placeholder = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+aW1hZ2VtPC90ZXh0Pjwvc3ZnPg==" }) => {
   const [imageSrc, setImageSrc] = useState(placeholder);
-  const [imageRef, inView] = useIntersectionObserver({
+  const [imageRef, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1
   });
