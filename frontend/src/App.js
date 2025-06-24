@@ -1609,14 +1609,21 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      console.log('Login attempt with:', { email: formData.email, isLogin });
+      console.log('API URL:', API);
+      
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
       const response = await axios.post(`${API}${endpoint}`, formData);
+
+      console.log('Login response:', response.data);
 
       if (response.data.access_token) {
         login(response.data.access_token, response.data.user);
         navigate('/');
       }
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
       alert(error.response?.data?.detail || 'Erro no sistema');
     }
 
