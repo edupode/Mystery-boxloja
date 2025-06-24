@@ -659,21 +659,29 @@ const Products = memo(() => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('Products - Loading data - API URL:', API);
+        console.log('Products - Selected category:', selectedCategory);
+        
         // Try cache first
         const cacheKey = `products_${selectedCategory || 'all'}`;
         const cachedProducts = cacheUtils.get(cacheKey);
         const cachedCategories = cacheUtils.get('categories');
         
         if (cachedProducts && cachedCategories) {
+          console.log('Products - Using cached data');
           setProducts(cachedProducts);
           setCategories(cachedCategories);
           return;
         }
 
+        console.log('Products - Fetching from API');
         const [productsRes, categoriesRes] = await Promise.all([
           axios.get(`${API}/products${selectedCategory ? `?category=${selectedCategory}` : ''}`),
           axios.get(`${API}/categories`)
         ]);
+        
+        console.log('Products - API response:', productsRes.data);
+        console.log('Categories - API response:', categoriesRes.data);
         
         setProducts(productsRes.data);
         setCategories(categoriesRes.data);
