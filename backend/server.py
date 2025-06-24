@@ -1474,7 +1474,13 @@ async def get_products(request: Request, category: Optional[str] = None, feature
     return result
 
 @api_router.get("/products/{product_id}")
-async def get_product(product_id: str):
+@limiter.limit("180/minute")
+async def get_product(request: Request, product_id: str):
+    # Try cache first
+    cache_key = f"product_{product_id}"
+    if cache_key in cache:
+        return cache[cache_key]
+    
     product = await db.products.find_one({"id": product_id})
     if not product:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
@@ -1502,6 +1508,8 @@ async def get_product(product_id: str):
         "created_at": product.get("created_at", datetime.utcnow())
     }
     
+    # Cache the result
+    cache[cache_key] = product_data
     return product_data
 
 @api_router.get("/categories")
