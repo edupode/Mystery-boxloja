@@ -5386,6 +5386,27 @@ const Footer = () => {
   );
 };
 
+// Lazy loading components for better performance
+const LazyHome = lazy(() => Promise.resolve({ default: Home }));
+const LazyProducts = lazy(() => Promise.resolve({ default: Products }));
+const LazyProductDetail = lazy(() => Promise.resolve({ default: ProductDetail }));
+const LazyCart = lazy(() => Promise.resolve({ default: Cart }));
+const LazyCheckout = lazy(() => Promise.resolve({ default: Checkout }));
+const LazyLogin = lazy(() => Promise.resolve({ default: Login }));
+const LazyAdminDashboard = lazy(() => Promise.resolve({ default: AdminDashboard }));
+const LazyAdminUsers = lazy(() => Promise.resolve({ default: AdminUsers }));
+const LazyAdminOrders = lazy(() => Promise.resolve({ default: AdminOrders }));
+const LazyAdminProducts = lazy(() => Promise.resolve({ default: AdminProducts }));
+const LazyAdminCoupons = lazy(() => Promise.resolve({ default: AdminCoupons }));
+const LazyAdminPromotions = lazy(() => Promise.resolve({ default: AdminPromotions }));
+const LazyAdminCategories = lazy(() => Promise.resolve({ default: AdminCategories }));
+const LazyAdminEmails = lazy(() => Promise.resolve({ default: AdminEmails }));
+const LazyAdminSubscriptions = lazy(() => Promise.resolve({ default: AdminSubscriptions }));
+const LazyAdminChatDashboard = lazy(() => Promise.resolve({ default: AdminChatDashboard }));
+const LazyUserProfile = lazy(() => Promise.resolve({ default: UserProfile }));
+const LazyFAQ = lazy(() => Promise.resolve({ default: FAQ }));
+const LazyTermsAndConditions = lazy(() => Promise.resolve({ default: TermsAndConditions }));
+
 const App = () => {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
