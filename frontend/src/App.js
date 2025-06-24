@@ -501,14 +501,22 @@ const Home = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        console.log('Loading data - API URL:', API);
+        console.log('Backend URL:', BACKEND_URL);
+        
         const [productsRes, categoriesRes] = await Promise.all([
           axios.get(`${API}/products?featured=true`),
           axios.get(`${API}/categories`)
         ]);
+        
+        console.log('Products response:', productsRes.data);
+        console.log('Categories response:', categoriesRes.data);
+        
         setFeaturedProducts(productsRes.data.slice(0, 3));
         setCategories(categoriesRes.data);
       } catch (error) {
         console.error('Error loading data:', error);
+        console.error('Error details:', error.response || error.message);
       }
     };
     loadData();
