@@ -7,6 +7,62 @@ import './App.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Performance utilities
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+// Local storage cache utilities
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+const cacheUtils = {
+  set: (key, data) => {
+    const cacheItem = {
+      data,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`cache_${key}`, JSON.stringify(cacheItem));
+  },
+  
+  get: (key) => {
+    try {
+      const cacheItem = JSON.parse(localStorage.getItem(`cache_${key}`));
+      if (!cacheItem) return null;
+      
+      const isExpired = Date.now() - cacheItem.timestamp > CACHE_DURATION;
+      if (isExpired) {
+        localStorage.removeItem(`cache_${key}`);
+        return null;
+      }
+      
+      return cacheItem.data;
+    } catch {
+      return null;
+    }
+  },
+  
+  clear: (pattern) => {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      if (key.startsWith(`cache_${pattern}`)) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+};
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 // Context for cart and user
