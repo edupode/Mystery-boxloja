@@ -3038,6 +3038,94 @@ const AdminProducts = () => {
                 </div>
               </div>
 
+              {/* Multiple Images Section */}
+              <div className="bg-gray-700/30 rounded-lg p-6 border border-purple-500/20">
+                <h4 className="text-lg font-semibold mb-4 text-white">🖼️ Galeria de Imagens (Opcional)</h4>
+                
+                {/* Upload múltiplas imagens */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2 text-gray-400">Adicionar Múltiplas Imagens (Max: 5MB cada)</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleMultipleImageUpload}
+                    className="w-full bg-gray-700 text-white border border-purple-500/30 rounded-lg px-4 py-3 focus:border-purple-400 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700"
+                  />
+                </div>
+
+                {/* Botão para adicionar URL */}
+                <div className="mb-4">
+                  <button
+                    type="button"
+                    onClick={addImageUrl}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-sm"
+                  >
+                    🔗 Adicionar URL de Imagem
+                  </button>
+                </div>
+
+                {/* Preview das imagens adicionais */}
+                {(formData.images_base64.length > 0 || formData.images.length > 0) && (
+                  <div className="space-y-4">
+                    <h5 className="text-sm font-medium text-gray-300">Imagens da Galeria:</h5>
+                    
+                    {/* Imagens Base64 */}
+                    {formData.images_base64.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2">Imagens enviadas:</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {formData.images_base64.map((image, index) => (
+                            <div key={`base64-${index}`} className="relative group">
+                              <img 
+                                src={image} 
+                                alt={`Galeria ${index + 1}`} 
+                                className="w-full h-20 object-cover rounded-lg border border-purple-500/30"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeAdditionalImage(index, true)}
+                                className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Imagens URL */}
+                    {formData.images.length > 0 && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-2">Imagens por URL:</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {formData.images.map((imageUrl, index) => (
+                            <div key={`url-${index}`} className="relative group">
+                              <img 
+                                src={imageUrl} 
+                                alt={`URL ${index + 1}`} 
+                                className="w-full h-20 object-cover rounded-lg border border-purple-500/30"
+                                onError={(e) => {
+                                  e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23374151"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%239CA3AF">Erro</text></svg>';
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeAdditionalImage(index, false)}
+                                className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-4">
                 <button
                   type="submit"
