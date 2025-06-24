@@ -550,10 +550,11 @@ def run_optimization_tests():
     logger.info("\n=== OPTIMIZATION TEST SUMMARY ===")
     
     for test_name, result in test_results.items():
-        status = "✅ PASSED" if result["success"] else "❌ FAILED"
-        logger.info(f"{status}: {test_name}")
-        if result.get("message"):
-            logger.info(f"  - {result['message']}")
+        if isinstance(result, dict) and "success" in result:
+            status = "✅ PASSED" if result["success"] else "❌ FAILED"
+            logger.info(f"{status}: {test_name}")
+            if result.get("message"):
+                logger.info(f"  - {result['message']}")
     
     return test_results
 
