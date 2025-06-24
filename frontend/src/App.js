@@ -775,7 +775,7 @@ const Products = memo(() => {
       </div>
     </div>
   );
-};
+});
 
 const ProductDetail = () => {
   const location = useLocation();
