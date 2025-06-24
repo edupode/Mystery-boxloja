@@ -1205,9 +1205,60 @@ SAMPLE_CATEGORIES = [
     {"name": "Stitch", "emoji": "👽", "color": "#06B6D4", "description": "Produtos do adorável alienígena"}
 ]
 
-# Initialize sample data
+# Initialize sample data and database indexes
 @api_router.on_event("startup")
 async def startup_event():
+    # Create database indexes for performance
+    try:
+        # Products indexes
+        await db.products.create_index([("id", 1)], unique=True)
+        await db.products.create_index([("category", 1)])
+        await db.products.create_index([("featured", 1)])
+        await db.products.create_index([("is_active", 1)])
+        await db.products.create_index([("created_at", -1)])
+        
+        # Users indexes
+        await db.users.create_index([("email", 1)], unique=True)
+        await db.users.create_index([("id", 1)], unique=True)
+        await db.users.create_index([("is_admin", 1)])
+        
+        # Orders indexes
+        await db.orders.create_index([("id", 1)], unique=True)
+        await db.orders.create_index([("user_id", 1)])
+        await db.orders.create_index([("session_id", 1)])
+        await db.orders.create_index([("created_at", -1)])
+        await db.orders.create_index([("order_status", 1)])
+        await db.orders.create_index([("payment_status", 1)])
+        
+        # Cart indexes
+        await db.carts.create_index([("session_id", 1)], unique=True)
+        await db.carts.create_index([("user_id", 1)])
+        await db.carts.create_index([("updated_at", -1)])
+        
+        # Categories indexes
+        await db.categories.create_index([("id", 1)], unique=True)
+        await db.categories.create_index([("is_active", 1)])
+        
+        # Coupons indexes
+        await db.coupons.create_index([("code", 1)], unique=True)
+        await db.coupons.create_index([("is_active", 1)])
+        await db.coupons.create_index([("valid_from", 1)])
+        await db.coupons.create_index([("valid_until", 1)])
+        
+        # Chat indexes
+        await db.chat_sessions.create_index([("id", 1)], unique=True)
+        await db.chat_sessions.create_index([("user_id", 1)])
+        await db.chat_sessions.create_index([("status", 1)])
+        await db.chat_sessions.create_index([("created_at", -1)])
+        
+        await db.chat_messages.create_index([("chat_session_id", 1)])
+        await db.chat_messages.create_index([("sender_id", 1)])
+        await db.chat_messages.create_index([("timestamp", -1)])
+        
+        print("Database indexes created successfully")
+    except Exception as e:
+        print(f"Error creating indexes: {e}")
+    
     # Check if admin user exists
     admin_user = await db.users.find_one({"email": ADMIN_EMAIL})
     if not admin_user:
