@@ -2625,7 +2625,7 @@ const AdminProducts = () => {
     }
   };
 
-  // Função para converter imagem para base64
+  // Função para converter imagem principal para base64
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -2644,6 +2644,62 @@ const AdminProducts = () => {
         });
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  // Função para converter múltiplas imagens para base64
+  const handleMultipleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // Check each file size
+    for (let file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Cada imagem deve ter menos de 5MB');
+        return;
+      }
+    }
+
+    // Convert all files to base64
+    const promises = files.map(file => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target.result);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(promises).then(base64Images => {
+      setFormData({
+        ...formData,
+        images_base64: [...formData.images_base64, ...base64Images]
+      });
+    });
+  };
+
+  // Função para remover imagem adicional
+  const removeAdditionalImage = (index, isBase64 = false) => {
+    if (isBase64) {
+      setFormData({
+        ...formData,
+        images_base64: formData.images_base64.filter((_, i) => i !== index)
+      });
+    } else {
+      setFormData({
+        ...formData,
+        images: formData.images.filter((_, i) => i !== index)
+      });
+    }
+  };
+
+  // Função para adicionar URL de imagem adicional
+  const addImageUrl = () => {
+    const url = prompt('Digite a URL da imagem:');
+    if (url && url.trim()) {
+      setFormData({
+        ...formData,
+        images: [...formData.images, url.trim()]
+      });
     }
   };
 
