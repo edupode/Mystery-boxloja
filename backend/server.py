@@ -336,6 +336,26 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # In-memory cache for frequently accessed data
 cache = TTLCache(maxsize=1000, ttl=300)  # 5 minutes TTL
 
+# Keep-alive system - ping every 2 minutes to keep connection alive
+async def keep_alive_ping():
+    """Ping system to keep connections alive"""
+    import aiohttp
+    while True:
+        try:
+            # Ping MongoDB to keep connection alive
+            await db.command("ping")
+            print(f"Keep-alive MongoDB ping successful at {datetime.utcnow()}")
+        except Exception as e:
+            print(f"Keep-alive MongoDB ping error: {str(e)}")
+        
+        # Wait 2 minutes before next ping
+        await asyncio.sleep(120)  # 2 minutes
+
+# Start keep-alive task
+async def start_background_tasks():
+    """Start background tasks"""
+    asyncio.create_task(keep_alive_ping())
+
 # Cache invalidation helper
 def invalidate_cache_pattern(pattern: str):
     """Invalidate cache entries matching a pattern"""
