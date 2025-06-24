@@ -444,6 +444,30 @@ backend:
         agent: "testing"
         comment: "MongoDB connection pooling is properly configured and functioning. The system maintains stability under concurrent load, with no connection failures observed during testing."
 
+  - task: "CORS and API Communication Testing"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Tested CORS headers for all main endpoints (products, products?featured=true, categories, health). All endpoints have proper CORS headers allowing requests from the Vercel frontend domain."
+      - working: true
+        agent: "testing"
+        comment: "All endpoints return proper CORS headers with Access-Control-Allow-Origin set to the Vercel frontend domain. OPTIONS preflight requests are handled correctly. The backend is properly configured to accept requests from the frontend."
+      - working: true
+        agent: "testing"
+        comment: "Tested response format and content for all endpoints. All endpoints return valid JSON data with appropriate content. The products endpoint returns 11 products, featured products returns 3 products, and categories returns 11 categories."
+      - working: true
+        agent: "testing"
+        comment: "Tested performance for all endpoints. All endpoints respond in reasonable time: products avg 351ms, featured products avg 189ms, categories avg 142ms, health avg 184ms. All endpoints have 100% success rate."
+      - working: true
+        agent: "testing"
+        comment: "Tested concurrent requests for all endpoints. All endpoints handle concurrent load well with 100% success rate. Under load of 10 concurrent requests: products avg 726ms, featured products avg 603ms, categories avg 143ms, health avg 178ms."
+
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
     implemented: true
