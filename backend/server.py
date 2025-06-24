@@ -2497,6 +2497,11 @@ async def delete_product(product_id: str, admin_user: User = Depends(get_admin_u
         {"id": product_id},
         {"$set": {"is_active": False}}
     )
+    
+    # Invalidate products cache
+    invalidate_cache_pattern("products_")
+    cache.pop(f"product_{product_id}", None)  # Invalidate specific product cache
+    
     return {"message": "Produto removido"}
 
 @api_router.post("/admin/categories")
