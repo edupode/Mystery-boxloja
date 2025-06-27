@@ -1099,95 +1099,101 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+    <div className="min-h-screen mystery-gradient">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto">
-          <div className="bg-gray-800 rounded-2xl shadow-2xl p-8">
-            <h1 className="text-3xl font-bold text-center text-white mb-8">
+          <div className="glass-card p-8 animate-fade-in-scale">
+            <h1 className="text-3xl font-bold text-center text-white mb-8 animate-fade-in-up">
               {isLogin ? '🔑 Entrar' : '📝 Registar'}
             </h1>
 
             {error && (
-              <div className="bg-red-600 text-white p-3 rounded-lg mb-6">
+              <div className="alert-error mb-6 animate-fade-in-up">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
-                <div>
-                  <label className="block text-white mb-2">Nome</label>
+                <div className="animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                  <label className="block text-white mb-2 font-medium">Nome</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                    className="form-input w-full"
+                    placeholder="O seu nome completo"
                   />
                 </div>
               )}
 
-              <div>
-                <label className="block text-white mb-2">Email</label>
+              <div className="animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                <label className="block text-white mb-2 font-medium">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                  className="form-input w-full"
+                  placeholder="seuemail@exemplo.com"
                 />
               </div>
 
-              <div>
-                <label className="block text-white mb-2">Password</label>
+              <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                <label className="block text-white mb-2 font-medium">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                  className="form-input w-full"
+                  placeholder="••••••••"
                 />
               </div>
 
               {!isLogin && (
                 <>
-                  <div>
-                    <label className="block text-white mb-2">Telefone</label>
+                  <div className="animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                    <label className="block text-white mb-2 font-medium">Telefone</label>
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                      className="form-input w-full"
+                      placeholder="+351 912 345 678"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-white mb-2">Morada</label>
+                  <div className="animate-fade-in-up" style={{animationDelay: '0.5s'}}>
+                    <label className="block text-white mb-2 font-medium">Morada</label>
                     <input
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                      className="form-input w-full"
+                      placeholder="Rua, Cidade, Código Postal"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-white mb-2">NIF</label>
+                  <div className="animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+                    <label className="block text-white mb-2 font-medium">NIF</label>
                     <input
                       type="text"
                       value={nif}
                       onChange={(e) => setNif(e.target.value)}
-                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                      className="form-input w-full"
+                      placeholder="123456789"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-white mb-2">Data de Nascimento</label>
+                  <div className="animate-fade-in-up" style={{animationDelay: '0.7s'}}>
+                    <label className="block text-white mb-2 font-medium">Data de Nascimento</label>
                     <input
                       type="date"
                       value={birthDate}
                       onChange={(e) => setBirthDate(e.target.value)}
-                      className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-400"
+                      className="form-input w-full"
                     />
                   </div>
                 </>
@@ -1196,26 +1202,34 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50"
+                className="btn-mystery w-full py-4 text-lg font-bold animate-fade-in-up"
+                style={{animationDelay: '0.8s'}}
               >
                 {loading ? '⏳ Aguarde...' : (isLogin ? '🔑 Entrar' : '📝 Registar')}
               </button>
             </form>
 
             {isLogin && GOOGLE_CLIENT_ID && (
-              <div className="mt-6">
-                <div className="text-center text-gray-400 mb-4">ou</div>
-                <GoogleLoginButton
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                />
+              <div className="mt-8 animate-fade-in-up" style={{animationDelay: '0.9s'}}>
+                <div className="text-center text-gray-400 mb-4 relative">
+                  <span className="bg-gray-800 px-4">ou</span>
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-600"></div>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <GoogleLoginButton
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                  />
+                </div>
               </div>
             )}
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center animate-fade-in-up" style={{animationDelay: '1s'}}>
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
               >
                 {isLogin ? 'Não tens conta? Registar' : 'Já tens conta? Entrar'}
               </button>
