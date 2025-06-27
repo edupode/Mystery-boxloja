@@ -621,18 +621,18 @@ const Products = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+    <div className="min-h-screen mystery-gradient">
       <div className="container mx-auto px-4 py-12">
-        <h1 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-12 text-center text-white`}>
+        <h1 className={`hero-title ${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-12 text-center animate-fade-in-up`}>
           🔮 Nossos Mistérios 🔮
         </h1>
 
         {/* Category Filter */}
-        <div className="mb-12 text-center">
+        <div className="mb-12 text-center animate-fade-in-scale">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className={`bg-gray-800 text-white border border-purple-500 rounded-lg ${isMobile ? 'px-4 py-2 text-base w-full max-w-xs' : 'px-6 py-3 text-lg'} focus:outline-none focus:border-purple-400 transition-colors duration-300`}
+            className={`form-input ${isMobile ? 'w-full max-w-xs' : 'px-6 py-3 text-lg'} focus:outline-none transition-all duration-300`}
           >
             <option value="">🎭 Todos os Universos</option>
             {categories.map(category => (
@@ -645,15 +645,19 @@ const Products = () => {
 
         {/* Products Grid */}
         {products.length === 0 ? (
-          <div className="text-center text-white">
-            <div className="text-6xl mb-4">📦</div>
-            <p className="text-xl">Nenhum produto encontrado</p>
+          <div className="text-center text-white glass-card p-12 rounded-3xl animate-fade-in-scale">
+            <div className="text-6xl mb-4 animate-float">📦</div>
+            <h2 className="text-2xl font-bold mb-4">Nenhum produto encontrado</h2>
+            <p className="text-gray-300 mb-6">Tenta uma categoria diferente ou volta mais tarde!</p>
+            <Link to="/" className="btn-mystery">
+              🏠 Voltar ao Início
+            </Link>
           </div>
         ) : (
-          <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 lg:grid-cols-4 gap-8'}`}>
+          <div className="grid-auto-fit">
             {products.map((product, index) => (
-              <div key={product.id} className="mystery-box-card hover:shadow-purple-500/50 transition-all duration-500">
-                <div className="relative overflow-hidden">
+              <div key={product.id} className="mystery-box-card animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+                <div className="product-image relative overflow-hidden">
                   <img
                     src={product.image_url}
                     alt={product.name}
@@ -661,27 +665,27 @@ const Products = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
                   {product.featured && (
-                    <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                    <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg">
                       ⭐ Destaque
                     </div>
                   )}
                 </div>
-                <div className={`${isMobile ? 'p-4' : 'p-6'} bg-gradient-to-b from-gray-800 to-gray-900`}>
+                <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold mb-3 text-white`}>{product.name}</h3>
                   <p className={`text-gray-300 ${isMobile ? 'text-sm' : 'text-sm'} mb-4 line-clamp-3`}>{product.description}</p>
 
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <div className="flex items-center justify-between">
-                      <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-purple-400`}>
+                      <span className={`price-display ${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>
                         €{product.price}
                       </span>
-                      <span className="text-xs text-gray-400">avulsa</span>
+                      <span className="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded-full">avulsa</span>
                     </div>
 
                     {product.subscription_prices && product.subscription_prices['12_months'] && (
-                      <div className="mt-2 text-xs text-green-400">
-                        Assinatura: desde €{product.subscription_prices['12_months']}/mês
-                        <span className="text-yellow-400 ml-1">(-20% desconto!)</span>
+                      <div className="mt-2 text-xs text-green-400 bg-green-900/20 border border-green-500/30 rounded-lg p-2">
+                        💎 Assinatura: desde €{product.subscription_prices['12_months']}/mês
+                        <span className="text-yellow-400 ml-1 font-semibold">(-20% desconto!)</span>
                       </div>
                     )}
                   </div>
@@ -689,14 +693,15 @@ const Products = () => {
                   <div className="flex items-center justify-between space-x-2">
                     <Link
                       to={`/produto/${product.id}`}
-                      className={`flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 text-center`}
+                      className="btn-mystery flex-1 text-center"
                     >
                       🔮 Descobrir
                     </Link>
                     <button
                       onClick={() => handleAddToCart(product.id)}
                       data-product-id={product.id}
-                      className={`bg-gray-700 hover:bg-gray-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg transition-all duration-300 transform hover:scale-105`}
+                      className={`bg-gray-700 hover:bg-gray-600 text-white ${isMobile ? 'px-3 py-2 text-sm' : 'px-4 py-2'} rounded-lg transition-all duration-300 transform hover:scale-105 border border-gray-600 hover:border-purple-400`}
+                      title="Adicionar ao carrinho"
                     >
                       🛒
                     </button>
