@@ -487,9 +487,9 @@ const Home = () => {
       </section>
 
       {/* Categories */}
-      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-b from-purple-900 to-black`}>
+      <section className={`${isMobile ? 'py-12' : 'py-20'} glass-card mx-4 rounded-3xl my-8`}>
         <div className="container mx-auto px-4">
-          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white`}>
+          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white animate-fade-in-up`}>
             🎭 Universos Misteriosos 🎭
           </h2>
 
@@ -498,9 +498,11 @@ const Home = () => {
               <Link
                 key={category.id}
                 to="/produtos"
-                className={`group relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl ${isMobile ? 'p-4' : 'p-8'} text-center hover:from-purple-800 hover:to-pink-800 transition-all duration-500 transform hover:scale-110 hover:rotate-2 border border-purple-500/30 hover:border-purple-400`}
+                className="category-card animate-fade-in-up"
+                style={{animationDelay: `${index * 0.1}s`}}
               >
-                <div className={`${isMobile ? 'text-3xl mb-2' : 'text-6xl mb-6'} transition-all duration-500`}>
+                <div className={`${isMobile ? 'text-3xl mb-2' : 'text-6xl mb-6'} animate-float`}
+                     style={{animationDelay: `${index * 0.3}s`}}>
                   {category.emoji}
                 </div>
                 <h3 className={`${isMobile ? 'text-sm' : 'text-xl'} font-semibold text-white group-hover:text-purple-200 transition-colors duration-300`}>
@@ -509,6 +511,9 @@ const Home = () => {
                 <p className={`text-gray-400 ${isMobile ? 'text-xs mt-1' : 'text-sm mt-2'} group-hover:text-purple-300 transition-colors duration-300`}>
                   {category.description}
                 </p>
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span className="text-yellow-400 animate-bounce">✨</span>
+                </div>
               </Link>
             ))}
           </div>
