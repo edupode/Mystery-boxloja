@@ -1526,6 +1526,11 @@ const App = () => {
             <Route path="/carrinho" element={<Cart />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/emails" element={<AdminEmails />} />
             <Route path="/perfil" element={<UserProfile />} />
           </Routes>
         </BrowserRouter>
