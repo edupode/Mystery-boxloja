@@ -3354,7 +3354,14 @@ async def shutdown_db_client():
 # Configure CORS with performance optimizations
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://mystery-box-loja.vercel.app", "http://localhost:3000"],
+    allow_origins=[
+        "https://mystery-box-loja.vercel.app", 
+        "http://localhost:3000",
+        "https://www.mysteryboxes.pt",
+        "https://mysteryboxes.pt",
+        "http://www.mysteryboxes.pt",
+        "http://mysteryboxes.pt"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # Specific methods for better security
     allow_headers=["Authorization", "Content-Type", "X-Requested-With"],  # Specific headers
