@@ -123,6 +123,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Verificado que os endpoints GET /api/products e GET /api/products/{product_id} já retornam corretamente o campo 'images' nas linhas 1618 e 1659. Os endpoints POST e PUT /api/admin/products também suportam múltiplas imagens através dos campos images e images_base64."
+      - working: true
+        agent: "testing"
+        comment: "Testados os endpoints GET /api/products, GET /api/products?featured=true e GET /api/products/{id}. Todos estão funcionando corretamente e retornando os dados esperados. O endpoint GET /api/products retorna 11 produtos, GET /api/products?featured=true retorna 3 produtos em destaque, e GET /api/products/{id} retorna os detalhes completos do produto."
 
 frontend:
   - task: "Correção crítica - Website só carrega a parte de cima"
