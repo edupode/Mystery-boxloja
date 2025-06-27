@@ -1513,6 +1513,117 @@ const UserProfile = () => {
   );
 };
 
+// Admin Components
+const AdminOrders = () => {
+  const { user } = useDeviceContext();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user?.is_admin) {
+      navigate('/');
+      return;
+    }
+    loadOrders();
+  }, [user, navigate]);
+
+  const loadOrders = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/orders`);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await axios.put(`${API}/admin/orders/${orderId}/status`, null, {
+        params: { status }
+      });
+      alert('Status atualizado com sucesso!');
+      loadOrders();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      alert('Erro ao atualizar status');
+    }
+  };
+
+  if (!user?.is_admin) return null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-white">📋 Gestão de Pedidos</h1>
+          <Link to="/admin" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+            ← Voltar ao Dashboard
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-white">
+            <div className="animate-spin text-6xl mb-4">⚙️</div>
+            <p>Carregando pedidos...</p>
+          </div>
+        ) : (
+          <div className="bg-gray-800 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-white">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 text-left">ID</th>
+                    <th className="px-4 py-3 text-left">Cliente</th>
+                    <th className="px-4 py-3 text-left">Total</th>
+                    <th className="px-4 py-3 text-left">Status</th>
+                    <th className="px-4 py-3 text-left">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-700">
+                      <td className="px-4 py-3">{order.id}</td>
+                      <td className="px-4 py-3">{order.user_email}</td>
+                      <td className="px-4 py-3">€{order.total}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-sm ${
+                          order.status === 'completed' ? 'bg-green-600' :
+                          order.status === 'processing' ? 'bg-yellow-600' :
+                          order.status === 'cancelled' ? 'bg-red-600' :
+                          'bg-gray-600'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <select 
+                          value={order.status} 
+                          onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                          className="bg-gray-700 text-white rounded px-2 py-1"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <DeviceProvider>
