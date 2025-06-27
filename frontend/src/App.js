@@ -589,11 +589,12 @@ const Products = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="min-h-screen mystery-gradient">
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center text-white">
-            <div className="animate-spin text-6xl mb-4">🔮</div>
-            <p className="text-xl">Carregando produtos...</p>
+          <div className="text-center text-white glass-card p-12 rounded-3xl animate-fade-in-scale">
+            <div className="loading-spinner mx-auto mb-6"></div>
+            <h2 className="text-2xl font-bold mb-4 animate-pulse-glow">Carregando produtos...</h2>
+            <p className="text-gray-300">Preparando os mistérios para si...</p>
           </div>
         </div>
       </div>
@@ -602,17 +603,17 @@ const Products = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+      <div className="min-h-screen mystery-gradient">
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center text-white">
-            <div className="text-6xl mb-4">⚠️</div>
-            <p className="text-xl mb-4">Erro ao carregar produtos</p>
-            <p className="text-gray-300">{error}</p>
+          <div className="text-center text-white glass-card p-12 rounded-3xl animate-fade-in-scale">
+            <div className="text-6xl mb-6 animate-float">⚠️</div>
+            <h2 className="text-2xl font-bold mb-4 text-red-400">Erro ao carregar produtos</h2>
+            <p className="text-gray-300 mb-6">{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg transition-colors"
+              className="btn-mystery"
             >
-              Tentar novamente
+              🔄 Tentar novamente
             </button>
           </div>
         </div>
