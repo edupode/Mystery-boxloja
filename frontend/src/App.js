@@ -445,33 +445,36 @@ const Home = () => {
       </section>
 
       {/* Featured Products */}
-      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-b from-black to-purple-900`}>
+      <section className={`${isMobile ? 'py-12' : 'py-20'} glass-card mx-4 rounded-3xl my-8`}>
         <div className="container mx-auto px-4">
-          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white`}>
+          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold text-center mb-12 text-white animate-fade-in-up`}>
             ✨ Mistérios em Destaque ✨
           </h2>
 
           <div className={`grid ${isMobile ? 'grid-cols-1 gap-6' : 'md:grid-cols-3 gap-10'}`}>
             {featuredProducts.map((product, index) => (
-              <div key={product.id} className="mystery-box-card hover:shadow-purple-500/50 transition-all duration-500 transform hover:scale-105">
-                <div className="relative overflow-hidden">
+              <div key={product.id} className="mystery-box-card animate-fade-in-up" style={{animationDelay: `${index * 0.2}s`}}>
+                <div className="product-image relative overflow-hidden">
                   <img
                     src={product.image_url}
                     alt={product.name}
                     className={`w-full ${isMobile ? 'h-48' : 'h-64'} object-cover transition-transform duration-500 hover:scale-110`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
+                  <div className="absolute top-4 right-4 animate-float">
+                    <span className="text-2xl">✨</span>
+                  </div>
                 </div>
-                <div className={`${isMobile ? 'p-6' : 'p-8'} bg-gradient-to-b from-gray-800 to-gray-900`}>
+                <div className={`${isMobile ? 'p-6' : 'p-8'}`}>
                   <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-semibold mb-4 text-white`}>{product.name}</h3>
-                  <p className="text-gray-300 mb-6 leading-relaxed">{product.description}</p>
+                  <p className="text-gray-300 mb-6 leading-relaxed line-clamp-3">{product.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-purple-400`}>
+                    <span className={`price-display ${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>
                       €{product.price}
                     </span>
                     <Link
                       to={`/produto/${product.id}`}
-                      className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`}
+                      className="btn-mystery"
                     >
                       🔮 Descobrir
                     </Link>
