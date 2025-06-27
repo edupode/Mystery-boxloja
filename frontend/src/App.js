@@ -521,17 +521,18 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className={`${isMobile ? 'py-12' : 'py-20'} bg-gradient-to-r from-purple-900 via-black to-red-900 text-center`}>
-        <div className="container mx-auto px-4">
-          <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-8 text-white`}>
+      <section className={`${isMobile ? 'py-12' : 'py-20'} mystery-gradient text-center rounded-3xl mx-4 my-8 relative overflow-hidden`}>
+        <div className="stars"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <h2 className={`hero-title ${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-8`}>
             Pronto para a Aventura? 🚀
           </h2>
-          <p className={`${isMobile ? 'text-lg mb-8' : 'text-xl mb-12'} text-purple-200 max-w-2xl mx-auto`}>
+          <p className={`${isMobile ? 'text-lg mb-8' : 'text-xl mb-12'} text-purple-200 max-w-2xl mx-auto animate-fade-in-up`}>
             Junta-te a milhares de exploradores que já descobriram tesouros incríveis!
           </p>
           <Link
             to="/produtos"
-            className={`bg-gradient-to-r from-yellow-500 to-orange-500 text-black ${isMobile ? 'px-8 py-4 text-lg' : 'px-12 py-6 text-xl'} rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-110 shadow-2xl`}
+            className={`btn-mystery ${isMobile ? 'px-8 py-4 text-lg' : 'px-12 py-6 text-xl'} font-bold animate-fade-in-scale`}
           >
             🎁 Começar Agora
           </Link>
