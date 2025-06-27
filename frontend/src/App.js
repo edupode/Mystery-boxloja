@@ -417,23 +417,26 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900 to-black">
+    <div className="min-h-screen mystery-gradient">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-purple-900 via-black to-red-900 text-white py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+      <section className="relative mystery-gradient text-white py-20 md:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="stars"></div>
+          <div className="moving-stars"></div>
+        </div>
         <div className={`container mx-auto px-4 text-center relative z-10 ${isMobile ? 'py-8' : ''}`}>
-          <h1 className={`${isMobile ? 'text-4xl md:text-6xl' : 'text-6xl md:text-8xl'} font-bold mb-8 animate-pulse bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent`}>
+          <h1 className={`hero-title ${isMobile ? 'text-4xl md:text-6xl' : 'text-6xl md:text-8xl'} font-bold mb-8`}>
             Descobre o Inesperado!
           </h1>
-          <div className="text-4xl mb-4 animate-bounce">🎭 ⚡ 👻</div>
-          <p className={`${isMobile ? 'text-lg mb-8' : 'text-2xl mb-12'} max-w-3xl mx-auto text-purple-200 leading-relaxed`}>
+          <div className="text-4xl mb-4 animate-float">🎭 ⚡ 👻</div>
+          <p className={`${isMobile ? 'text-lg mb-8' : 'text-2xl mb-12'} max-w-3xl mx-auto text-purple-200 leading-relaxed animate-fade-in-up`}>
             Mystery boxes temáticas cheias de surpresas incríveis.
             Mergulha no mistério e descobre tesouros únicos!
           </p>
-          <div className={`${isMobile ? 'space-y-4' : 'space-x-6'} ${isMobile ? 'flex flex-col items-center' : ''}`}>
+          <div className={`${isMobile ? 'space-y-4' : 'space-x-6'} ${isMobile ? 'flex flex-col items-center' : ''} animate-fade-in-scale`}>
             <Link
               to="/produtos"
-              className={`bg-gradient-to-r from-purple-600 to-pink-600 text-white ${isMobile ? 'px-8 py-3' : 'px-10 py-4'} rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-110 shadow-2xl ${isMobile ? 'w-full max-w-xs text-center' : ''}`}
+              className={`btn-mystery ${isMobile ? 'px-8 py-4 text-lg' : 'px-12 py-6 text-xl'} font-bold ${isMobile ? 'w-full max-w-xs' : ''}`}
             >
               🔍 Explorar Mistérios
             </Link>
