@@ -902,6 +902,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint funciona corretamente com 4 categorias na base de dados"
+      - working: true
+        agent: "testing"
+        comment: "Testado novamente o endpoint GET /api/categories. O endpoint está funcionando corretamente e retornando 9 categorias ativas. Todas as categorias têm os campos esperados (id, name, description, emoji, color)."
 
   - task: "Sistema de carrinho - Obter carrinho"
     implemented: true
