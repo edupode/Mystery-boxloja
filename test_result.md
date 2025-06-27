@@ -920,6 +920,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "Endpoint funciona corretamente, cria carrinho automaticamente se não existir"
+      - working: true
+        agent: "testing"
+        comment: "Testado novamente o endpoint GET /api/cart/{session_id}. O endpoint está funcionando corretamente, criando um novo carrinho quando o session_id não existe e retornando o carrinho existente quando o session_id já existe. O carrinho retornado tem a estrutura esperada com os campos id, session_id, items, coupon_code, created_at e updated_at."
 
   - task: "Sistema de carrinho - Adicionar produtos"
     implemented: true
