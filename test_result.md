@@ -545,6 +545,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "Tested concurrent requests for all endpoints. All endpoints handle concurrent load well with 100% success rate. Under load of 10 concurrent requests: products avg 726ms, featured products avg 603ms, categories avg 143ms, health avg 178ms."
+      - working: true
+        agent: "testing"
+        comment: "Retested CORS headers for critical endpoints (products, products?featured=true, categories, health). All endpoints have proper CORS headers allowing requests from the frontend domain https://mystery-box-loja.vercel.app. The backend is correctly configured to accept requests from the frontend."
 
 backend:
   - task: "FASE 1 - Correção checkout - Melhorar processo de finalização"
